@@ -16,7 +16,7 @@ WORKDIR /app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-ENV am4_username=""
-ENV am4_password=""
+ENV AM4_USERNAME=""
+ENV AM4_PASSWORD=""
 
-CMD ["python", "./app.py", "--username='${am4_username}'", "--password='${am4_password}'"]
+CMD python ./app.py --username="${AM4_USERNAME}" --password="${AM4_PASSWORD}"
