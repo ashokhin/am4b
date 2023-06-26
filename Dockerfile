@@ -1,6 +1,6 @@
 FROM python:3.11-slim-bookworm
 
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y install wget
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install wget gnupg2
 # Adding trusting keys to apt for repositories
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 
