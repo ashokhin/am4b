@@ -19,4 +19,4 @@ RUN pip install -r requirements.txt
 ENV am4_username=""
 ENV am4_password=""
 
-CMD "python ./app.py --username='${am4_username}' --password='${am4_password}'"
+CMD ["python", "./app.py", "--username='${am4_username}'", "--password='${am4_password}'"]
