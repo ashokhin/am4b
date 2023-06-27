@@ -112,6 +112,18 @@ class AirlineManager4Bot(object):
     xtxt_mnt_acheck_cost = '//div[@id="typeCheck"]//div[contains(text(), "$ ")]'
     #
     xbtn_mnt_acheck_do = '//div[@id="typeCheck"]//button[contains(@onclick, "maint_plan_do.php?mode=do&type=check&id=")]'
+    #
+    xbtn_mnt_modify_plan = './/button[contains(@onclick, "maint_plan_do.php?type=modify&id=")]'
+    #
+    xcb_mnt_modify_reduced_co2 = '//div[@id="typeModify"]//input[@id="mod1"]'
+    #
+    xcb_mnt_modify_speed_increase = '//div[@id="typeModify"]//input[@id="mod2"]'
+    #
+    xcb_mnt_modify_reduced_fuel = '//div[@id="typeModify"]//input[@id="mod3"]'
+    #
+    xtxt_mnt_modify_cost = '//div[@id="typeModify"]//span[@id="acCost"]'
+    #
+    xbtn_mnt_modify_do = '//div[@id="typeModify"]//button[contains(@onclick, "modifyAction")]'
 
     def __init__(self) -> None:
         logging.debug("Init driver")
@@ -250,7 +262,7 @@ class AirlineManager4Bot(object):
     def _click_button(self, element_xpath: str):
         try:
             logging.debug("Click button '{}'".format(element_xpath))
-            btn = self._driver.find_element("xpath", element_xpath)
+            btn = self._driver.find_element('xpath', element_xpath)
             # If button not displayed than skip click
             if not btn.is_displayed():
                 return
@@ -279,7 +291,7 @@ class AirlineManager4Bot(object):
     def _type_text_in_field(self, element_xpath: str, input_text: str):
         try:
             logging.debug("Write field '{}'".format(element_xpath))
-            text_field = self._driver.find_element("xpath", element_xpath)
+            text_field = self._driver.find_element('xpath', element_xpath)
             text_field.clear()
             text_field.send_keys(input_text)
         except selenium.common.exceptions.NoSuchElementException as nselex:
@@ -292,7 +304,7 @@ class AirlineManager4Bot(object):
     def _get_text_from_element(self, element_xpath: str) -> str:
         try:
             logging.debug("Get text '{}'".format(element_xpath))
-            return self._driver.find_element("xpath", element_xpath).text
+            return self._driver.find_element('xpath', element_xpath).text
         except selenium.common.exceptions.InvalidArgumentException as iae:
             logging.error("Error with element '{}'".format(element_xpath))
             logging.exception("Exception: \n{}".format(iae))
@@ -679,9 +691,10 @@ CO2 capacity:\t{:.2f} %
 
         return aircrafts_on_base
 
-    def _repair_all_aircrafts(self, aircrafts_on_base: list[selenium.webdriver.remote.webelement.WebElement]):
+    def _repair_all_aircrafts(self):
         logging.info("Search aircrafts which need repair")
         acs_need_repair = []
+        aircrafts_on_base = self._find_all_for_maintanance()
         for ac in aircrafts_on_base:
             ac_wear = int(float(ac.get_attribute('data-wear')))
             if ac_wear >= self._aircraft_wear_percent:
@@ -714,7 +727,8 @@ CO2 capacity:\t{:.2f} %
         available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
 
         if acheck_cost > available_money:
-            logging.warn("A-Check is too expensive. A-Check cost: ${}, available money for repair: ${}")
+            logging.warn("A-Check is too expensive. A-Check cost: ${}, available money for A-Ckeck: ${}".format(acheck_cost,
+                                                                                                                available_money))
             # Close popup window 'maintanance'
             self._click_button(self.xbtn_popup_close)
             return
@@ -724,13 +738,14 @@ CO2 capacity:\t{:.2f} %
         # Close popup window 'maintanance'
         self._click_button(self.xbtn_popup_close)
     
-    def _acheck_all_aircrafts(self, aircrafts_on_base: list[selenium.webdriver.remote.webelement.WebElement]):
+    def _acheck_all_aircrafts(self):
         logging.info("Search aircrafts which need A-Check")
         acs_need_acheck = []
+        aircrafts_on_base = self._find_all_for_maintanance()
         for ac in aircrafts_on_base:
             ac_hours_to_acheck = int(ac.get_attribute('data-hours'))
             if ac_hours_to_acheck < self._aircraft_max_hours_to_acheck:
-                acs_need_acheck.append(ac)
+                acs_need_acheck.append(str(ac.get_attribute('data-reg')))
         
         # Close popup window 'maintanance'
         self._click_button(self.xbtn_popup_close)
@@ -741,20 +756,75 @@ CO2 capacity:\t{:.2f} %
         
         for ac in acs_need_acheck:
             self._acheck_aircraft()
+    
+    def _modify_aircraft(self, aircraft_reg: str) -> bool:
+        self._click_button(self.xbtn_maintanance)
+        self._click_button(self.xbtn_mnt_plan)
+        for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
+            if not str(ac.get_attribute('data-reg')) == aircraft_reg:
+                continue
+
+            ac_data_type = str(ac.get_attribute('data-type'))
+            # Find and click 'Modify' button
+            child_element = ac.find_element('xpath', self.xbtn_mnt_modify_plan)
+            child_element.click()
+            time.sleep(2)
+            for checkbox_xpath in [self.xcb_mnt_modify_reduced_co2, self.xcb_mnt_modify_speed_increase, self.xcb_mnt_modify_reduced_fuel]:
+                checkbox_web_elem = self._driver.find_element('xpath', checkbox_xpath)
+                if bool(checkbox_web_elem.get_attribute('checked')):
+                    continue
+                self._click_button(checkbox_xpath)
+            
+            modification_cost = extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_modify_cost))
+            if modification_cost == 0:
+                # Close popup window 'maintanance'
+                self._click_button(self.xbtn_popup_close)
+                return False
+            logging.info("AC type: {}, AC reg: {}".format(ac_data_type,
+                                                          aircraft_reg))
+            available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
+            if modification_cost > available_money:
+                logging.warn("Modification is too expensive. Modification cost: ${}, available money for modification: ${}".format(modification_cost,
+                                                                                                                                    available_money))
+                # Close popup window 'maintanance'
+                self._click_button(self.xbtn_popup_close)
+                return False
+    
+            self._click_button(self.xbtn_mnt_modify_do)
+            logging.info("Aircraft '{}' planed to modification for ${}".format(modification_cost))
+            # Close popup window 'maintanance'
+            self._click_button(self.xbtn_popup_close)
+            self._account_money -= modification_cost
+            
+            return True
+
+    def _modify_all_aircrafts(self):
+        logging.info("Search aircrafts which need modification")
+        modified_acs = []
+        aircrafts_on_base = self._find_all_for_maintanance()
+        acs_regs = []
+        for ac in aircrafts_on_base:
+            acs_regs.append(str(ac.get_attribute('data-reg')))
+
+        if len(acs_regs) > 0:
+            self._check_money()
+            logging.info("Check {} aircrafts for maintanance need...".format(len(acs_regs)))
+        
+        for aircraft_reg in acs_regs:
+            if self._modify_aircraft(aircraft_reg):
+                modified_acs.append(aircraft_reg)
+        
+        logging.info("Aircrafts planed for modification: {}".format(len(modified_acs)))
+        logging.debug("Modification planed for aircrafts: '{}'".format(modified_acs))
 
     def _do_maintanance(self):
         logging.info("Check aircrafts maintanance needs...")
-
-        aircrafts_on_base = self._find_all_for_maintanance()
-
-        if len(aircrafts_on_base) == 0:
-            logging.info("No aircrafts towards to base")
-            return
-        
         # A-Check
-        self._acheck_all_aircrafts(aircrafts_on_base)
+        self._acheck_all_aircrafts()
         # Repair
-        self._repair_all_aircrafts(aircrafts_on_base)
+        self._repair_all_aircrafts()
+        # Modification
+        self._modify_all_aircrafts()
 
     def do_maintanance(self):
         self._do_maintanance()
@@ -785,7 +855,8 @@ CO2 capacity:\t{:.2f} %
                 start_service(seconds_to_sleep)
             except KeyboardInterrupt:
                 return
-
+            except Exception as ex:
+                raise ex
 
     def run_service(self, seconds_to_sleep: int=300):
         try:

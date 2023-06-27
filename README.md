@@ -7,11 +7,13 @@
 4. Install Python requirements `pip install -r requirements.txt`.
 
 ### Features
-- ✔️ Autostart marketing companies.
-- ✔️ Autodepartures.
-- ✔️ Autobuy Fuel when price is low.
-- ✔️ Autobuy CO2 when price is low.
-- ✔️ Autorepair.
+- ✔️ Automatic start marketing companies.
+- ✔️ Automatic departures.
+- ✔️ Automatic buy Fuel when price is low.
+- ✔️ Automatic buy CO2 when price is low.
+- ✔️ Automatic repair.
+- ✔️ Automatic A-Check.
+- ✔️ Automatic modification.
 
 ### AM4Bot variables
 | Variable | Type | Default value | Description | Usage example |

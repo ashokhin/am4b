@@ -39,7 +39,7 @@ def main():
     logging.basicConfig(format=u'[%(asctime)s][%(levelname)-8s][PID:%(process)d] %(funcName)s.%(lineno)d: %(message)s', 
                         level=logging.DEBUG, stream=sys.stdout)
     """
-
+    
     logging.basicConfig(format=u'[%(asctime)s] %(message)s', 
                         level=logging.INFO, stream=sys.stdout)
 
@@ -66,7 +66,8 @@ def main():
     except KeyboardInterrupt:
             logging.info("Program interupted by user")
             sys.exit(0)
-    except Exception:
+    except Exception as ex:
+         logging.exception("Exception:\n{}".format(ex))
          sys.exit(1)
 
 
