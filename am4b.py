@@ -101,7 +101,7 @@ class AirlineManager4Bot(object):
     #
     xelem_list_mnt_to_base = '//div[@id="acListView"]/div[@data-base="1"]'
     #
-    xbtn_mnt_repair_plan = '//div[@id="acListView"]//button[contains(@onclick, "maint_plan_do.php?type=repair&id=")]'
+    xbtn_mnt_repair_plan = './/button[contains(@onclick, "maint_plan_do.php?type=repair&id=")]'
     #
     xtxt_mnt_repair_cost = '//div[@id="typeRepair"]//div[contains(text(), "$ ")]'
     #
@@ -115,11 +115,13 @@ class AirlineManager4Bot(object):
     #
     xbtn_mnt_modify_plan = './/button[contains(@onclick, "maint_plan_do.php?type=modify&id=")]'
     #
-    xcb_mnt_modify_reduced_co2 = '//div[@id="typeModify"]//input[@id="mod1"]'
+    xelem_list_mnt_modify_checkbox = '//div[@id="typeModify"]//label[@class="check-container"]'
     #
-    xcb_mnt_modify_speed_increase = '//div[@id="typeModify"]//input[@id="mod2"]'
+    xcb_mnt_modify_reduced_co2 = './/input[@id="mod1"]'
     #
-    xcb_mnt_modify_reduced_fuel = '//div[@id="typeModify"]//input[@id="mod3"]'
+    xcb_mnt_modify_speed_increase = './/input[@id="mod2"]'
+    #
+    xcb_mnt_modify_reduced_fuel = './/input[@id="mod3"]'
     #
     xtxt_mnt_modify_cost = '//div[@id="typeModify"]//span[@id="acCost"]'
     #
@@ -259,30 +261,31 @@ class AirlineManager4Bot(object):
         self._driver.refresh()
         time.sleep(5)
     
-    def _click_button(self, element_xpath: str):
+    def _click_button(self, button: any):
         try:
-            logging.debug("Click button '{}'".format(element_xpath))
-            btn = self._driver.find_element('xpath', element_xpath)
-            # If button not displayed than skip click
-            if not btn.is_displayed():
-                return
+            if isinstance(button, str):
+                logging.debug("Find button '{}'".format(button))
+                btn = self._driver.find_element('xpath', button)
+            else:
+                btn = button
         
+            logging.debug("Click button '{}'".format(btn))
             btn.click()
             time.sleep(2)
         except selenium.common.exceptions.NoSuchElementException as nselx:
-            logging.error("No such element exception. Unable to locate element: '{}'".format(element_xpath))
+            logging.error("No such element exception. Unable to locate element: '{}'".format(button))
             logging.exception("Exception: \n{}".format(nselx))
             logging.debug("Page source: {}".format(self._driver.page_source))
 
             return
         except selenium.common.exceptions.ElementClickInterceptedException as ecie:
-            logging.error("Button '{}' not avaiable for click".format(element_xpath))
+            logging.error("Button '{}' not avaiable for click".format(button))
             logging.exception("Exception: \n{}".format(ecie))
             logging.debug("Page source: {}".format(self._driver.page_source))
 
             return
         except selenium.common.exceptions.StaleElementReferenceException as sere:
-            logging.error("Button '{}' not avaiable for click".format(element_xpath))
+            logging.error("Button '{}' not avaiable for click".format(button))
             logging.exception("Exception: \n{}".format(sere))
             logging.debug("Page source: {}".format(self._driver.page_source))
 
@@ -358,7 +361,6 @@ class AirlineManager4Bot(object):
     def _enable_marketing_company(self, marketing_company: dict):
         logging.info("Check marketing company '{}'...".format(marketing_company['name']))
 
-        self._check_money()
         self._click_button(self.xbtn_finance)
         self._click_button(self.xbtn_marketing_tab)
         self._click_button(self.xbtn_mrktn_new_campaign)
@@ -381,14 +383,15 @@ class AirlineManager4Bot(object):
         available_money = int(self._account_money * (self._marketing_budget_percent * 0.01))
 
         if company_cost > available_money:
-            logging.warning("Not enough money for marketing company. Available money for marketing company: $ {}. Marketing company price: $ {}".format(available_money,
-                                                                                                                                                        company_cost))
+            logging.warning("Not enough money for marketing company. Available money for marketing company: ${}. Marketing company price: ${}".format(available_money,
+                                                                                                                                                      company_cost))
             self._click_button(self.xbtn_popup_close)
             return
 
         logging.info("Activate marketing company '{}' for ${}".format(marketing_company['name'], company_cost))
         self._click_button(marketing_company['button_xpath'])
         self._click_button(self.xbtn_popup_close)
+        self._account_money -= company_cost
     
     def _enable_marketing_companies(self):
         marketing_companies = [
@@ -404,6 +407,7 @@ class AirlineManager4Bot(object):
             },
         ]
 
+        self._check_money()
         for marketing_company in marketing_companies:
             self._enable_marketing_company(marketing_company)
     
@@ -577,7 +581,7 @@ CO2 capacity:\t{:.2f} %
                               100 * float(self._co2_data['current_capacity'])/float(self._co2_data['maximum_capacity'])))
 
     def _buy_fuel_amount(self, amount: int):
-        logging.info("Buy fuel. {} Lbs for $ {}".format(amount, int((self._fuel_data['price'] * amount)/1000)))
+        logging.info("Buy fuel. {} Lbs for ${}".format(amount, int((self._fuel_data['price'] * amount)/1000)))
         # Open popup window 'fuel'
         self._click_button(self.xbtn_fuel)
         # Enter fuel amount
@@ -612,7 +616,7 @@ CO2 capacity:\t{:.2f} %
         self._buy_fuel_amount(avaiable_amount)
 
     def _buy_co2_amount(self, amount: int):
-        logging.info("Buy CO2. {} Quotas for $ {}".format(amount, int((self._co2_data['price'] * amount)/1000)))
+        logging.info("Buy CO2. {} Quotas for ${}".format(amount, int((self._co2_data['price'] * amount)/1000)))
         # Open popup window 'fuel'
         self._click_button(self.xbtn_fuel)
         # Go to tab 'CO2' in popup window 'fuel'
@@ -655,33 +659,6 @@ CO2 capacity:\t{:.2f} %
     def buy_fuel(self):
         self._buy_fuel()
     
-    def _repair_aircraft(self):
-        logging.info("Repair aircraft...")
-        self._check_money()
-        # repair first founded
-        self._click_button(self.xbtn_maintanance)
-        self._click_button(self.xbtn_mnt_plan)
-        self._click_button(self.xbtn_mnt_sort_by_wear)
-        aircraft_web_elem = self._driver.find_elements('xpath', self.xelem_list_mnt_to_base)[0]
-        logging.info("AC type: {}, AC reg: {}, AC wear: {}".format(aircraft_web_elem.get_attribute('data-type'),
-                                                                   aircraft_web_elem.get_attribute('data-reg'),
-                                                                   aircraft_web_elem.get_attribute('data-wear')))
-        self._click_button(self.xbtn_mnt_repair_plan)
-
-        repair_cost = extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_repair_cost))
-        available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
-
-        if repair_cost > available_money:
-            logging.warn("Repair is too expensive. Repair cost: ${}, available money for repair: ${}")
-            # Close popup window 'maintanance'
-            self._click_button(self.xbtn_popup_close)
-            return
-        
-        self._click_button(self.xbtn_mnt_repair_do)
-        logging.info("Aircraft planed to repair for ${}".format(repair_cost))
-        # Close popup window 'maintanance'
-        self._click_button(self.xbtn_popup_close)
-    
     def _find_all_for_maintanance(self) -> list[selenium.webdriver.remote.webelement.WebElement]:
         self._click_button(self.xbtn_maintanance)
         self._click_button(self.xbtn_mnt_plan)
@@ -690,6 +667,52 @@ CO2 capacity:\t{:.2f} %
         self._click_button(self.xbtn_popup_close)
 
         return aircrafts_on_base
+    
+    def _repair_aircraft(self, aircraft_reg: str) -> bool:
+        logging.info("Repair aircraft...")
+
+        self._click_button(self.xbtn_maintanance)
+        self._click_button(self.xbtn_mnt_plan)
+        self._click_button(self.xbtn_mnt_sort_by_wear)
+        ac_data_type: str
+        ac_data_reg: str
+        ac_data_wear: str
+        child_element_repair_button: selenium.webdriver.remote.webelement.WebElement
+
+        for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
+            ac_data_reg = str(ac.get_attribute('data-reg'))
+            if ac_data_reg == aircraft_reg:
+                ac_data_type = str(ac.get_attribute('data-type'))
+                ac_data_wear = str(ac.get_attribute('data-wear'))
+                # Find 'Repair' button
+                child_element_repair_button = ac.find_element('xpath', self.xbtn_mnt_repair_plan)
+                break
+
+        
+        logging.info("AC type: {}, AC reg: {}, AC wear: {}".format(ac_data_type,
+                                                                   ac_data_reg,
+                                                                   ac_data_wear))
+        
+        # Click 'Repair' button
+        self._click_button(child_element_repair_button)
+
+        repair_cost = extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_repair_cost))
+        available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
+
+        if repair_cost > available_money:
+            logging.warn("Repair is too expensive. Repair cost: ${}, available money for repair: ${}".format(repair_cost, 
+                                                                                                             available_money))
+            # Close popup window 'maintanance'
+            self._click_button(self.xbtn_popup_close)
+            return False
+        
+        self._click_button(self.xbtn_mnt_repair_do)
+        logging.info("Aircraft '{}' planed to repair for ${}".format(ac_data_reg, repair_cost))
+        # Close popup window 'maintanance'
+        self._click_button(self.xbtn_popup_close)
+        self._account_money -= repair_cost
+
+        return True
 
     def _repair_all_aircrafts(self):
         logging.info("Search aircrafts which need repair")
@@ -698,45 +721,65 @@ CO2 capacity:\t{:.2f} %
         for ac in aircrafts_on_base:
             ac_wear = int(float(ac.get_attribute('data-wear')))
             if ac_wear >= self._aircraft_wear_percent:
-                acs_need_repair.append(ac)
+                acs_need_repair.append(str(ac.get_attribute('data-reg')))
         
-        # Close popup window 'maintanance'
-        self._click_button(self.xbtn_popup_close)
-
         if len(acs_need_repair) == 0:
             logging.info("No aircrafts need repair")
             return
         
-        for ac in acs_need_repair:
-            self._repair_aircraft()
-    
-    def _acheck_aircraft(self):
-        logging.info("A-Check aircraft...")
         self._check_money()
-        # A-Check first founded
+        repaired_acs = 0
+        for ac in acs_need_repair:
+            if self._repair_aircraft(ac):
+                repaired_acs += 1
+        
+        logging.info("Aircrafts repaired: {}".format(repaired_acs))
+    
+    def _acheck_aircraft(self, aircraft_reg) -> bool:
+        logging.info("A-Check aircraft...")
+        
         self._click_button(self.xbtn_maintanance)
         self._click_button(self.xbtn_mnt_plan)
         self._click_button(self.xbtn_mnt_sort_by_acheck)
-        aircraft_web_elem = self._driver.find_elements('xpath', self.xelem_list_mnt_to_base)[0]
-        logging.info("AC type: {}, AC reg: {}, AC hours to check: {}".format(aircraft_web_elem.get_attribute('data-type'),
-                                                                   aircraft_web_elem.get_attribute('data-reg'),
-                                                                   aircraft_web_elem.get_attribute('data-hours')))
+        ac_data_type: str
+        ac_data_reg: str
+        ac_data_hours: str
+        child_element_acheck_button: selenium.webdriver.remote.webelement.WebElement
+
+        for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
+            ac_data_reg = str(ac.get_attribute('data-reg'))
+            if ac_data_reg == aircraft_reg:
+                ac_data_type = str(ac.get_attribute('data-type'))
+                ac_data_hours = str(ac.get_attribute('data-hours'))
+                # Find 'A-Check' button
+                child_element_acheck_button = ac.find_element('xpath', self.xbtn_mnt_acheck_plan)
+                break
         
-        self._click_button(self.xbtn_mnt_acheck_plan)
+        logging.info("AC type: {}, AC reg: {}, AC hours to check: {}".format(ac_data_type,
+                                                                             ac_data_reg,
+                                                                             ac_data_hours))
+        
+        # Click 'A-Check' button
+        self._click_button(child_element_acheck_button)
+
         acheck_cost = extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_acheck_cost))
         available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
 
         if acheck_cost > available_money:
-            logging.warn("A-Check is too expensive. A-Check cost: ${}, available money for A-Ckeck: ${}".format(acheck_cost,
+            logging.warn("A-Check is too expensive. A-Check cost: ${}, available money for A-Check: ${}".format(acheck_cost,
                                                                                                                 available_money))
             # Close popup window 'maintanance'
             self._click_button(self.xbtn_popup_close)
-            return
+
+            return False
         
         self._click_button(self.xbtn_mnt_acheck_do)
-        logging.info("Aircraft planed to A-Check for ${}".format(acheck_cost))
+        logging.info("Aircraft '{}' planed to A-Check for ${}".format(ac_data_reg, acheck_cost))
         # Close popup window 'maintanance'
         self._click_button(self.xbtn_popup_close)
+        self._account_money -= acheck_cost
+
+        return True
     
     def _acheck_all_aircrafts(self):
         logging.info("Search aircrafts which need A-Check")
@@ -747,56 +790,75 @@ CO2 capacity:\t{:.2f} %
             if ac_hours_to_acheck < self._aircraft_max_hours_to_acheck:
                 acs_need_acheck.append(str(ac.get_attribute('data-reg')))
         
-        # Close popup window 'maintanance'
-        self._click_button(self.xbtn_popup_close)
-
         if len(acs_need_acheck) == 0:
             logging.info("No aircrafts needs A-Check")
             return
         
+        self._check_money()
+        achecked_acs = 0
         for ac in acs_need_acheck:
-            self._acheck_aircraft()
+            if self._acheck_aircraft(ac):
+                achecked_acs += 1
+        
+        logging.info("Aircrafts planed for A-Check: {}".format(achecked_acs))
     
     def _modify_aircraft(self, aircraft_reg: str) -> bool:
         self._click_button(self.xbtn_maintanance)
         self._click_button(self.xbtn_mnt_plan)
-        for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
-            if not str(ac.get_attribute('data-reg')) == aircraft_reg:
-                continue
+        ac_data_type: str
+        ac_data_reg: str
+        child_element_modify_button: selenium.webdriver.remote.webelement.WebElement
 
-            ac_data_type = str(ac.get_attribute('data-type'))
-            # Find and click 'Modify' button
-            child_element = ac.find_element('xpath', self.xbtn_mnt_modify_plan)
-            child_element.click()
-            time.sleep(2)
-            for checkbox_xpath in [self.xcb_mnt_modify_reduced_co2, self.xcb_mnt_modify_speed_increase, self.xcb_mnt_modify_reduced_fuel]:
-                checkbox_web_elem = self._driver.find_element('xpath', checkbox_xpath)
-                if bool(checkbox_web_elem.get_attribute('checked')):
-                    continue
-                self._click_button(checkbox_xpath)
+        for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
+            ac_data_reg = str(ac.get_attribute('data-reg'))
+            if ac_data_reg == aircraft_reg:
+                ac_data_type = str(ac.get_attribute('data-type'))
+                # Find 'Modify' button
+                child_element_modify_button = ac.find_element('xpath', self.xbtn_mnt_modify_plan)
+                break
+
             
-            modification_cost = extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_modify_cost))
-            if modification_cost == 0:
-                # Close popup window 'maintanance'
-                self._click_button(self.xbtn_popup_close)
-                return False
-            logging.info("AC type: {}, AC reg: {}".format(ac_data_type,
-                                                          aircraft_reg))
-            available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
-            if modification_cost > available_money:
-                logging.warn("Modification is too expensive. Modification cost: ${}, available money for modification: ${}".format(modification_cost,
-                                                                                                                                    available_money))
-                # Close popup window 'maintanance'
-                self._click_button(self.xbtn_popup_close)
-                return False
-    
-            self._click_button(self.xbtn_mnt_modify_do)
-            logging.info("Aircraft '{}' planed to modification for ${}".format(modification_cost))
+        # Click 'Modify' button
+        self._click_button(child_element_modify_button)
+
+        for modification_checkbox_row in self._driver.find_elements('xpath', self.xelem_list_mnt_modify_checkbox):
+            for checkbox_xpath in [self.xcb_mnt_modify_reduced_co2, self.xcb_mnt_modify_speed_increase, self.xcb_mnt_modify_reduced_fuel]:
+                try:
+                    checkbox_web_elem = modification_checkbox_row.find_element('xpath', checkbox_xpath)
+
+                    if bool(checkbox_web_elem.get_attribute('checked')):
+                        break
+                    
+                    checkbox_span = modification_checkbox_row.find_element('xpath', './/span[@class="checkmark"]')
+                    self._click_button(checkbox_span)
+                    break
+
+                except:
+                    continue
+        
+        modification_cost = extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_modify_cost))
+        if modification_cost == 0:
             # Close popup window 'maintanance'
             self._click_button(self.xbtn_popup_close)
-            self._account_money -= modification_cost
-            
-            return True
+            return False
+        logging.info("AC type: {}, AC reg: {}".format(ac_data_type,
+                                                      aircraft_reg))
+        available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
+        if modification_cost > available_money:
+            logging.warn("Modification is too expensive. Modification cost: ${}, available money for modification: ${}".format(modification_cost,
+                                                                                                                               available_money))
+            # Close popup window 'maintanance'
+            self._click_button(self.xbtn_popup_close)
+            return False
+
+        self._click_button(self.xbtn_mnt_modify_do)
+        logging.info("Aircraft '{}' planed for modification for ${}".format(ac_data_reg,
+                                                                           modification_cost))
+        # Close popup window 'maintanance'
+        self._click_button(self.xbtn_popup_close)
+        self._account_money -= modification_cost
+        
+        return True
 
     def _modify_all_aircrafts(self):
         logging.info("Search aircrafts which need modification")
@@ -808,7 +870,7 @@ CO2 capacity:\t{:.2f} %
 
         if len(acs_regs) > 0:
             self._check_money()
-            logging.info("Check {} aircrafts for maintanance need...".format(len(acs_regs)))
+            logging.info("Check {} aircrafts for modification need...".format(len(acs_regs)))
         
         for aircraft_reg in acs_regs:
             if self._modify_aircraft(aircraft_reg):
