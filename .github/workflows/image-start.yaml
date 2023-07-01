@@ -2,7 +2,7 @@ name: Docker Image run
 
 on:
   schedule:
-    - cron: '7/30 * * * *'
+    - cron: '7/20 * * * *'
 
 jobs:
 
