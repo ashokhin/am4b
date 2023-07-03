@@ -56,9 +56,9 @@ python app.py
 `app.py` example with rewrite all available variables and run as a service:
 
 ``` python
-import am4b
+import am4.bot as bot
 
-am4bot = am4b.AirlineManager4Bot()
+am4bot = bot.AirlineManager4Bot()
 
 am4bot.am4_base_url = "https://airlinemanager.com/"
 am4bot.username = "bob@example.com"
@@ -79,7 +79,7 @@ am4bot.run_service(300)
 import logging
 import sys
 
-import am4b
+import am4.bot as bot
 
 
 """
@@ -90,7 +90,7 @@ logging.basicConfig(format=u'[%(asctime)s][%(levelname)-8s][PID:%(process)d] %(f
 logging.basicConfig(format=u'[%(asctime)s] %(message)s', 
                     level=logging.INFO, stream=sys.stdout)
 
-am4bot = am4b.AirlineManager4Bot()
+am4bot = bot.AirlineManager4Bot()
 
 am4bot.username = "bob@example.com"
 am4bot.password = "PA5sW0rD"
@@ -100,10 +100,10 @@ am4bot.run_once()
 
 `app.py` example with minimum rewrites and full flow control (except `run_once` and/or `run_service`):
 ``` python
-import am4b
+import am4.bot as bot
 
 
-am4bot = am4b.AirlineManager4Bot()
+am4bot = bot.AirlineManager4Bot()
 
 am4bot.username = "bob@example.com"
 am4bot.password = "PA5sW0rD"

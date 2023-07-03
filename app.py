@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 
-import am4b
+import am4.bot as bot
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -19,13 +19,13 @@ def parse_arguments() -> argparse.Namespace:
                         default=120)
     parser.add_argument('--fuel-budget-percent', type=int, help="Percent of account money available for buying fuel/CO2",
                         default=70)
-    parser.add_argument('--maintanance_budget_percent', type=int,
+    parser.add_argument('--maintanance-budget-percent', type=int,
                         default=50)
-    parser.add_argument('--marketing_budget_percent', type=int,
+    parser.add_argument('--marketing-budget-percent', type=int,
                         default=70)
-    parser.add_argument('--aircraft_wear_percent', type=int,
-                        default=20)
-    parser.add_argument('--aircraft_max_hours_to_acheck', type=int,
+    parser.add_argument('--aircraft-wear-percent', type=int,
+                        default=30)
+    parser.add_argument('--aircraft-max-hours-to-acheck', type=int,
                         default=12)
     parser.add_argument('--run-mode', type=str, choices=['once', 'service'], help="Run mode",
                         default='once')
@@ -45,7 +45,7 @@ def main():
 
     args = parse_arguments()
 
-    am4bot = am4b.AirlineManager4Bot()
+    am4bot = bot.AirlineManager4Bot()
 
     am4bot.am4_base_url = args.base_url
     am4bot.username = args.username

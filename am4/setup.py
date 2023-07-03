@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-  name='am4b',
-  packages=['am4b'],
+  name='am4',
+  packages=['am4'],
   version='1.0',
   license='MIT',
   description='Python bot for Airline Manager game',

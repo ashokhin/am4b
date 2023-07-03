@@ -1,10 +1,12 @@
 import datetime
 import logging
 import time
-import sys
 import selenium
 
 from selenium import webdriver
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -28,6 +30,10 @@ class AirlineManager4Bot(object):
     # xpath for button 'login' in popup window
     xbtn_auth = '//form[@id="loginForm"]//button[@id="btnLogin"]'
 
+    # Loading overlay
+    #
+    #
+    xelem_load_overlay = '/html/body/div[@class="preloader exo xl-text" and contains(@style, "AM_loading.jpg") and contains(@style, "display: none")]'
     # Main game page
     #
     # xpath for text 'Account' on main game page, which contains available money
@@ -270,8 +276,11 @@ class AirlineManager4Bot(object):
                 btn = button
         
             logging.debug("Click button '{}'".format(btn))
-            btn.click()
-            time.sleep(2)
+            if btn.is_displayed():
+                btn.click()
+                time.sleep(2)
+            else:
+                logging.warning("Button element '{}' isn't clickable".format(button))
         except selenium.common.exceptions.NoSuchElementException as nselx:
             logging.error("No such element exception. Unable to locate element: '{}'".format(button))
             logging.exception("Exception: \n{}".format(nselx))
@@ -322,7 +331,7 @@ class AirlineManager4Bot(object):
             return ""
 
     def _login(self):
-        logging.info("Login into '{}'".format(self._am4_base_url))
+        logging.info("Login...")
         logging.info("Login attempts: {}".format(self._login_attempts))
         logging.info("Last login attempt: {}".format(self._login_last_attempt.isoformat()))
         self._driver.delete_all_cookies()
@@ -344,9 +353,16 @@ class AirlineManager4Bot(object):
         self._type_text_in_field(self.xtf_password, self._am4_credentials['password'])
         self._click_button(self.xcb_remember_me)
         self._click_button(self.xbtn_auth)
-        logging.info("Wait loading page after authentification...")
-        time.sleep(5)
-        self._loged_in = True
+
+        try:
+            logging.info("Wait loading page after authentification...")
+            _ = WebDriverWait(self._driver, 30).until(
+                EC.presence_of_element_located(('xpath', self.xelem_load_overlay))
+            )
+            self._loged_in = True
+        except Exception as ex:
+            logging.exception("Login exception:\n{}".format(ex))
+            raise ex
     
     def login(self):
         self._login()
@@ -659,7 +675,7 @@ CO2 capacity:\t{:.2f} %
     def buy_fuel(self):
         self._buy_fuel()
     
-    def _find_all_for_maintanance(self) -> list[selenium.webdriver.remote.webelement.WebElement]:
+    def _find_all_for_maintanance(self) -> list[WebElement]:
         self._click_button(self.xbtn_maintanance)
         self._click_button(self.xbtn_mnt_plan)
         aircrafts_on_base = self._driver.find_elements('xpath', self.xelem_list_mnt_to_base)
@@ -677,7 +693,7 @@ CO2 capacity:\t{:.2f} %
         ac_data_type: str
         ac_data_reg: str
         ac_data_wear: str
-        child_element_repair_button: selenium.webdriver.remote.webelement.WebElement
+        child_element_repair_button: WebElement
 
         for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
             ac_data_reg = str(ac.get_attribute('data-reg'))
@@ -744,7 +760,7 @@ CO2 capacity:\t{:.2f} %
         ac_data_type: str
         ac_data_reg: str
         ac_data_hours: str
-        child_element_acheck_button: selenium.webdriver.remote.webelement.WebElement
+        child_element_acheck_button: WebElement
 
         for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
             ac_data_reg = str(ac.get_attribute('data-reg'))
@@ -807,7 +823,7 @@ CO2 capacity:\t{:.2f} %
         self._click_button(self.xbtn_mnt_plan)
         ac_data_type: str
         ac_data_reg: str
-        child_element_modify_button: selenium.webdriver.remote.webelement.WebElement
+        child_element_modify_button: WebElement
 
         for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
             ac_data_reg = str(ac.get_attribute('data-reg'))
@@ -870,7 +886,13 @@ CO2 capacity:\t{:.2f} %
 
         if len(acs_regs) > 0:
             self._check_money()
-            logging.info("Check {} aircrafts for modification need...".format(len(acs_regs)))
+            if len(acs_regs) > 5:
+                # Check only last 5 aircrafts
+                logging.info("Check only last 5 aircrafts for modification need...")
+                acs_regs.sort()
+                acs_regs = acs_regs[-5:]
+            else:
+                logging.info("Check {} aircrafts for modification need...".format(len(acs_regs)))
         
         for aircraft_reg in acs_regs:
             if self._modify_aircraft(aircraft_reg):

@@ -21,4 +21,4 @@ jobs:
     
     - name: Execute docker image with rewrite environment variables
       run: |
-        docker run --env AM4_USERNAME='${{ secrets.AM4_USERNAME }}' --env AM4_PASSWORD='${{ secrets.AM4_PASSWORD }}' ${{ secrets.DOCKERHUB_REPO_ORG }}/${{ secrets.DOCKERHUB_REPO_NAME }}
+        docker run --env USERNAME='${{ secrets.AM4_USERNAME }}' --env PASSWORD='${{ secrets.AM4_PASSWORD }}' ${{ secrets.DOCKERHUB_REPO_ORG }}/${{ secrets.DOCKERHUB_REPO_NAME }}
