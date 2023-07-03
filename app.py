@@ -3,6 +3,7 @@ import logging
 import sys
 
 import am4.bot as bot
+import am4.scaner as scaner
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -45,6 +46,7 @@ def main():
 
     args = parse_arguments()
 
+    """
     am4bot = bot.AirlineManager4Bot()
 
     am4bot.am4_base_url = args.base_url
@@ -69,6 +71,14 @@ def main():
     except Exception as ex:
          logging.exception("Exception:\n{}".format(ex))
          sys.exit(1)
+
+    """
+    am4scaner = scaner.AM4Scaner()
+    am4scaner.am4_base_url = args.base_url
+    am4scaner.username = args.username
+    am4scaner.password = args.password
+
+    am4scaner.scan()
 
 
 if __name__ == "__main__":
