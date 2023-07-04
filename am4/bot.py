@@ -16,11 +16,11 @@ class AirlineManager4Bot(AM4BaseClass):
         ### Set good prices for fuel and co2
         self._fuel_good_price = 350
         self._co2_good_price = 120
-        ### Set available percent of budget for fuel, maintanance and marketing
+        ### Set available percent of budget for fuel, maintenance and marketing
         self._fuel_budget_percent = 30
-        self._maintanance_budget_percent = 30
+        self._maintenance_budget_percent = 30
         self._marketing_budget_percent = 30
-        ### Set borders for maintanance (Repairs and A-Checks)
+        ### Set borders for maintenance (Repairs and A-Checks)
         self._aircraft_wear_percent = 20
         self._aircraft_max_hours_to_acheck = 24
         ### Class inner variables
@@ -68,12 +68,12 @@ class AirlineManager4Bot(AM4BaseClass):
         self._fuel_budget_percent = int(value)
     
     @property
-    def maintanance_budget_percent(self) -> int:
-        return int(self._maintanance_budget_percent)
+    def maintenance_budget_percent(self) -> int:
+        return int(self._maintenance_budget_percent)
     
-    @maintanance_budget_percent.setter
-    def maintanance_budget_percent(self, value: int):
-        self._maintanance_budget_percent = int(value)
+    @maintenance_budget_percent.setter
+    def maintenance_budget_percent(self, value: int):
+        self._maintenance_budget_percent = int(value)
 
     @property
     def marketing_budget_percent(self) -> int:
@@ -205,14 +205,14 @@ class AirlineManager4Bot(AM4BaseClass):
         ready_for_depart_ac = self._check_ready_for_depart()
 
         if ready_for_depart_ac > 0:
-            logging.info("Aircrafts ready for depart: {}".format(ready_for_depart_ac))
+            logging.info("Aircraft ready for depart: {}".format(ready_for_depart_ac))
             self._click_button(self.xbtn_depart)
             departed_ac = (ready_for_depart_ac - self._check_ready_for_depart())
-            logging.info("Aircrafts departed: {}".format(departed_ac))
+            logging.info("Aircraft departed: {}".format(departed_ac))
 
             return
         
-        logging.info("No aircrafts ready to depart")
+        logging.info("No aircraft ready to depart")
     
     def depart(self):
         self._depart()
@@ -360,8 +360,8 @@ CO2 capacity:\t{:.2f} %
             self._buy_fuel_amount(self._fuel_data['current_capacity'])
             return
         
-        avaiable_amount = int(available_money / self._fuel_data['price']) * 1000
-        self._buy_fuel_amount(avaiable_amount)
+        available_amount = int(available_money / self._fuel_data['price']) * 1000
+        self._buy_fuel_amount(available_amount)
 
     def _buy_co2_amount(self, amount: int):
         logging.info("Buy CO2. {} Quotas for ${}".format(amount, int((self._co2_data['price'] * amount)/1000)))
@@ -395,8 +395,8 @@ CO2 capacity:\t{:.2f} %
             self._buy_co2_amount(self._co2_data['current_capacity'])
             return
         
-        avaiable_amount = int(available_money / self._co2_data['price']) * 1000
-        self._buy_co2_amount(avaiable_amount)
+        available_amount = int(available_money / self._co2_data['price']) * 1000
+        self._buy_co2_amount(available_amount)
 
     def _buy_fuel(self):
         logging.info("Try to buy fuel...")
@@ -407,19 +407,19 @@ CO2 capacity:\t{:.2f} %
     def buy_fuel(self):
         self._buy_fuel()
     
-    def _find_all_for_maintanance(self) -> list[WebElement]:
-        self._click_button(self.xbtn_maintanance)
+    def _find_all_for_maintenance(self) -> list[WebElement]:
+        self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
-        aircrafts_on_base = self._driver.find_elements('xpath', self.xelem_list_mnt_to_base)
-        # Close popup window 'maintanance'
+        aircraft_on_base = self._driver.find_elements('xpath', self.xelem_list_mnt_to_base)
+        # Close popup window 'maintenance'
         self._click_button(self.xbtn_popup_close)
 
-        return aircrafts_on_base
+        return aircraft_on_base
     
     def _repair_aircraft(self, aircraft_reg: str) -> bool:
         logging.info("Repair aircraft...")
 
-        self._click_button(self.xbtn_maintanance)
+        self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
         self._click_button(self.xbtn_mnt_sort_by_wear)
         ac_data_type: str
@@ -445,34 +445,34 @@ CO2 capacity:\t{:.2f} %
         self._click_button(child_element_repair_button)
 
         repair_cost = func.extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_repair_cost))
-        available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
+        available_money = int(self._account_money * (self._maintenance_budget_percent * 0.01))
 
         if repair_cost > available_money:
             logging.warn("Repair is too expensive. Repair cost: ${}, available money for repair: ${}".format(repair_cost, 
                                                                                                              available_money))
-            # Close popup window 'maintanance'
+            # Close popup window 'maintenance'
             self._click_button(self.xbtn_popup_close)
             return False
         
         self._click_button(self.xbtn_mnt_repair_do)
         logging.info("Aircraft '{}' planed to repair for ${}".format(ac_data_reg, repair_cost))
-        # Close popup window 'maintanance'
+        # Close popup window 'maintenance'
         self._click_button(self.xbtn_popup_close)
         self._account_money -= repair_cost
 
         return True
 
-    def _repair_all_aircrafts(self):
-        logging.info("Search aircrafts which need repair")
+    def _repair_all_aircraft(self):
+        logging.info("Search aircraft which need repair")
         acs_need_repair = []
-        aircrafts_on_base = self._find_all_for_maintanance()
-        for ac in aircrafts_on_base:
+        aircraft_on_base = self._find_all_for_maintenance()
+        for ac in aircraft_on_base:
             ac_wear = int(float(ac.get_attribute('data-wear')))
             if ac_wear >= self._aircraft_wear_percent:
                 acs_need_repair.append(str(ac.get_attribute('data-reg')))
         
         if len(acs_need_repair) == 0:
-            logging.info("No aircrafts need repair")
+            logging.info("No aircraft need repair")
             return
         
         self._check_money()
@@ -481,12 +481,12 @@ CO2 capacity:\t{:.2f} %
             if self._repair_aircraft(ac):
                 repaired_acs += 1
         
-        logging.info("Aircrafts repaired: {}".format(repaired_acs))
+        logging.info("Aircraft repaired: {}".format(repaired_acs))
     
     def _acheck_aircraft(self, aircraft_reg) -> bool:
         logging.info("A-Check aircraft...")
         
-        self._click_button(self.xbtn_maintanance)
+        self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
         self._click_button(self.xbtn_mnt_sort_by_acheck)
         ac_data_type: str
@@ -511,35 +511,35 @@ CO2 capacity:\t{:.2f} %
         self._click_button(child_element_acheck_button)
 
         acheck_cost = func.extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_acheck_cost))
-        available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
+        available_money = int(self._account_money * (self._maintenance_budget_percent * 0.01))
 
         if acheck_cost > available_money:
             logging.warn("A-Check is too expensive. A-Check cost: ${}, available money for A-Check: ${}".format(acheck_cost,
                                                                                                                 available_money))
-            # Close popup window 'maintanance'
+            # Close popup window 'maintenance'
             self._click_button(self.xbtn_popup_close)
 
             return False
         
         self._click_button(self.xbtn_mnt_acheck_do)
         logging.info("Aircraft '{}' planed to A-Check for ${}".format(ac_data_reg, acheck_cost))
-        # Close popup window 'maintanance'
+        # Close popup window 'maintenance'
         self._click_button(self.xbtn_popup_close)
         self._account_money -= acheck_cost
 
         return True
     
-    def _acheck_all_aircrafts(self):
-        logging.info("Search aircrafts which need A-Check")
+    def _acheck_all_aircraft(self):
+        logging.info("Search aircraft which need A-Check")
         acs_need_acheck = []
-        aircrafts_on_base = self._find_all_for_maintanance()
-        for ac in aircrafts_on_base:
+        aircraft_on_base = self._find_all_for_maintenance()
+        for ac in aircraft_on_base:
             ac_hours_to_acheck = int(ac.get_attribute('data-hours'))
             if ac_hours_to_acheck < self._aircraft_max_hours_to_acheck:
                 acs_need_acheck.append(str(ac.get_attribute('data-reg')))
         
         if len(acs_need_acheck) == 0:
-            logging.info("No aircrafts needs A-Check")
+            logging.info("No aircraft needs A-Check")
             return
         
         self._check_money()
@@ -548,10 +548,10 @@ CO2 capacity:\t{:.2f} %
             if self._acheck_aircraft(ac):
                 achecked_acs += 1
         
-        logging.info("Aircrafts planed for A-Check: {}".format(achecked_acs))
+        logging.info("Aircraft planed for A-Check: {}".format(achecked_acs))
     
     def _modify_aircraft(self, aircraft_reg: str) -> bool:
-        self._click_button(self.xbtn_maintanance)
+        self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
         ac_data_type: str
         ac_data_reg: str
@@ -586,70 +586,70 @@ CO2 capacity:\t{:.2f} %
         
         modification_cost = func.extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_modify_cost))
         if modification_cost == 0:
-            # Close popup window 'maintanance'
+            # Close popup window 'maintenance'
             self._click_button(self.xbtn_popup_close)
             return False
         logging.info("AC type: {}, AC reg: {}".format(ac_data_type,
                                                       aircraft_reg))
-        available_money = int(self._account_money * (self._maintanance_budget_percent * 0.01))
+        available_money = int(self._account_money * (self._maintenance_budget_percent * 0.01))
         if modification_cost > available_money:
             logging.warn("Modification is too expensive. Modification cost: ${}, available money for modification: ${}".format(modification_cost,
                                                                                                                                available_money))
-            # Close popup window 'maintanance'
+            # Close popup window 'maintenance'
             self._click_button(self.xbtn_popup_close)
             return False
 
         self._click_button(self.xbtn_mnt_modify_do)
         logging.info("Aircraft '{}' planed for modification for ${}".format(ac_data_reg,
                                                                            modification_cost))
-        # Close popup window 'maintanance'
+        # Close popup window 'maintenance'
         self._click_button(self.xbtn_popup_close)
         self._account_money -= modification_cost
         
         return True
 
-    def _modify_all_aircrafts(self):
-        logging.info("Search aircrafts which need modification")
+    def _modify_all_aircraft(self):
+        logging.info("Search aircraft which need modification")
         modified_acs = []
-        aircrafts_on_base = self._find_all_for_maintanance()
+        aircraft_on_base = self._find_all_for_maintenance()
         acs_regs = []
-        for ac in aircrafts_on_base:
+        for ac in aircraft_on_base:
             acs_regs.append(str(ac.get_attribute('data-reg')))
 
         if len(acs_regs) > 0:
             self._check_money()
             if len(acs_regs) > 5:
-                # Check only last 5 aircrafts
-                logging.info("Check only last 5 aircrafts for modification need...")
+                # Check only last 5 aircraft
+                logging.info("Check only last 5 aircraft for modification need...")
                 acs_regs.sort()
                 acs_regs = acs_regs[-5:]
             else:
-                logging.info("Check {} aircrafts for modification need...".format(len(acs_regs)))
+                logging.info("Check {} aircraft for modification need...".format(len(acs_regs)))
         
         for aircraft_reg in acs_regs:
             if self._modify_aircraft(aircraft_reg):
                 modified_acs.append(aircraft_reg)
         
-        logging.info("Aircrafts planed for modification: {}".format(len(modified_acs)))
-        logging.debug("Modification planed for aircrafts: '{}'".format(modified_acs))
+        logging.info("Aircraft planed for modification: {}".format(len(modified_acs)))
+        logging.debug("Modification planed for aircraft: '{}'".format(modified_acs))
 
-    def _do_maintanance(self):
-        logging.info("Check aircrafts maintanance needs...")
+    def _do_maintenance(self):
+        logging.info("Check aircraft maintenance needs...")
         # A-Check
-        self._acheck_all_aircrafts()
+        self._acheck_all_aircraft()
         # Repair
-        self._repair_all_aircrafts()
+        self._repair_all_aircraft()
         # Modification
-        self._modify_all_aircrafts()
+        self._modify_all_aircraft()
 
-    def do_maintanance(self):
-        self._do_maintanance()
+    def do_maintenance(self):
+        self._do_maintenance()
     
     def run_once(self):
         logging.info("Run all actions")
         self._login()
         self._marketing_companies()
-        self._do_maintanance()
+        self._do_maintenance()
         self._depart()
         self._buy_fuel()
         self._driver.close()
@@ -658,10 +658,10 @@ CO2 capacity:\t{:.2f} %
         def start_service(seconds_to_sleep):
             logging.debug("Start service")
             self.login()
-            while self._loged_in:
+            while self._logged_in:
                 self._marketing_companies()
                 self._depart()
-                self._do_maintanance()
+                self._do_maintenance()
                 self._buy_fuel()
                 time.sleep(seconds_to_sleep)
         

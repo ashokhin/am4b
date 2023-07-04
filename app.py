@@ -3,7 +3,7 @@ import logging
 import sys
 
 import am4.bot as bot
-import am4.scaner as scaner
+import am4.scanner as scanner
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -20,7 +20,7 @@ def parse_arguments() -> argparse.Namespace:
                         default=120)
     parser.add_argument('--fuel-budget-percent', type=int, help="Percent of account money available for buying fuel/CO2",
                         default=70)
-    parser.add_argument('--maintanance-budget-percent', type=int,
+    parser.add_argument('--maintenance-budget-percent', type=int,
                         default=50)
     parser.add_argument('--marketing-budget-percent', type=int,
                         default=70)
@@ -46,7 +46,6 @@ def main():
 
     args = parse_arguments()
 
-    """
     am4bot = bot.AirlineManager4Bot()
 
     am4bot.am4_base_url = args.base_url
@@ -55,7 +54,7 @@ def main():
     am4bot.fuel_good_price = args.fuel_good_price
     am4bot.co2_good_price = args.co2_good_price
     am4bot.fuel_budget_percent = args.fuel_budget_percent
-    am4bot.maintanance_budget_percent = args.maintanance_budget_percent
+    am4bot.maintenance_budget_percent = args.maintenance_budget_percent
     am4bot.marketing_budget_percent = args.marketing_budget_percent
     am4bot.aircraft_wear_percent = args.aircraft_wear_percent
     am4bot.aircraft_max_hours_to_acheck = args.aircraft_max_hours_to_acheck
@@ -66,20 +65,20 @@ def main():
         else:
             am4bot.run_service(seconds_to_sleep=args.service_sleep_sec)
     except KeyboardInterrupt:
-            logging.info("Program interupted by user")
+            logging.info("Program interrupted by user")
             sys.exit(0)
     except Exception as ex:
          logging.exception("Exception:\n{}".format(ex))
          sys.exit(1)
 
     """
-    am4scaner = scaner.AM4Scaner()
-    am4scaner.am4_base_url = args.base_url
-    am4scaner.username = args.username
-    am4scaner.password = args.password
+    am4scanner = scanner.AM4Scanner()
+    am4scanner.am4_base_url = args.base_url
+    am4scanner.username = args.username
+    am4scanner.password = args.password
 
-    am4scaner.scan()
-
+    am4scanner.scan()
+    """
 
 if __name__ == "__main__":
     main()

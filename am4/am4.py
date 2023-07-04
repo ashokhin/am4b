@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
+from . import func
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
@@ -40,7 +41,7 @@ class AM4BaseClass(object):
     #
     # xpath for button 'landed' in side menu
     xbtn_landed = '//div[@id="flightInfo"]//button[@id="flightStatusLanded"]'
-    # xpath for list of landed aircrafts in 'landed' list
+    # xpath for list of landed aircraft in 'landed' list
     xelem_list_landed = '//div[@id="landedList"]/div[contains(@id, "flightStatus") and contains(@onclick, "showFlightInfo")]'
     # xpath for 'depart' button
     xbtn_depart = '//div[@id="flightInfo"]//button[contains(@onclick, "route_depart.php?mode=all&ids=x")]'
@@ -92,11 +93,11 @@ class AM4BaseClass(object):
     # xpath for button 'close' in all popup windows
     xbtn_popup_close = '//div[@id="popup"]//span[@onclick="closePop();"]'
     
-    ### 'Maintanance' popup
+    ### 'Maintenance' popup
     #
-    # xpath for button 'Maintanance' in main window
-    xbtn_maintanance = '//div[@id="mapMaint" and @data-original-title="Maintenance"]'
-    # xpath for button 'Plan' in popup window 'maintanance'
+    # xpath for button 'Maintenance' in main window
+    xbtn_maintenance = '//div[@id="mapMaint" and @data-original-title="Maintenance"]'
+    # xpath for button 'Plan' in popup window 'maintenance'
     xbtn_mnt_plan = '//div[@id="popup"]//button[@id="popBtn2"]'
     # 
     xbtn_mnt_sort_by_wear = """//div[@id="maintView"]//button[@onclick="sortMaint();"]"""
@@ -142,10 +143,19 @@ class AM4BaseClass(object):
     #
     xelem_list_fl_ac = '//div[@id="sortManu"]//div[@id="acListDetail"]//div[contains(@onclick, "#modelSelection") and contains(@onclick, "#acModel")]'
     #
-    xtxt_fl_ac_model_name = '//div[@id="sortManu"]//span[@id="modelSelection"]'
+    xtxt_fl_ac_model_name = './/div[@class="col-6"]/b'
     #
     xtxt_fl_ac_speed = '//div[@id="acModel"]//div[@id="acModelList"]//span[@id="acSpeed"]'
-
+    #
+    xtxt_fl_ac_capacity = '//div[@id="acModel"]//div[@id="acModelList"]//span[@id="acCapacity"]'
+    #
+    xtxt_fl_ac_price = '//div[@id="acModel"]//div[@id="acModelList"]//span[@id="acCost"]'
+    #
+    xtxt_fl_ac_capacity = '//div[@id="acModel"]//div[@id="acModelList"]//span[@id="acCapacity"]'
+    #
+    xtxt_fl_ac_range = '//div[@id="acModel"]//div[@id="acModelList"]//div[@class="col-sm-6"]//table[@class="table m-text"]//b[contains(text(), " km")]'
+    #
+    xtxt_fl_ac_runway = '//div[@id="acModel"]//div[@id="acModelList"]//div[@class="col-sm-6"]//table[@class="table m-text"]//td[@style="width:25%;"]/b[contains(text(), " ft")]'
 
     def __init__(self) -> None:
         logging.debug("Init driver")
@@ -158,7 +168,7 @@ class AM4BaseClass(object):
         ### Class inner variables
         self._login_attempts = 0
         self._login_last_attempt = datetime.datetime.now()
-        self._loged_in = False
+        self._logged_in = False
 
     @property
     def am4_base_url(self) -> str:
@@ -186,7 +196,7 @@ class AM4BaseClass(object):
 
     def _set_chrome_options(self) -> Options:
         chrome_options = webdriver.ChromeOptions()
-        # chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         # chrome_options.binary_location = "./chromedriver"
@@ -218,13 +228,13 @@ class AM4BaseClass(object):
 
             return
         except selenium.common.exceptions.ElementClickInterceptedException as ecie:
-            logging.error("Button '{}' not avaiable for click".format(button))
+            logging.error("Button '{}' not available for click".format(button))
             logging.exception("Exception: \n{}".format(ecie))
             logging.debug("Page source: {}".format(self._driver.page_source))
 
             return
         except selenium.common.exceptions.StaleElementReferenceException as sere:
-            logging.error("Button '{}' not avaiable for click".format(button))
+            logging.error("Button '{}' not available for click".format(button))
             logging.exception("Exception: \n{}".format(sere))
             logging.debug("Page source: {}".format(self._driver.page_source))
 
@@ -243,29 +253,34 @@ class AM4BaseClass(object):
 
             return
     
-    def _get_text_from_element(self, element_xpath: str) -> str:
+    def _get_text_from_element(self, element: any) -> str:
         try:
-            logging.debug("Get text '{}'".format(element_xpath))
-            return self._driver.find_element('xpath', element_xpath).text
+            logging.debug("Get text '{}'".format(element))
+            if isinstance(element, str):
+                return self._driver.find_element('xpath', element).text
+            return element.text
         except selenium.common.exceptions.InvalidArgumentException as iae:
-            logging.error("Error with element '{}'".format(element_xpath))
+            logging.error("Error with element '{}'".format(element))
             logging.exception("Exception: \n{}".format(iae))
             logging.debug("Page source: {}".format(self._driver.page_source))
 
             return ""
         except selenium.common.exceptions.NoSuchElementException as nsee:
-            logging.error("Error with element '{}'".format(element_xpath))
+            logging.error("Error with element '{}'".format(element))
             logging.exception("Exception: \n{}".format(nsee))
             logging.debug("Page source: {}".format(self._driver.page_source))
 
             return ""
+    
+    def _get_int_from_element(self, element: any):
+        return func.extract_int_from_string(self._get_text_from_element(element))
 
     def _login(self):
         logging.info("Login...")
         logging.info("Login attempts: {}".format(self._login_attempts))
         logging.info("Last login attempt: {}".format(self._login_last_attempt.isoformat()))
         self._driver.delete_all_cookies()
-        self._loged_in = False
+        self._logged_in = False
         if self._login_attempts > 5:
             time_delta_sec = (datetime.datetime.now() - self._login_last_attempt).seconds
             if time_delta_sec < 60:
@@ -285,11 +300,11 @@ class AM4BaseClass(object):
         self._click_button(self.xbtn_auth)
 
         try:
-            logging.info("Wait loading page after authentification...")
+            logging.info("Wait loading page after authentication...")
             _ = WebDriverWait(self._driver, 30).until(
                 EC.presence_of_element_located(('xpath', self.xelem_load_overlay))
             )
-            self._loged_in = True
+            self._logged_in = True
         except Exception as ex:
             logging.exception("Login exception:\n{}".format(ex))
             raise ex
