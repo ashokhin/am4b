@@ -37,7 +37,7 @@ CMD python ./app.py \
     --fuel-good-price=${FUEL_GOOD_PRICE} \
     --co2-good-price=${CO2_GOOD_PRICE} \
     --fuel-budget-percent=${FUEL_BUDGET_PERCENT} \
-    --maintanance-budget-percent=${MAINTANANCE_BUDGET_PERCENT} \
+    --maintenance-budget-percent=${MAINTANANCE_BUDGET_PERCENT} \
     --marketing-budget-percent=${MARKETING_BUDGET_PERCENT} \
     --aircraft-wear-percent=${AIRCRAFT_WEAR_PERCENT} \
     --aircraft-max-hours-to-acheck=${AIRCRAFT_MAX_HOURS_TO_ACHECK} \
