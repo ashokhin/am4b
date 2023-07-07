@@ -13,8 +13,16 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 class AM4Scanner(AM4BaseClass):
     def __init__(self) -> None:
         super().__init__()
-        self._csv_file = ""
+        self._file_path = ""
         self._csv_fieldnames = []
+    
+    @property
+    def file_path(self) -> str:
+        return self._file_path
+    
+    @file_path.setter
+    def file_path(self, value: str):
+        self._file_path = value
     
     def _open_ac_order(self) -> None:
         self._click_button(self.xbtn_fleetandroutes)
@@ -43,19 +51,22 @@ class AM4Scanner(AM4BaseClass):
                 break
         
         ac_dict = {
-            'model': ac_model,
+            'model': ac_model_name,
             'capacity': self._get_int_from_element(self.xtxt_fl_ac_capacity),
             'price': self._get_int_from_element(self.xtxt_fl_ac_price),
             'range': self._get_int_from_element(self.xtxt_fl_ac_range),
             'runway': self._get_int_from_element(self.xtxt_fl_ac_runway),
             'speed': self._get_int_from_element(self.xtxt_fl_ac_speed),
         }
+
+        logging.debug("Got AC dictionary: '{}'".format(ac_dict))
         
         self._click_button(self.xbtn_popup_close)
 
         return ac_dict
 
     def _get_all_aircraft(self) -> list:
+        logging.info("Scan all aircraft...")
         aircraft_data = []
         self._open_ac_order()
         aircraft_webelem_list = self._driver.find_elements('xpath', self.xelem_list_fl_ac)
@@ -65,22 +76,22 @@ class AM4Scanner(AM4BaseClass):
         
         self._click_button(self.xbtn_popup_close)
 
-        logging.info("Total AC: {}".format(len(ac_models_list)))
+        logging.info("Total AC for scan: {}".format(len(ac_models_list)))
 
-        for ac in ac_models_list[0:5]:
+        for ac in ac_models_list:
             aircraft_data.append(self._get_ac_details(ac))
         
         return aircraft_data
     
     def _write_to_csv(self, csv_data: list):
-        with open(self._csv_file, mode='w') as csv_file:
+        logging.info("Write data to CSV-file '{}'".format(self._file_path))
+        with open(self._file_path, mode='w') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=self._csv_fieldnames, delimiter=';', quoting=csv.QUOTE_ALL)
             writer.writeheader()
             writer.writerows(csv_data)
 
     def _scan(self):
         self._login()
-        self._csv_file = "./am4scanner.csv"
         self._csv_fieldnames = ["model", "capacity", "price", "range", "runway", "speed"]
         self._write_to_csv(self._get_all_aircraft())
     

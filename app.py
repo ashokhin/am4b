@@ -2,8 +2,6 @@ import argparse
 import logging
 import sys
 
-import am4.bot as bot
-import am4.scanner as scanner
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -32,19 +30,14 @@ def parse_arguments() -> argparse.Namespace:
                         default='once')
     parser.add_argument('--service-sleep-sec', type=int, help="Seconds to sleep between iterations when program runs as a service",
                         default=300)
+    parser.add_argument('--scanner-file', type=str, help="Path to file for save scanner results",
+                        default="am4scanner.csv")
 
     return parser.parse_args()
 
-def main():
-    """
-    logging.basicConfig(format=u'[%(asctime)s][%(levelname)-8s][PID:%(process)d] %(funcName)s.%(lineno)d: %(message)s', 
-                        level=logging.DEBUG, stream=sys.stdout)
-    """
-    
-    logging.basicConfig(format=u'[%(asctime)s] %(message)s', 
-                        level=logging.INFO, stream=sys.stdout)
 
-    args = parse_arguments()
+def run_bot(args: argparse.Namespace) -> None:
+    import am4.bot as bot
 
     am4bot = bot.AirlineManager4Bot()
 
@@ -68,17 +61,40 @@ def main():
             logging.info("Program interrupted by user")
             sys.exit(0)
     except Exception as ex:
-         logging.exception("Exception:\n{}".format(ex))
-         sys.exit(1)
+        logging.exception("Exception:\n{}".format(ex))
+        sys.exit(1)
 
-    """
+
+def run_scanner(args: argparse.Namespace) -> None:
+    import am4.scanner as scanner
+
     am4scanner = scanner.AM4Scanner()
+
     am4scanner.am4_base_url = args.base_url
     am4scanner.username = args.username
     am4scanner.password = args.password
+    am4scanner.file_path = args.scanner_file
 
     am4scanner.scan()
+
+
+def main():
     """
+    logging.basicConfig(format=u'[%(asctime)s][%(levelname)-8s][PID:%(process)d] %(funcName)s.%(lineno)d: %(message)s', 
+                        level=logging.DEBUG, stream=sys.stdout)
+    """
+    
+    logging.basicConfig(format=u'[%(asctime)s] %(message)s', 
+                        level=logging.INFO, stream=sys.stdout)
+
+    args = parse_arguments()
+
+    if args.run_mode == 'once' or args.run_mode == 'service':
+        run_bot(args)
+    
+    if args.run_mode == 'scanner':
+        run_scanner(args)
+
 
 if __name__ == "__main__":
     main()
