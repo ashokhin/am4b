@@ -18,6 +18,8 @@ WORKDIR /app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+VOLUME [ "/app" ]
+
 ENV USERNAME=""
 ENV PASSWORD=""
 ENV FUEL_GOOD_PRICE=450
@@ -25,10 +27,11 @@ ENV CO2_GOOD_PRICE=120
 ENV FUEL_BUDGET_PERCENT=70
 ENV MAINTANANCE_BUDGET_PERCENT=50
 ENV MARKETING_BUDGET_PERCENT=70
-ENV AIRCRAFT_WEAR_PERCENT=30
-ENV AIRCRAFT_MAX_HOURS_TO_ACHECK=12
+ENV AIRCRAFT_WEAR_PERCENT=80
+ENV AIRCRAFT_MAX_HOURS_TO_ACHECK=24
 ENV RUN_MODE="once"
 ENV SERVICE_SLEEP_SEC=300
+ENV SCANNER_FILE="am4scanner.csv"
 
 
 CMD python ./app.py \
@@ -42,4 +45,5 @@ CMD python ./app.py \
     --aircraft-wear-percent=${AIRCRAFT_WEAR_PERCENT} \
     --aircraft-max-hours-to-acheck=${AIRCRAFT_MAX_HOURS_TO_ACHECK} \
     --run-mode=${RUN_MODE} \
-    --service-sleep-sec=${SERVICE_SLEEP_SEC}
+    --service-sleep-sec=${SERVICE_SLEEP_SEC} \
+    --scanner-file=${SCANNER_FILE}
