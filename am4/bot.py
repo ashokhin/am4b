@@ -638,7 +638,7 @@ CO2 capacity:\t{:.2f} %
         # A-Check
         self._acheck_all_aircraft()
         # Repair
-        # self._repair_all_aircraft()
+        self._repair_all_aircraft()
         # Modification
         self._modify_all_aircraft()
 
