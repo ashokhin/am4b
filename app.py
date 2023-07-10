@@ -13,19 +13,19 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--username', type=str, help="AM4 username/email")
     parser.add_argument('--password', type=str, help="AM4 password")
     parser.add_argument('--fuel-good-price', type=int, help="Good price for 1000 Lbs of fuel",
-                        default=450)
+                        default=500)
     parser.add_argument('--co2-good-price', type=int, help="Good price for 1000 Quotas of CO2",
                         default=120)
     parser.add_argument('--fuel-budget-percent', type=int, help="Percent of account money available for buying fuel/CO2",
                         default=70)
-    parser.add_argument('--maintenance-budget-percent', type=int,
+    parser.add_argument('--maintenance-budget-percent', type=int, help="Percent of account money available for maintenance",
                         default=50)
-    parser.add_argument('--marketing-budget-percent', type=int,
+    parser.add_argument('--marketing-budget-percent', type=int, help="Percent of account money available for marketing",
                         default=70)
-    parser.add_argument('--aircraft-wear-percent', type=int,
+    parser.add_argument('--aircraft-wear-percent', type=int, help="Percent of aircraft wear for repair",
                         default=30)
-    parser.add_argument('--aircraft-max-hours-to-acheck', type=int,
-                        default=12)
+    parser.add_argument('--aircraft-max-hours-to-acheck', type=int, help="Percent of aircraft A-Check for repair",
+                        default=24)
     parser.add_argument('--run-mode', type=str, choices=['once', 'service'], help="Run mode",
                         default='once')
     parser.add_argument('--service-sleep-sec', type=int, help="Seconds to sleep between iterations when program runs as a service",
