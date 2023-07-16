@@ -2,8 +2,8 @@ name: Docker Image run
 
 on:
   schedule:
-    - cron: '12 * * * *'
-    - cron: '42 * * * *'
+    - cron: '12 * 1-15 * *'
+    - cron: '42 * 1-15 * *'
 
 jobs:
 
