@@ -301,7 +301,7 @@ class AirlineManager4Bot(AM4BaseClass):
         self._click_button(self.xbtn_popup_close)
     
 
-    def buy_fuel_type(self, fuel_type: str):
+    def _buy_fuel_type(self, fuel_type: str):
         self.check_money()
         if fuel_type not in self._fuel_data:
             self._check_fuel_type(fuel_type)
@@ -333,10 +333,15 @@ class AirlineManager4Bot(AM4BaseClass):
         self._buy_fuel_type_amount(available_amount, fuel_type)
 
 
+    def _check_fuel(self):
+        for fuel_type in AirplaneFuel.fuel_types:
+            self._check_fuel_type(fuel_type)
+    
+
     def _buy_fuel(self):
         logging.info("Try to buy fuel...")
         for fuel_type in AirplaneFuel.fuel_types:
-            self.buy_fuel_type(fuel_type)
+            self._buy_fuel_type(fuel_type)
 
 
     def buy_fuel(self):
@@ -608,6 +613,7 @@ class AirlineManager4Bot(AM4BaseClass):
                 self._marketing_companies()
                 self._depart()
                 self._do_maintenance()
+                self._check_fuel()
                 self._buy_fuel()
                 time.sleep(seconds_to_sleep)
         

@@ -5,7 +5,7 @@ setup(
   packages=['am4'],
   version='1.0',
   license='MIT',
-  description='Python bot for Airline Manager game',
+  description='Python bot for Airline Manager 4 game',
   author='Andrei Shokhin',
   author_email='shokhin.andrey@gmail.com',
   url='https://github.com/ashokhin/am4b',
