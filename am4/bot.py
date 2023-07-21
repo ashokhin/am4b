@@ -294,9 +294,9 @@ class AirlineManager4Bot(AM4BaseClass):
             self._click_button(self.fuel_elements_xpath['btn_co2_tab'])
         
         # Enter fuel amount
-        self._type_text_in_field(self.fuel_elements_xpath[fuel_type]['tf_amount'], str(amount))
+        self._type_text_in_field(self.fuel_elements_xpath['tf_amount'], str(amount))
         # Click 'purchase' button
-        self._click_button(self.fuel_elements_xpath[fuel_type]['tf_amount'])
+        self._click_button(self.fuel_elements_xpath[fuel_type]['btn_purchase'])
         # Close popup window 'fuel'
         self._click_button(self.xbtn_popup_close)
     
@@ -433,9 +433,9 @@ class AirlineManager4Bot(AM4BaseClass):
         self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
         self._click_button(self.xbtn_mnt_sort_by_acheck)
-        ac_data_type: str
-        ac_data_reg: str
-        ac_data_hours: str
+        ac_data_type = ""
+        ac_data_reg = ""
+        ac_data_hours = ""
         child_element_acheck_button: WebElement
 
         for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
@@ -598,9 +598,11 @@ class AirlineManager4Bot(AM4BaseClass):
     def run_once(self):
         logging.info("Run all actions")
         self._login()
+        self._buy_fuel()
         self._marketing_companies()
         self._do_maintenance()
         self._depart()
+        self._check_fuel()
         self._buy_fuel()
         self._driver.close()
     
@@ -610,6 +612,7 @@ class AirlineManager4Bot(AM4BaseClass):
             logging.debug("Start service")
             self.login()
             while self._logged_in:
+                self._buy_fuel()
                 self._marketing_companies()
                 self._depart()
                 self._do_maintenance()
