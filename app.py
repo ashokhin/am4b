@@ -23,7 +23,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--marketing-budget-percent', type=int, help="Percent of account money available for marketing",
                         default=70)
     parser.add_argument('--aircraft-wear-percent', type=int, help="Percent of aircraft wear for repair",
-                        default=30)
+                        default=90)
     parser.add_argument('--aircraft-max-hours-to-acheck', type=int, help="Percent of aircraft A-Check for repair",
                         default=24)
     parser.add_argument('--run-mode', type=str, choices=['once', 'service'], help="Run mode",
@@ -84,7 +84,7 @@ def main():
                         level=logging.DEBUG, stream=sys.stdout)
     """
     
-    logging.basicConfig(format=u'[%(asctime)s] %(message)s', 
+    logging.basicConfig(format=u'[%(asctime)s][%(levelname)-8s] %(message)s', 
                         level=logging.INFO, stream=sys.stdout)
 
     args = parse_arguments()

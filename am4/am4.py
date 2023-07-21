@@ -68,28 +68,35 @@ class AM4BaseClass(object):
 
     ### 'Fuel & CO2' popup
     #
-    # xpath for button 'Fuel' in main window
-    xbtn_fuel = '//div[@id="mapMaint" and @data-original-title="Fuel & co2"]'
-    # xpath for text 'current price' for fuel in popup window 'fuel'
-    xtxt_fuel_price = '//div[@id="fuelMain"]/div/div[1]/span[2]/b'
-    # xpath for text 'max.capacity' for fuel in popup window 'fuel'
-    xtxt_fuel_max_cap = '//div[@id="fuelMain"]//span[@class="s-text" and contains(text(), "Lbs")]'
-    # xpath for text 'current capacity' for fuel in popup window 'fuel'
-    xtxt_fuel_cur_cap = '//div[@id="fuelMain"]//span[@id="remCapacity"]'
-    # xpath for text field 'Amount to purchase' for fuel and CO2 in popup window 'fuel'
-    xtf_fuel_and_co2_amount = '//div[@id="fuelMain"]//input[@id="amountInput"]'
-    # xpath for button 'Purchase' for fuel in popup window 'fuel'
-    xbtn_fuel_purchase = '//div[@id="fuelMain"]//button[contains(@onclick, "fuel.php?mode=do&amount=")]'
-    # xpath for tab 'co2' in popup window 'fuel'
-    xbtn_co2_tab = '//div[@id="popup"]//button[@id="popBtn2"]'
-    # xpath for text 'current price' for CO2 in popup window 'fuel'
-    xtxt_co2_price = '//div[@id="co2Main"]/div/div[2]/span[2]/b'
-    # xpath for text 'max.capacity' for CO2 in popup window 'fuel'
-    xtxt_co2_max_cap = '//div[@id="co2Main"]//span[@class="s-text" and contains(text(), "Quotas")]'
-    # xpath for text 'current capacity' for CO2 in popup window 'fuel'
-    xtxt_co2_cur_cap = '//div[@id="co2Main"]//span[@id="remCapacity"]'
-    # xpath for button 'Purchase' for CO2 in popup window 'fuel'
-    xbtn_co2_purchase = '//div[@id="co2Main"]//button[contains(@onclick, "co2.php?mode=do&amount=")]'
+    #
+    fuel_elements_xpath = {
+        # xpath for button 'Fuel' in main window
+        'btn_menu': '//div[@id="mapMaint" and @data-original-title="Fuel & co2"]',
+        # xpath for text field 'Amount to purchase' for fuel and CO2 in popup window 'fuel'
+        'tf_amount': '//div[@id="fuelMain"]//input[@id="amountInput"]',
+        # xpath for tab 'co2' in popup window 'fuel'
+        'btn_co2_tab': '//div[@id="popup"]//button[@id="popBtn2"]',
+        'fuel': {
+            # xpath for text 'current price' for fuel in popup window 'fuel'
+            'txt_price': '//div[@id="fuelMain"]/div/div[1]/span[2]/b',
+            # xpath for text 'max.capacity' for fuel in popup window 'fuel'
+            'txt_max_cap': '//div[@id="fuelMain"]//span[@class="s-text" and contains(text(), "Lbs")]',
+            # xpath for text 'current capacity' for fuel in popup window 'fuel'
+            'txt_cur_cap': '//div[@id="fuelMain"]//span[@id="remCapacity"]',
+            # xpath for button 'Purchase' for fuel in popup window 'fuel'
+            'btn_purchase': '//div[@id="fuelMain"]//button[contains(@onclick, "fuel.php?mode=do&amount=")]',
+        },
+        'co2': {
+            # xpath for text 'current price' for CO2 in popup window 'fuel'
+            'txt_price': '//div[@id="co2Main"]/div/div[2]/span[2]/b',
+            # xpath for text 'max.capacity' for CO2 in popup window 'fuel'
+            'txt_max_cap': '//div[@id="co2Main"]//span[@class="s-text" and contains(text(), "Quotas")]',
+            # xpath for text 'current capacity' for CO2 in popup window 'fuel'
+            'txt_cur_cap': '//div[@id="co2Main"]//span[@id="remCapacity"]',
+            # xpath for button 'Purchase' for CO2 in popup window 'fuel'
+            'btn_purchase': '//div[@id="co2Main"]//button[contains(@onclick, "co2.php?mode=do&amount=")]',
+        },
+    }
 
     # xpath for button 'close' in all popup windows
     xbtn_popup_close = '//div[@id="popup"]//span[@onclick="closePop();"]'

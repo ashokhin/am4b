@@ -5,6 +5,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 from . import func
 from .am4 import AM4BaseClass
+from .fuel import AirplaneFuel
 
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -16,6 +17,10 @@ class AirlineManager4Bot(AM4BaseClass):
         ### Set good prices for fuel and co2
         self._fuel_good_price = 350
         self._co2_good_price = 120
+        self._good_price = {
+            'fuel': 350,
+            'co2': 120,
+        }
         ### Set available percent of budget for fuel, maintenance and marketing
         self._fuel_budget_percent = 30
         self._maintenance_budget_percent = 30
@@ -25,39 +30,27 @@ class AirlineManager4Bot(AM4BaseClass):
         self._aircraft_max_hours_to_acheck = 24
         ### Class inner variables
         self._account_money = 0
-        self._fuel_data = {
-            'holding': 0,
-            'price': 0,
-            'current_capacity': 0,
-            'maximum_capacity': 0,
-        }
-        self._co2_data = {
-            'holding': 0,
-            'price': 0,
-            'current_capacity': 0,
-            'maximum_capacity': 0,
-        }
-        self._not_enough_fuel = True
-        self._not_enough_co2 = True
+        self._fuel_data = {}
+    
     
     def __exit__(self):
         self._driver.close()
     
     @property
     def fuel_good_price(self) -> int:
-        return self._fuel_good_price
+        return self._good_price['fuel']
     
     @fuel_good_price.setter
     def fuel_good_price(self, value: int):
-        self._fuel_good_price = int(value)
+        self._good_price['fuel'] = int(value)
     
     @property
     def co2_good_price(self) -> int:
-        return self._co2_good_price
+        return self._good_price['co2']
     
     @co2_good_price.setter
     def co2_good_price(self, value: int):
-        self._co2_good_price = int(value)
+        self._good_price['co2'] = int(value)
     
     @property
     def fuel_budget_percent(self) -> int:
@@ -99,12 +92,14 @@ class AirlineManager4Bot(AM4BaseClass):
     def aircraft_max_hours_to_acheck(self, value: int):
         self._aircraft_max_hours_to_acheck = int(value)
     
+
     def _company_active(self, company_xpath: str) -> bool:
         company_web_elem = self._driver.find_element('xpath', company_xpath)
         if company_web_elem.get_attribute('class') == "not-active":
             return False
         
         return True
+
 
     def _enable_marketing_company(self, marketing_company: dict):
         logging.info("Check marketing company '{}'...".format(marketing_company['name']))
@@ -141,6 +136,7 @@ class AirlineManager4Bot(AM4BaseClass):
         self._click_button(self.xbtn_popup_close)
         self._account_money -= company_cost
     
+
     def _enable_marketing_companies(self):
         marketing_companies = [
             {
@@ -159,6 +155,7 @@ class AirlineManager4Bot(AM4BaseClass):
         for marketing_company in marketing_companies:
             self._enable_marketing_company(marketing_company)
     
+
     def _check_marketing_companies(self):
         self._click_button(self.xbtn_finance)
         self._click_button(self.xbtn_marketing_tab)
@@ -167,17 +164,15 @@ class AirlineManager4Bot(AM4BaseClass):
         self._click_button(self.xbtn_popup_close)
         return len(active_marketing_companies)
 
+
     def _marketing_companies(self):
         self._get_info()
-        if self._not_enough_fuel:
-            logging.warning("Not enough fuel ({} / {}). Skip marketing companies.".format(self._fuel_data['holding'], 
-                                                                                         self._fuel_data['maximum_capacity']))
-            return
-        
-        if self._not_enough_co2:
-            logging.warning("Not enough CO2 ({} / {}). Skip marketing companies.".format(self._co2_data['holding'], 
-                                                                                        self._co2_data['maximum_capacity']))
-            return
+        for fuel_type in AirplaneFuel.fuel_types:
+            if self._fuel_data[fuel_type].not_enough_fuel:
+                logging.warning("Not enough {} ({} / {}). Skip marketing companies.".format(fuel_type, 
+                                                                                            self._fuel_data[fuel_type].holding_capacity, 
+                                                                                            self._fuel_data[fuel_type].maximum_capacity))
+                return
         
         logging.info("Search marketing companies for enabling...")
         
@@ -191,8 +186,10 @@ class AirlineManager4Bot(AM4BaseClass):
         
         self._enable_marketing_companies()
     
+
     def marketing_companies(self):
         self._marketing_companies()
+
 
     def _check_ready_for_depart(self) -> int:
         self._click_button(self.xbtn_landed)
@@ -200,6 +197,7 @@ class AirlineManager4Bot(AM4BaseClass):
         
         return len(elems)
     
+
     def _depart(self):
         logging.info("Depart all available planes...")
         ready_for_depart_ac = self._check_ready_for_depart()
@@ -214,8 +212,10 @@ class AirlineManager4Bot(AM4BaseClass):
         
         logging.info("No aircraft ready to depart")
     
+
     def depart(self):
         self._depart()
+
 
     def _check_money(self):
         logging.info("Check account money...")
@@ -228,185 +228,121 @@ class AirlineManager4Bot(AM4BaseClass):
         
         self._account_money = func.extract_int_from_string(account_money)
     
+
     def check_money(self):
         self._check_money()
 
-    def _check_fuel(self):
-        logging.info("Check fuel/CO2 prices and capacity...")
+
+    def _check_fuel_type(self, fuel_type: str) -> None:
+        logging.info("Check '{}' price and capacity...".format(fuel_type))
         # Open popup window 'fuel'
-        self._click_button(self.xbtn_fuel)
+        self._click_button(self.fuel_elements_xpath['btn_menu'])
+
+        if fuel_type == 'co2':
+            # Open 'CO2' tab
+            self._click_button(self.fuel_elements_xpath['btn_co2_tab'])
 
         # Get info about fuel
-        fuel_price = self._get_text_from_element(self.xtxt_fuel_price)
+        fuel_price = self._get_text_from_element(self.fuel_elements_xpath[fuel_type]['txt_price'])
         if fuel_price == '':
-            logging.error("Fuel price not found")
+            logging.error("'{}' price not found".format(fuel_type))
             return
 
-        self._fuel_data['price'] = func.extract_int_from_string(fuel_price)
+        fuel_price = func.extract_int_from_string(fuel_price)
 
-        fuel_cur_cap = self._get_text_from_element(self.xtxt_fuel_cur_cap)
+        fuel_cur_cap = self._get_text_from_element(self.fuel_elements_xpath[fuel_type]['txt_cur_cap'])
         if fuel_cur_cap == '':
-            logging.error("Fuel current capacity not found")
+            logging.error("'{}' current capacity not found".format(fuel_type))
             return
         
-        self._fuel_data['current_capacity'] = func.extract_int_from_string(fuel_cur_cap)
+        fuel_cur_cap = func.extract_int_from_string(fuel_cur_cap)
 
-        fuel_max_cap = self._get_text_from_element(self.xtxt_fuel_max_cap)
+        fuel_max_cap = self._get_text_from_element(self.fuel_elements_xpath[fuel_type]['txt_max_cap'])
         if fuel_max_cap == '':
-            logging.error("Fuel maximum capacity not found")
+            logging.error("'{}' maximum capacity not found".format(fuel_type))
             return
         
-        self._fuel_data['maximum_capacity'] = func.extract_int_from_string(fuel_max_cap)
+        fuel_max_cap = func.extract_int_from_string(fuel_max_cap)
 
-        self._fuel_data['holding'] = int(self._fuel_data['maximum_capacity'] - self._fuel_data['current_capacity'])
-
-        if self._fuel_data['holding'] <= int(self._fuel_data['maximum_capacity'] * 0.2):
-            logging.warning("You are holding less than 20% ({} / {}) of fuel".format(self._fuel_data['holding'], 
-                                                                                     self._fuel_data['maximum_capacity']))
-            self._not_enough_fuel = True
-        else:
-            self._not_enough_fuel = False
+        self._fuel_data[fuel_type] = AirplaneFuel(fuel_type=fuel_type,
+                                                  fuel_price=fuel_price,
+                                                  current_capacity=fuel_cur_cap,
+                                                  maximum_capacity=fuel_max_cap)
         
-        # Get info about CO2
-        self._click_button(self.xbtn_co2_tab)
-
-        # Get CO2 price
-        co2_price = self._get_text_from_element(self.xtxt_co2_price)
-        if co2_price == '':
-            logging.error("CO2 price not found")
-            return
-
-        self._co2_data['price'] = func.extract_int_from_string(co2_price)
-
-        # Get CO2 current capacity
-        co2_cur_cap = self._get_text_from_element(self.xtxt_co2_cur_cap)
-        if co2_cur_cap == '':
-            logging.error("CO2 current capacity not found")
-            return
-        
-        self._co2_data['current_capacity'] = func.extract_int_from_string(co2_cur_cap)
-
-        # Get CO2 maximum capacity
-        co2_max_cap = self._get_text_from_element(self.xtxt_co2_max_cap)
-        if co2_max_cap == '':
-            logging.error("Fuel maximum capacity not found")
-            return
-        
-        self._co2_data['maximum_capacity'] = func.extract_int_from_string(co2_max_cap)
-
-        self._co2_data['holding'] = int(self._co2_data['maximum_capacity'] - self._co2_data['current_capacity'])
-
-        if self._co2_data['holding'] <= int(self._co2_data['maximum_capacity'] * 0.2):
-            logging.warning("You are holding less than 20% ({} / {}) of CO2".format(self._co2_data['holding'], 
-                                                                                     self._co2_data['maximum_capacity']))
-            self._not_enough_co2 = True
-        else:
-            self._not_enough_co2 = False
-
         # Close popup window 'fuel'
-        self._click_button(self.xbtn_popup_close)        
+        self._click_button(self.xbtn_popup_close)
+    
 
     def check_fuel(self):
-        self._check_fuel()
+        for fuel_type in AirplaneFuel.fuel_types:
+            self._check_fuel_type(fuel_type)
     
+
     def _get_info(self):
         self._check_money()
-        self._check_fuel()
+        for fuel_type in AirplaneFuel.fuel_types:
+            self._check_fuel_type(fuel_type)
 
-    def get_info(self):
-        self._get_info()
-        print("""
-===Airline info===
-Account:\t$ {}
-Fuel price:\t$ {}
-Fuel capacity:\t{:.2f} %
-CO2 price:\t$ {}
-CO2 capacity:\t{:.2f} %
-===================""".format(self._account_money,
-                              self._fuel_data['price'],
-                              100 * float(self._fuel_data['current_capacity'])/float(self._fuel_data['maximum_capacity']),
-                              self._co2_data['price'],
-                              100 * float(self._co2_data['current_capacity'])/float(self._co2_data['maximum_capacity'])))
 
-    def _buy_fuel_amount(self, amount: int):
-        logging.info("Buy fuel. {} Lbs for ${}".format(amount, int((self._fuel_data['price'] * amount)/1000)))
+    def _buy_fuel_type_amount(self, amount: int, fuel_type: str):
+        logging.info("Buy '{}'. {} for ${}".format(fuel_type, amount, int((self._fuel_data[fuel_type].fuel_price * amount)/1000)))
         # Open popup window 'fuel'
-        self._click_button(self.xbtn_fuel)
+        self._click_button(self.fuel_elements_xpath['btn_menu'])
+
+        if fuel_type == 'co2':
+            # Open 'CO2' tab
+            self._click_button(self.fuel_elements_xpath['btn_co2_tab'])
+        
         # Enter fuel amount
-        self._type_text_in_field(self.xtf_fuel_and_co2_amount, str(amount))
+        self._type_text_in_field(self.fuel_elements_xpath[fuel_type]['tf_amount'], str(amount))
         # Click 'purchase' button
-        self._click_button(self.xbtn_fuel_purchase)
+        self._click_button(self.fuel_elements_xpath[fuel_type]['tf_amount'])
         # Close popup window 'fuel'
         self._click_button(self.xbtn_popup_close)
-        self._check_money()
+    
 
-    def _buy_fuel_percent(self):
-        # self._refresh_page()
-        if self._fuel_data['price'] > self._fuel_good_price:
-            logging.info("Fuel price is too high. Current: ${}, recommended: ${}".format(self._fuel_data['price'], self._fuel_good_price))
-            return
+    def buy_fuel_type(self, fuel_type: str):
+        self.check_money()
+        if fuel_type not in self._fuel_data:
+            self._check_fuel_type(fuel_type)
+
+        if self._fuel_data[fuel_type].fuel_price > self._good_price[fuel_type]:
+            logging.info("'{}' price is too high. Current: ${}, recommended: ${}".format(fuel_type, 
+                                                                                         self._fuel_data[fuel_type].fuel_price, 
+                                                                                         self._good_price[fuel_type]))
+            if not self._fuel_data[fuel_type].not_enough_fuel:
+                return
         
-        logging.info("Buy fuel for good price: ${}...".format(self._fuel_data['price']))
+        logging.info("Buy '{}' for ${}...".format(fuel_type, self._fuel_data[fuel_type].fuel_price))
         available_money = int(self._account_money * (self._fuel_budget_percent * 0.01))
-        fuel_total_price = int((self._fuel_data['price'] * self._fuel_data['current_capacity'])/1000)
-        logging.info("Available money for fuel: ${}, fuel total price: ${}, available capacity: {}".format(available_money, 
-                                                                                                           fuel_total_price,
-                                                                                                           self._fuel_data['current_capacity']))
+        fuel_total_price = int((self._fuel_data[fuel_type].fuel_price * self._fuel_data[fuel_type].current_capacity)/1000)
+        logging.info("Available money for {fuel_type}: ${available_money}, {fuel_type} total price: ${fuel_total_price}, available {fuel_type} capacity: {available_capacity}".format(available_money=available_money,
+                                                                                                                                                                                      fuel_type=fuel_type,
+                                                                                                                                                                                      fuel_total_price=fuel_total_price,
+                                                                                                                                                                                      available_capacity=self._fuel_data[fuel_type].current_capacity))
+        
         if fuel_total_price <= 0:
-            logging.info("No need to buy more fuel")
+            logging.info("No need to buy more {}".format(fuel_type))
             return
 
-        if fuel_total_price <= available_money:
-            self._buy_fuel_amount(self._fuel_data['current_capacity'])
-            return
-        
-        available_amount = int(available_money / self._fuel_data['price']) * 1000
-        self._buy_fuel_amount(available_amount)
-
-    def _buy_co2_amount(self, amount: int):
-        logging.info("Buy CO2. {} Quotas for ${}".format(amount, int((self._co2_data['price'] * amount)/1000)))
-        # Open popup window 'fuel'
-        self._click_button(self.xbtn_fuel)
-        # Go to tab 'CO2' in popup window 'fuel'
-        self._click_button(self.xbtn_co2_tab)
-        # Enter fuel amount
-        self._type_text_in_field(self.xtf_fuel_and_co2_amount, str(amount))
-        # Click 'purchase' button
-        self._click_button(self.xbtn_co2_purchase)
-        # Close popup window 'fuel'
-        self._click_button(self.xbtn_popup_close)
-        self._check_money()
-
-    def _buy_co2_percent(self):
-        if self._co2_data['price'] > self._co2_good_price:
-            logging.info("CO2 price is too high. Current: ${}, recommended: ${}".format(self._co2_data['price'], self._co2_good_price))
-            return
-
-        logging.info("Buy CO2 quotas for good price: ${}...".format(self._co2_data['price']))
-        
-        available_money = int(self._account_money * (self._fuel_budget_percent * 0.01))
-        co2_total_price = int((self._co2_data['price'] * self._co2_data['current_capacity'])/1000)
-        logging.info("Available money for CO2: ${}, CO2 total price: ${}".format(available_money, co2_total_price))
-        if co2_total_price <= 0:
-            logging.info("No need to buy more CO2")
-            return
-
-        if co2_total_price <= available_money:
-            self._buy_co2_amount(self._co2_data['current_capacity'])
+        if available_money >= fuel_total_price:
+            self._buy_fuel_type_amount(self._fuel_data[fuel_type].current_capacity, fuel_type)
             return
         
-        available_amount = int(available_money / self._co2_data['price']) * 1000
-        self._buy_co2_amount(available_amount)
+        available_amount = int(available_money / self._fuel_data[fuel_type].fuel_price) * 1000
+        self._buy_fuel_type_amount(available_amount, fuel_type)
+
 
     def _buy_fuel(self):
         logging.info("Try to buy fuel...")
-        self._get_info()
-        self._buy_fuel_percent()
-        self._buy_co2_percent()            
+        for fuel_type in AirplaneFuel.fuel_types:
+            self.buy_fuel_type(fuel_type)
+
 
     def buy_fuel(self):
         self._buy_fuel()
     
+
     def _find_all_for_maintenance(self) -> list[WebElement]:
         self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
@@ -416,6 +352,7 @@ CO2 capacity:\t{:.2f} %
 
         return aircraft_on_base
     
+
     def _repair_aircraft(self, aircraft_reg: str) -> bool:
         logging.info("Repair aircraft...")
 
@@ -462,6 +399,7 @@ CO2 capacity:\t{:.2f} %
 
         return True
 
+
     def _repair_all_aircraft(self):
         logging.info("Search aircraft which need repair")
         acs_need_repair = []
@@ -483,6 +421,7 @@ CO2 capacity:\t{:.2f} %
         
         logging.info("Aircraft repaired: {}".format(repaired_acs))
     
+
     def _acheck_aircraft(self, aircraft_reg) -> bool:
         logging.info("A-Check aircraft...")
         
@@ -529,6 +468,7 @@ CO2 capacity:\t{:.2f} %
 
         return True
     
+
     def _acheck_all_aircraft(self):
         logging.info("Search aircraft which need A-Check")
         acs_need_acheck = []
@@ -539,7 +479,7 @@ CO2 capacity:\t{:.2f} %
                 acs_need_acheck.append(str(ac.get_attribute('data-reg')))
         
         if len(acs_need_acheck) == 0:
-            logging.info("No aircraft needs A-Check")
+            logging.info("No aircraft need A-Check")
             return
         
         self._check_money()
@@ -550,6 +490,7 @@ CO2 capacity:\t{:.2f} %
         
         logging.info("Aircraft planed for A-Check: {}".format(achecked_acs))
     
+
     def _modify_aircraft(self, aircraft_reg: str) -> bool:
         self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
@@ -608,6 +549,7 @@ CO2 capacity:\t{:.2f} %
         
         return True
 
+
     def _modify_all_aircraft(self):
         logging.info("Search aircraft which need modification")
         modified_acs = []
@@ -633,8 +575,9 @@ CO2 capacity:\t{:.2f} %
         logging.info("Aircraft planed for modification: {}".format(len(modified_acs)))
         logging.debug("Modification planed for aircraft: '{}'".format(modified_acs))
 
+
     def _do_maintenance(self):
-        logging.info("Check aircraft maintenance needs...")
+        logging.info("Check aircraft maintenance need...")
         # A-Check
         self._acheck_all_aircraft()
         # Repair
@@ -642,9 +585,11 @@ CO2 capacity:\t{:.2f} %
         # Modification
         self._modify_all_aircraft()
 
+
     def do_maintenance(self):
         self._do_maintenance()
     
+
     def run_once(self):
         logging.info("Run all actions")
         self._login()
@@ -654,6 +599,7 @@ CO2 capacity:\t{:.2f} %
         self._buy_fuel()
         self._driver.close()
     
+
     def _run_service(self, seconds_to_sleep: int=300):
         def start_service(seconds_to_sleep):
             logging.debug("Start service")
@@ -673,6 +619,7 @@ CO2 capacity:\t{:.2f} %
                 return
             except Exception as ex:
                 raise ex
+
 
     def run_service(self, seconds_to_sleep: int=300):
         try:
