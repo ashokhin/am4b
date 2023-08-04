@@ -499,9 +499,9 @@ class AirlineManager4Bot(AM4BaseClass):
     def _modify_aircraft(self, aircraft_reg: str) -> bool:
         self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
-        ac_data_type: str
-        ac_data_reg: str
-        child_element_modify_button: WebElement
+        ac_data_type = ""
+        ac_data_reg = ""
+        child_element_modify_button = ""
 
         for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
             ac_data_reg = str(ac.get_attribute('data-reg'))
