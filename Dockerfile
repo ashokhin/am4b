@@ -1,4 +1,16 @@
-FROM python:3.11-slim-bookworm
+FROM maven:3.8.6-openjdk-8 AS MAVEN_BUILD
+
+COPY ./ ./
+
+RUN pwd
+
+RUN ls -al ./
+
+RUN mvn clean package assembly:single
+
+FROM openjdk:8-jre-slim-buster
+
+COPY --from=MAVEN_BUILD /target/am4bot-jar-with-dependencies.jar /app/am4bot.jar
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \
@@ -13,15 +25,14 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 RUN apt-get -y update
 RUN apt-get install -y google-chrome-stable
 
-COPY . /app
+COPY src/main/resources/log4j2.properties /app
+
 WORKDIR /app
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
 
 VOLUME [ "/app" ]
 
-ENV USERNAME=""
-ENV PASSWORD=""
+ENV AM4_USERNAME=""
+ENV AM4_PASSWORD=""
 ENV FUEL_GOOD_PRICE=500
 ENV CO2_GOOD_PRICE=120
 ENV FUEL_BUDGET_PERCENT=70
@@ -33,17 +44,4 @@ ENV RUN_MODE="once"
 ENV SERVICE_SLEEP_SEC=300
 ENV SCANNER_FILE="am4scanner.csv"
 
-
-CMD python ./app.py \
-    --username="${USERNAME}" \
-    --password="${PASSWORD}" \
-    --fuel-good-price=${FUEL_GOOD_PRICE} \
-    --co2-good-price=${CO2_GOOD_PRICE} \
-    --fuel-budget-percent=${FUEL_BUDGET_PERCENT} \
-    --maintenance-budget-percent=${MAINTANANCE_BUDGET_PERCENT} \
-    --marketing-budget-percent=${MARKETING_BUDGET_PERCENT} \
-    --aircraft-wear-percent=${AIRCRAFT_WEAR_PERCENT} \
-    --aircraft-max-hours-to-acheck=${AIRCRAFT_MAX_HOURS_TO_ACHECK} \
-    --run-mode=${RUN_MODE} \
-    --service-sleep-sec=${SERVICE_SLEEP_SEC} \
-    --scanner-file=${SCANNER_FILE}
+CMD java -cp am4bot.jar -Dlog4j.configurationFile=log4j2.properties com.ashokhin.am4bot.App
