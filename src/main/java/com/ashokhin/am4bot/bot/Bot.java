@@ -269,6 +269,9 @@ public final class Bot extends BotBase {
     private final boolean aCheckAircraft(Aircraft aircraftForACheck) {
         logger.debug(String.format("Try to A-Check '%s'", aircraftForACheck));
 
+        this.clickButton(APIXpath.xpathButtonMaintenancePlan);
+        this.clickButton(APIXpath.xpathButtonMaintenanceSortByACheck);
+
         WebElement aCheckButton = null;
 
         for (WebElement aircraftFromList : this.getElements(APIXpath.xpathElementListMaintenanceToBase)) {
@@ -324,7 +327,6 @@ public final class Bot extends BotBase {
 
         int aCheckedAircraftCount = 0;
         for (Aircraft aircraftForACheck : aircraftNeedACheck) {
-            this.clickButton(APIXpath.xpathButtonMaintenancePlan);
             if (this.aCheckAircraft(aircraftForACheck)) {
                 aCheckedAircraftCount++;
             }
@@ -336,6 +338,9 @@ public final class Bot extends BotBase {
 
     private final boolean repairAircraft(Aircraft aircraftForRepair) {
         logger.debug(String.format("Try to repair '%s'", aircraftForRepair));
+
+        this.clickButton(APIXpath.xpathButtonMaintenancePlan);
+        this.clickButton(APIXpath.xpathButtonMaintenanceSortByWear);
 
         WebElement repairButton = null;
 
@@ -391,7 +396,6 @@ public final class Bot extends BotBase {
 
         int repairedAircraftCount = 0;
         for (Aircraft aircraftForRepair : aircraftNeedRepair) {
-            this.clickButton(APIXpath.xpathButtonMaintenancePlan);
             if (this.repairAircraft(aircraftForRepair)) {
                 repairedAircraftCount++;
             }
@@ -402,6 +406,8 @@ public final class Bot extends BotBase {
 
     private final boolean modifyAircraft(Aircraft aircraftForModify) {
         logger.debug(String.format("Try to modify '%s'", aircraftForModify));
+
+        this.clickButton(APIXpath.xpathButtonMaintenancePlan);
 
         WebElement modifyButton = null;
 
@@ -490,7 +496,7 @@ public final class Bot extends BotBase {
 
         int modifiedAircraftCount = 0;
         for (Aircraft aircraftForModify : aircraftListForModify) {
-            this.clickButton(APIXpath.xpathButtonMaintenancePlan);
+
             if (this.modifyAircraft(aircraftForModify)) {
                 modifiedAircraftCount++;
             }
