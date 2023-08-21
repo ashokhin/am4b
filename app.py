@@ -50,7 +50,7 @@ def run_bot(args: argparse.Namespace) -> None:
     am4bot.maintenance_budget_percent = args.maintenance_budget_percent
     am4bot.marketing_budget_percent = args.marketing_budget_percent
     am4bot.aircraft_wear_percent = args.aircraft_wear_percent
-    am4bot.aircraft_max_hours_to_acheck = args.aircraft_max_hours_to_acheck
+    am4bot.aircraft_max_hours_to_a_check = args.aircraft_max_hours_to_acheck
     
     try:
         if args.run_mode == 'once':

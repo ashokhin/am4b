@@ -1,5 +1,6 @@
 import logging
 import time
+from am4.aircraft import Aircraft
 
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -27,7 +28,7 @@ class AirlineManager4Bot(AM4BaseClass):
         self._marketing_budget_percent = 30
         ### Set borders for maintenance (Repairs and A-Checks)
         self._aircraft_wear_percent = 20
-        self._aircraft_max_hours_to_acheck = 24
+        self._aircraft_max_hours_to_a_check = 24
         ### Class inner variables
         self._account_money = 0
         self._fuel_data = {}
@@ -85,12 +86,12 @@ class AirlineManager4Bot(AM4BaseClass):
         self._aircraft_wear_percent = int(value)
     
     @property
-    def aircraft_max_hours_to_acheck(self) -> int:
-        return self._aircraft_max_hours_to_acheck
+    def aircraft_max_hours_to_a_check(self) -> int:
+        return self._aircraft_max_hours_to_a_check
     
-    @aircraft_max_hours_to_acheck.setter
-    def aircraft_max_hours_to_acheck(self, value: int):
-        self._aircraft_max_hours_to_acheck = int(value)
+    @aircraft_max_hours_to_a_check.setter
+    def aircraft_max_hours_to_a_check(self, value: int):
+        self._aircraft_max_hours_to_a_check = int(value)
     
 
     def _company_active(self, company_xpath: str) -> bool:
@@ -348,40 +349,50 @@ class AirlineManager4Bot(AM4BaseClass):
         self._buy_fuel()
     
 
-    def _find_all_for_maintenance(self) -> list[WebElement]:
+    def _find_all_for_maintenance(self) -> list[Aircraft]:
         self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
-        aircraft_on_base = self._driver.find_elements('xpath', self.xelem_list_mnt_to_base)
+        ac_data = []
+        for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
+            ac_data.append(
+                Aircraft(
+                    type = str(ac.get_attribute('data-type')),
+                    reg_number = str(ac.get_attribute('data-reg')),
+                    wear = int(float(ac.get_attribute('data-wear'))),
+                    a_check_hours = int(float(ac.get_attribute('data-hours')))
+                )
+            )
         # Close popup window 'maintenance'
         self._click_button(self.xbtn_popup_close)
 
-        return aircraft_on_base
+        return ac_data
     
 
-    def _repair_aircraft(self, aircraft_reg: str) -> bool:
+    def _repair_aircraft(self, aircraft_for_repair: Aircraft) -> bool:
         logging.info("Repair aircraft...")
 
         self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
         self._click_button(self.xbtn_mnt_sort_by_wear)
-        ac_data_type: str
-        ac_data_reg: str
-        ac_data_wear: str
-        child_element_repair_button: WebElement
+
+        child_element_repair_button = None
 
         for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
             ac_data_reg = str(ac.get_attribute('data-reg'))
-            if ac_data_reg == aircraft_reg:
-                ac_data_type = str(ac.get_attribute('data-type'))
-                ac_data_wear = str(ac.get_attribute('data-wear'))
+            if aircraft_for_repair.reg_number == str(ac.get_attribute('data-reg')):
                 # Find 'Repair' button
                 child_element_repair_button = ac.find_element('xpath', self.xbtn_mnt_repair_plan)
                 break
 
         
-        logging.info("AC type: {}, AC reg: {}, AC wear: {}".format(ac_data_type,
-                                                                   ac_data_reg,
-                                                                   ac_data_wear))
+        logging.info("AC type: {}, AC reg: {}, AC wear: {}".format(aircraft_for_repair.type,
+                                                                   aircraft_for_repair.reg_number,
+                                                                   aircraft_for_repair.wear))
+        
+        if not child_element_repair_button:
+            logging.warning("Button for repair not found")
+
+            return False
         
         # Click 'Repair' button
         self._click_button(child_element_repair_button)
@@ -394,10 +405,11 @@ class AirlineManager4Bot(AM4BaseClass):
                                                                                                              available_money))
             # Close popup window 'maintenance'
             self._click_button(self.xbtn_popup_close)
+
             return False
         
         self._click_button(self.xbtn_mnt_repair_do)
-        logging.info("Aircraft '{}' planed to repair for ${}".format(ac_data_reg, repair_cost))
+        logging.info("Aircraft '{}' planed to repair for ${}".format(aircraft_for_repair.reg_number, repair_cost))
         # Close popup window 'maintenance'
         self._click_button(self.xbtn_popup_close)
         self._account_money -= repair_cost
@@ -409,10 +421,10 @@ class AirlineManager4Bot(AM4BaseClass):
         logging.info("Search aircraft which need repair")
         acs_need_repair = []
         aircraft_on_base = self._find_all_for_maintenance()
+
         for ac in aircraft_on_base:
-            ac_wear = int(float(ac.get_attribute('data-wear')))
-            if ac_wear >= self._aircraft_wear_percent:
-                acs_need_repair.append(str(ac.get_attribute('data-reg')))
+            if ac.wear >= self._aircraft_wear_percent:
+                acs_need_repair.append(ac)
         
         if len(acs_need_repair) == 0:
             logging.info("No aircraft need repair")
@@ -420,6 +432,7 @@ class AirlineManager4Bot(AM4BaseClass):
         
         self._check_money()
         repaired_acs = 0
+
         for ac in acs_need_repair:
             if self._repair_aircraft(ac):
                 repaired_acs += 1
@@ -427,32 +440,31 @@ class AirlineManager4Bot(AM4BaseClass):
         logging.info("Aircraft repaired: {}".format(repaired_acs))
     
 
-    def _acheck_aircraft(self, aircraft_reg) -> bool:
+    def _a_check_aircraft(self, aircraft_for_a_check: Aircraft) -> bool:
         logging.info("A-Check aircraft...")
         
         self._click_button(self.xbtn_maintenance)
         self._click_button(self.xbtn_mnt_plan)
-        self._click_button(self.xbtn_mnt_sort_by_acheck)
-        ac_data_type = ""
-        ac_data_reg = ""
-        ac_data_hours = ""
-        child_element_acheck_button: WebElement
+        self._click_button(self.xbtn_mnt_sort_by_a_check)
+        child_element_a_check_button = None
 
         for ac in self._driver.find_elements('xpath', self.xelem_list_mnt_to_base):
-            ac_data_reg = str(ac.get_attribute('data-reg'))
-            if ac_data_reg == aircraft_reg:
-                ac_data_type = str(ac.get_attribute('data-type'))
-                ac_data_hours = str(ac.get_attribute('data-hours'))
+            if aircraft_for_a_check.reg_number == str(ac.get_attribute('data-reg')):
                 # Find 'A-Check' button
-                child_element_acheck_button = ac.find_element('xpath', self.xbtn_mnt_acheck_plan)
+                child_element_a_check_button = ac.find_element('xpath', self.xbtn_mnt_a_check_plan)
                 break
         
-        logging.info("AC type: {}, AC reg: {}, AC hours to check: {}".format(ac_data_type,
-                                                                             ac_data_reg,
-                                                                             ac_data_hours))
+        logging.info("AC type: {}, AC reg: {}, AC hours to check: {}".format(aircraft_for_a_check.type,
+                                                                             aircraft_for_a_check.reg_number,
+                                                                             aircraft_for_a_check.a_check_hours))
         
+        if not child_element_a_check_button:
+            logging.warning("Button for A-Check not found")
+
+            return False
+
         # Click 'A-Check' button
-        self._click_button(child_element_acheck_button)
+        self._click_button(child_element_a_check_button)
 
         acheck_cost = func.extract_int_from_string(self._get_text_from_element(self.xtxt_mnt_acheck_cost))
         available_money = int(self._account_money * (self._maintenance_budget_percent * 0.01))
@@ -480,7 +492,7 @@ class AirlineManager4Bot(AM4BaseClass):
         aircraft_on_base = self._find_all_for_maintenance()
         for ac in aircraft_on_base:
             ac_hours_to_acheck = int(ac.get_attribute('data-hours'))
-            if ac_hours_to_acheck < self._aircraft_max_hours_to_acheck:
+            if ac_hours_to_acheck < self._aircraft_max_hours_to_a_check:
                 acs_need_acheck.append(str(ac.get_attribute('data-reg')))
         
         if len(acs_need_acheck) == 0:
@@ -490,7 +502,7 @@ class AirlineManager4Bot(AM4BaseClass):
         self._check_money()
         achecked_acs = 0
         for ac in acs_need_acheck:
-            if self._acheck_aircraft(ac):
+            if self._a_check_aircraft(ac):
                 achecked_acs += 1
         
         logging.info("Aircraft planed for A-Check: {}".format(achecked_acs))

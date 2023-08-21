@@ -110,7 +110,7 @@ class AM4BaseClass(object):
     # 
     xbtn_mnt_sort_by_wear = """//div[@id="maintView"]//button[@onclick="sortMaint();"]"""
     #
-    xbtn_mnt_sort_by_acheck = """//div[@id="maintView"]//button[@onclick="sortMaint('check');"]"""
+    xbtn_mnt_sort_by_a_check = """//div[@id="maintView"]//button[@onclick="sortMaint('check');"]"""
     #
     xelem_list_mnt_to_base = '//div[@id="acListView"]/div[@data-base="1"]'
     #
@@ -120,7 +120,7 @@ class AM4BaseClass(object):
     #
     xbtn_mnt_repair_do = '//div[@id="typeRepair"]//button[contains(@onclick, "maint_plan_do.php?mode=do&type=repair&id=")]'
     #
-    xbtn_mnt_acheck_plan = '//div[@id="acListView"]//button[contains(@onclick, "maint_plan_do.php?type=check&id=")]'
+    xbtn_mnt_a_check_plan = '//div[@id="acListView"]//button[contains(@onclick, "maint_plan_do.php?type=check&id=")]'
     #
     xtxt_mnt_acheck_cost = '//div[@id="typeCheck"]//div[contains(text(), "$ ")]'
     #
