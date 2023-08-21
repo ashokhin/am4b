@@ -19,6 +19,7 @@ import com.ashokhin.am4bot.model.Maintenance;
 import com.ashokhin.am4bot.model.MaintenanceOperation;
 import com.ashokhin.am4bot.model.Marketing;
 import com.ashokhin.am4bot.model.MarketingCompany;
+import com.ashokhin.am4bot.model.MarketingCompanyType;
 import com.ashokhin.am4bot.utils.AircraftSortingComparator;
 
 public final class Bot extends BotBase {
@@ -566,13 +567,12 @@ public final class Bot extends BotBase {
 
         this.clickButton(APIXpath.xpathButtonFinanceMarketingNewCampaign);
 
-        for (Map.Entry<String, HashMap<String, String>> marketingCompanyMap : Marketing.marketingCompaniesMap
-                .entrySet()) {
-            logger.debug(String.format("Try to check company '%s'", marketingCompanyMap.getKey()));
+        for (MarketingCompanyType marketingCompanyType : MarketingCompanyType.values()) {
+            logger.debug(String.format("Try to check company '%s'", marketingCompanyType));
             this.marketingDataList.add(
                     new MarketingCompany(
-                            marketingCompanyMap.getKey(),
-                            this.getAttribute(marketingCompanyMap.getValue().get("rowXpath"), "class")
+                            marketingCompanyType,
+                            this.getAttribute(marketingCompanyType.getRowXpath(), "class")
                                     .equals("not-active")));
         }
     }
@@ -580,21 +580,21 @@ public final class Bot extends BotBase {
     private final boolean enableMarketingCompany(MarketingCompany marketingCompany) {
         logger.debug("Try to activate marketing company '%s'", marketingCompany.getName());
 
-        this.clickButton(Marketing.marketingCompaniesMap.get(marketingCompany.getName()).get("rowXpath"));
+        this.clickButton(marketingCompany.getRowXpath());
 
         String marketingCompanyCostFullXpath = "";
 
-        if (marketingCompany.getName().equals("Airline reputation")) {
+        if (marketingCompany.getType() == MarketingCompanyType.AIRLINE_REPUTATION) {
             this.selectFromDropdown(APIXpath.xpathElementFinanceMarketingCompany1Select,
                     Marketing.MARKETING_COMPANY_REPUTATION_DURATION);
 
             marketingCompanyCostFullXpath = String.format("%s//span[@id='c4']",
-                    Marketing.marketingCompaniesMap.get(marketingCompany.getName()).get("buttonXpath"));
+                    marketingCompany.getButtonXpath());
         }
 
-        if (marketingCompany.getName().equals("Eco friendly")) {
+        if (marketingCompany.getType() == MarketingCompanyType.ECO_FRIENDLY) {
             marketingCompanyCostFullXpath = String.format("%s",
-                    Marketing.marketingCompaniesMap.get(marketingCompany.getName()).get("buttonXpath"));
+                    marketingCompany.getButtonXpath());
         }
 
         int marketingCompanyPrice = this.getIntFromElement(marketingCompanyCostFullXpath);
@@ -614,7 +614,7 @@ public final class Bot extends BotBase {
                 marketingCompany.getName(),
                 marketingCompanyPrice));
 
-        this.clickButton(Marketing.marketingCompaniesMap.get(marketingCompany.getName()).get("buttonXpath"));
+        this.clickButton(marketingCompany.getButtonXpath());
 
         return true;
     }
@@ -630,7 +630,7 @@ public final class Bot extends BotBase {
         int readyForDepartCount = this.getReadyForDepartCount();
 
         if (readyForDepartCount == 0) {
-            logger.info("No aircraft ready to depart");
+            logger.info("No aircraft ready for depart");
 
             return;
         }

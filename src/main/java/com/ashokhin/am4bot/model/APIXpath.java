@@ -31,7 +31,7 @@ public class APIXpath {
     // xpath for button 'landed' in side menu
     public static final String xpathButtonLanded = "//div[@id='flightInfo']//button[@id='flightStatusLanded']";
     // xpath for list of landed aircraft in 'landed' list
-    public static final String xpathElementListLanded = "//div[@id='landedList']/div[contains(@id, 'flightStatus') and contains(@onclick, 'showFlightInfo')]";
+    public static final String xpathElementListLanded = "//div[@id='landedList']/div[contains(@id, 'flightStatus') and contains(@onclick, 'showFlightInfo') and contains(@data-grounded, '0')]";
     // xpath for 'depart' button
     public static final String xpathButtonDepart = "//div[@id='flightInfo']//button[contains(@onclick, 'route_depart.php?mode=all&ids=x')]";
     // 'Finance, Marketing & Stock' menu

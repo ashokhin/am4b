@@ -40,7 +40,7 @@ public final class Aircraft {
     @Override
     public final String toString() {
         return String.format(
-                "%s{type='%s',regNumber='%s', aCheckHours=%d,wearPercent=%d}",
+                "%s{type='%s', regNumber='%s', aCheckHours=%d, wearPercent=%d}",
                 this.getClass().getSimpleName(), this.type,
                 this.regNumber, this.aCheckHours, this.wearPercent);
     }
