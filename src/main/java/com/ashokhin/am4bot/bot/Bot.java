@@ -614,20 +614,21 @@ public final class Bot extends BotBase {
         return this.getElements(APIXpath.xpathElementListLanded).size();
     }
 
-    private final void departAllAircraft() {
+    private final int departAllAircraft() {
         logger.info("Depart all available aircraft...");
         int readyForDepartCount = this.getReadyForDepartCount();
 
         if (readyForDepartCount == 0) {
             logger.info("No aircraft ready for depart");
 
-            return;
+            return readyForDepartCount;
         }
 
         logger.info(String.format("Aircraft ready for depart: %d", readyForDepartCount));
         this.clickButton(APIXpath.xpathButtonDepart);
         logger.info(String.format("Aircraft departed: %d", (readyForDepartCount - this.getReadyForDepartCount())));
 
+        return readyForDepartCount;
     }
 
     public final void startOnce() {
@@ -636,8 +637,9 @@ public final class Bot extends BotBase {
         this.buyFuel();
         this.startMarketingCompanies();
         this.maintenanceAircraft();
-        this.departAllAircraft();
-        this.buyFuel();
+        if (this.departAllAircraft() > 0) {
+            this.buyFuel();
+        }
     }
 
     @Override
