@@ -98,8 +98,8 @@ public class APIXpath {
     public static final Map<String, Map<String, String>> xpathAllFuelElementsMap = new HashMap<String, Map<String, String>>() {
         {
             put("common", xpathCommonElementsMap);
-            put("fuel", xpathFuelElementsMap);
-            put("co2", xpathCO2ElementsMap);
+            put(FuelType.FUEL.getTitle(), xpathFuelElementsMap);
+            put(FuelType.CO2.getTitle(), xpathCO2ElementsMap);
         }
     };
 

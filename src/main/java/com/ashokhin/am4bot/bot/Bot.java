@@ -14,7 +14,9 @@ import org.openqa.selenium.WebElement;
 import com.ashokhin.am4bot.model.APIXpath;
 import com.ashokhin.am4bot.model.Aircraft;
 import com.ashokhin.am4bot.model.AirplaneFuel;
+import com.ashokhin.am4bot.model.FuelType;
 import com.ashokhin.am4bot.model.Maintenance;
+import com.ashokhin.am4bot.model.MaintenanceOperation;
 import com.ashokhin.am4bot.model.Marketing;
 import com.ashokhin.am4bot.model.MarketingCompany;
 import com.ashokhin.am4bot.utils.AircraftSortingComparator;
@@ -22,26 +24,26 @@ import com.ashokhin.am4bot.utils.AircraftSortingComparator;
 public final class Bot extends BotBase {
     private static final Logger logger = LogManager.getLogger(Bot.class);
     private static int accountMoney;
-    private String botMode;
+    private BotMode botMode;
     private int fuelBudgetPercent;
     private int maintenanceBudgetPercent;
     private int marketingBudgetPercent;
     private int wearPercent;
     private int maximumHoursBeforeACheck;
-    private Map<String, Integer> fuelPricesMap;
-    private Map<String, AirplaneFuel> fuelDataMap;
+    private Map<FuelType, Integer> fuelPricesMap;
+    private Map<FuelType, AirplaneFuel> fuelDataMap;
     private ArrayList<MarketingCompany> marketingDataList = new ArrayList<MarketingCompany>();
 
     public Bot(String baseUrl, String login, String password) {
         super(baseUrl, login, password);
-        fuelDataMap = new HashMap<String, AirplaneFuel>();
+        fuelDataMap = new HashMap<FuelType, AirplaneFuel>();
     }
 
     public Bot(
             String baseUrl,
             String login,
             String password,
-            String botMode,
+            BotMode botMode,
             int fuelGoodPrice,
             int co2GoodPrice,
             int criticalFuelLevelPercent,
@@ -51,10 +53,10 @@ public final class Bot extends BotBase {
             int aircraftWearPercent,
             int aircraftMaximumHoursBeforeACheck) {
         super(baseUrl, login, password);
-        this.fuelPricesMap = new HashMap<String, Integer>() {
+        this.fuelPricesMap = new HashMap<FuelType, Integer>() {
             {
-                put("fuel", fuelGoodPrice);
-                put("co2", co2GoodPrice);
+                put(FuelType.FUEL, fuelGoodPrice);
+                put(FuelType.CO2, co2GoodPrice);
             }
         };
         AirplaneFuel.setCriticalLevelPercent(criticalFuelLevelPercent);
@@ -63,8 +65,8 @@ public final class Bot extends BotBase {
         this.marketingBudgetPercent = marketingBudgetPercent;
         this.wearPercent = aircraftWearPercent;
         this.maximumHoursBeforeACheck = aircraftMaximumHoursBeforeACheck;
-        this.botMode = this.checkMode(botMode);
-        fuelDataMap = new HashMap<String, AirplaneFuel>();
+        this.botMode = botMode;
+        fuelDataMap = new HashMap<FuelType, AirplaneFuel>();
     }
 
     public final void setSettings(
@@ -76,10 +78,10 @@ public final class Bot extends BotBase {
             int marketingBudgetPercent,
             int aircraftWearPercent,
             int aircraftMaximumHoursBeforeACheck) {
-        this.fuelPricesMap = new HashMap<String, Integer>() {
+        this.fuelPricesMap = new HashMap<FuelType, Integer>() {
             {
-                put("fuel", fuelGoodPrice);
-                put("co2", co2GoodPrice);
+                put(FuelType.FUEL, fuelGoodPrice);
+                put(FuelType.CO2, co2GoodPrice);
             }
         };
         AirplaneFuel.setCriticalLevelPercent(criticalFuelLevelPercent);
@@ -93,56 +95,31 @@ public final class Bot extends BotBase {
     @Override
     public void run() {
         switch (this.botMode) {
-            case BotMode.ALL:
+            case ALL:
                 this.startOnce();
                 this.quit();
                 break;
-            case BotMode.BUY_FUEL:
+            case BUY_FUEL:
                 super.startBot();
                 this.buyFuel();
                 this.quit();
                 break;
-            case BotMode.DEPART:
+            case DEPART:
                 super.startBot();
                 this.departAllAircraft();
                 this.quit();
                 break;
-            case BotMode.MAINTENANCE:
+            case MAINTENANCE:
                 super.startBot();
                 this.maintenanceAircraft();
                 this.quit();
                 break;
-            case BotMode.MARKETING:
+            case MARKETING:
                 super.startBot();
                 this.startMarketingCompanies();
                 this.quit();
                 break;
-            default:
-                logger.fatal(String.format("'%s' bot mode unknown!"));
-
-                return;
         }
-    }
-
-    public final String checkMode(String botMode) {
-        switch (botMode) {
-            case BotMode.ALL:
-                break;
-            case BotMode.BUY_FUEL:
-                break;
-            case BotMode.DEPART:
-                break;
-            case BotMode.MAINTENANCE:
-                break;
-            case BotMode.MARKETING:
-                break;
-            default:
-                logger.fatal(String.format("'%s' bot mode Unknown!"));
-
-                return null;
-        }
-
-        return botMode;
     }
 
     private final synchronized void checkMoney() {
@@ -159,34 +136,36 @@ public final class Bot extends BotBase {
         Bot.accountMoney -= moneySpent;
     }
 
-    private final void checkFuelType(String fuelType) {
-        String fuelDisplayUnits = fuelType.equals("fuel") ? "Lbs" : "Quotas";
+    private final void checkFuelType(FuelType fuelType) {
+        logger.info(String.format("Check '%s' price and capacity", fuelType.getTitle()));
 
-        logger.info(String.format("Check '%s' price and capacity", fuelType));
+        switch (fuelType) {
+            case FUEL:
+                this.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonFuelTab"));
+                break;
 
-        if (fuelType.equals("fuel")) {
-            this.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonFuelTab"));
-        }
-
-        if (fuelType.equals("co2")) {
-            this.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonCO2Tab"));
+            case CO2:
+                this.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonCO2Tab"));
+                break;
         }
 
         int fuelPrice = this.getIntFromElement(APIXpath.xpathAllFuelElementsMap
-                .get(fuelType).get("xpathTextPrice"));
+                .get(fuelType.getTitle()).get("xpathTextPrice"));
 
-        logger.info(String.format("Price for '%s' is $%d", fuelType, fuelPrice));
+        logger.info(String.format("Price for '%s' is $%d", fuelType.getTitle(), fuelPrice));
 
         int fuelCurrentCapacity = this.getIntFromElement(APIXpath.xpathAllFuelElementsMap
-                .get(fuelType).get("xpathTextCurrentCapacity"));
+                .get(fuelType.getTitle()).get("xpathTextCurrentCapacity"));
 
         logger.info(
-                String.format("Current capacity for '%s' is %d %s", fuelType, fuelCurrentCapacity, fuelDisplayUnits));
+                String.format("Current capacity for '%s' is %d %s", fuelType.getTitle(), fuelCurrentCapacity,
+                        fuelType.getUnit()));
 
         int fuelMaxCapacity = this.getIntFromElement(APIXpath.xpathAllFuelElementsMap
-                .get(fuelType).get("xpathTextMaxCapacity"));
+                .get(fuelType.getTitle()).get("xpathTextMaxCapacity"));
 
-        logger.info(String.format("Maximum capacity for '%s' is %d %s", fuelType, fuelMaxCapacity, fuelDisplayUnits));
+        logger.info(String.format("Maximum capacity for '%s' is %d %s", fuelType.getTitle(), fuelMaxCapacity,
+                fuelType.getUnit()));
 
         if (this.fuelDataMap.containsKey(fuelType)) {
             this.fuelDataMap.get(fuelType).update(fuelPrice, fuelCurrentCapacity);
@@ -214,18 +193,18 @@ public final class Bot extends BotBase {
         airplaneFuel.buyFuelAmount(needFuelAmount);
     }
 
-    private final void buyFuelType(String fuelType) {
+    private final void buyFuelType(FuelType fuelType) {
         this.checkFuelType(fuelType);
         AirplaneFuel currentFuel = this.fuelDataMap.get(fuelType);
 
         if (currentFuel.isFull()) {
-            logger.info(String.format("We already have enough %s", currentFuel.getFuelType()));
+            logger.info(String.format("We already have enough %s", fuelType.getTitle()));
 
             return;
         }
 
         if (currentFuel.notEnoughFuel()) {
-            logger.warn(String.format("We haven't enough %s", currentFuel.getFuelType()));
+            logger.warn(String.format("We haven't enough %s", fuelType.getTitle()));
         }
 
         logger.debug(String.format("Fuel data info: %s", currentFuel));
@@ -238,7 +217,7 @@ public final class Bot extends BotBase {
 
         this.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonFuelMenu"));
 
-        for (String fuelType : AirplaneFuel.fuelTypes) {
+        for (FuelType fuelType : FuelType.values()) {
             this.checkFuelType(fuelType);
         }
 
@@ -251,24 +230,28 @@ public final class Bot extends BotBase {
 
         this.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonFuelMenu"));
 
-        for (String fuelType : AirplaneFuel.fuelTypes) {
+        for (FuelType fuelType : FuelType.values()) {
             this.buyFuelType(fuelType);
         }
 
         this.clickButton(APIXpath.xpathButtonPopupClose);
     }
 
-    private final List<Aircraft> findAllAircraftForMaintenance(String maintenanceOperation) {
+    private final List<Aircraft> findAllAircraftForMaintenance(MaintenanceOperation maintenanceOperation) {
         List<Aircraft> aircraftForMaintenance = new ArrayList<Aircraft>();
 
         this.clickButton(APIXpath.xpathButtonMaintenancePlan);
 
         switch (maintenanceOperation) {
-            case Maintenance.A_CHECK:
+            case A_CHECK:
                 this.clickButton(APIXpath.xpathButtonMaintenanceSortByACheck);
                 break;
-            case Maintenance.REPAIR:
+            case REPAIR:
                 this.clickButton(APIXpath.xpathButtonMaintenanceSortByWear);
+                break;
+            case MODIFY:
+                break;
+            default:
                 break;
         }
 
@@ -327,7 +310,7 @@ public final class Bot extends BotBase {
         logger.info("Search aircraft which need A-Check");
 
         List<Aircraft> aircraftNeedACheck = new ArrayList<Aircraft>();
-        for (Aircraft aircraftForMaintenance : this.findAllAircraftForMaintenance(Maintenance.A_CHECK)) {
+        for (Aircraft aircraftForMaintenance : this.findAllAircraftForMaintenance(MaintenanceOperation.A_CHECK)) {
             if (aircraftForMaintenance.getACheckHours() < this.maximumHoursBeforeACheck) {
                 aircraftNeedACheck.add(aircraftForMaintenance);
             }
@@ -394,7 +377,7 @@ public final class Bot extends BotBase {
         logger.info("Search aircraft which need repair");
 
         List<Aircraft> aircraftNeedRepair = new ArrayList<Aircraft>();
-        for (Aircraft aircraftForMaintenance : this.findAllAircraftForMaintenance(Maintenance.REPAIR)) {
+        for (Aircraft aircraftForMaintenance : this.findAllAircraftForMaintenance(MaintenanceOperation.REPAIR)) {
             if (aircraftForMaintenance.getWearPercent() >= this.wearPercent) {
                 aircraftNeedRepair.add(aircraftForMaintenance);
             }
@@ -450,7 +433,7 @@ public final class Bot extends BotBase {
 
                 if (checkboxWebElem.getAttribute("checked") != null) {
                     // checkbox already checked
-                    logger.trace(String.format("The checkbox '%s' is already checked", checkboxWebElem.toString()));
+                    logger.trace(String.format("The checkbox '%s' is already checked", checkboxWebElem));
                     break;
                 }
 
@@ -491,7 +474,7 @@ public final class Bot extends BotBase {
 
     private final void modifyAllAircraft() {
         logger.info("Search aircraft which need modification");
-        List<Aircraft> aircraftNeedModify = this.findAllAircraftForMaintenance(Maintenance.MODIFY);
+        List<Aircraft> aircraftNeedModify = this.findAllAircraftForMaintenance(MaintenanceOperation.MODIFY);
         // Sort Aircraft list by 'aircraftRegNumber'
         Collections.sort(aircraftNeedModify, new AircraftSortingComparator());
         // Get only last N (Maintenance.MODIFY_AIRCRAFT_NUMBER) aircraft for modify
@@ -530,10 +513,10 @@ public final class Bot extends BotBase {
 
     private final void startMarketingCompanies() {
         this.checkFuel();
-        for (String fuelType : AirplaneFuel.fuelTypes) {
+        for (FuelType fuelType : FuelType.values()) {
             if (this.fuelDataMap.get(fuelType).notEnoughFuel()) {
                 logger.warn(String.format("Not enough %s (%d / %d). Skip marketing companies.",
-                        fuelType, this.fuelDataMap.get(fuelType).getHoldingCapacity(),
+                        fuelType.getTitle(), this.fuelDataMap.get(fuelType).getHoldingCapacity(),
                         this.fuelDataMap.get(fuelType).getMaximumCapacity()));
 
                 return;

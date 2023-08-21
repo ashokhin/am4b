@@ -21,14 +21,6 @@ public final class Aircraft {
         this.wearPercent = wearPercent;
     }
 
-    @Override
-    public final String toString() {
-        return String.format(
-                "Aircraft{type='%s',regNumber='%s', aCheckHours=%d,wearPercent=%d}",
-                this.type,
-                this.regNumber, this.aCheckHours, this.wearPercent);
-    }
-
     public final String getType() {
         return this.type;
     }
@@ -43,5 +35,13 @@ public final class Aircraft {
 
     public final int getWearPercent() {
         return this.wearPercent;
+    }
+
+    @Override
+    public final String toString() {
+        return String.format(
+                "%s{type='%s',regNumber='%s', aCheckHours=%d,wearPercent=%d}",
+                this.getClass().getSimpleName(), this.type,
+                this.regNumber, this.aCheckHours, this.wearPercent);
     }
 }

@@ -1,9 +1,19 @@
 package com.ashokhin.am4bot.bot;
 
-public final class BotMode {
-    public static final String ALL = "ALL";
-    public static final String BUY_FUEL = "BUY_FUEL";
-    public static final String MAINTENANCE = "MAINTENANCE";
-    public static final String DEPART = "DEPART";
-    public static final String MARKETING = "MARKETING";
+public enum BotMode {
+    ALL("ALL"),
+    BUY_FUEL("BUY_FUEL"),
+    MAINTENANCE("MAINTENANCE"),
+    DEPART("DEPART"),
+    MARKETING("MARKETING");
+
+    private String title;
+
+    private BotMode(String title) {
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return this.title;
+    }
 }

@@ -5,12 +5,8 @@ import org.apache.logging.log4j.Logger;
 
 public final class AirplaneFuel {
     private static final Logger logger = LogManager.getLogger(AirplaneFuel.class);
-    public static final String[] fuelTypes = {
-            "fuel",
-            "co2"
-    };
     private static int criticalLevelPercent;
-    private String type;
+    private FuelType type;
     private int price;
     private int goodPrice;
     private int budgetPercent;
@@ -20,7 +16,7 @@ public final class AirplaneFuel {
     private String displayUnit;
 
     public AirplaneFuel(
-            String type,
+            FuelType type,
             int price,
             int goodPrice,
             int budgetPercent,
@@ -32,7 +28,7 @@ public final class AirplaneFuel {
         this.budgetPercent = budgetPercent;
         this.currentCapacity = currentCapacity;
         this.maximumCapacity = maximumCapacity;
-        this.displayUnit = this.type.equals("fuel") ? "Lbs" : "Quotas";
+        this.displayUnit = this.type.getUnit();
         this.updateHoldingCapacity();
     }
 
@@ -40,16 +36,8 @@ public final class AirplaneFuel {
         this.holdingCapacity = (this.maximumCapacity - this.currentCapacity);
     }
 
-    @Override
-    public final String toString() {
-        return String.format(
-                "AirlineFuel{type='%s', price=%d, goodPrice=%d, budgetPercent=%d, currentCapacity=%d, maximumCapacity=%d, holdingCapacity=%d, displayUnit='%s'}",
-                this.type, this.price, this.goodPrice, this.budgetPercent,
-                this.currentCapacity, this.maximumCapacity, this.holdingCapacity, this.displayUnit);
-    }
-
     public final String getFuelType() {
-        return this.type;
+        return this.type.getTitle();
     }
 
     public static final void setCriticalLevelPercent(int criticalFuelLevelPercent) {
@@ -59,7 +47,7 @@ public final class AirplaneFuel {
     public final String getFuelInfo() {
         return String.format(
                 "Fuel type: %s\nFuel price: $%d\nFuel good price: $%d\nFuel budget percent: %d%%\nCurrent capacity: %d %s\nMaximum capacity: %d %s\nHolding capacity: %d %s (%d%%)",
-                this.type, this.price, this.goodPrice, this.budgetPercent,
+                this.type.getTitle(), this.price, this.goodPrice, this.budgetPercent,
                 this.currentCapacity, this.displayUnit,
                 this.maximumCapacity, this.displayUnit,
                 this.holdingCapacity, this.displayUnit,
@@ -76,13 +64,14 @@ public final class AirplaneFuel {
 
     public final int getNeedAmount(int accountMoney) {
         if (this.price > this.goodPrice) {
-            logger.info(String.format("'%s' price is too high. Current: $%d, recommended: $%d", this.type, this.price,
+            logger.warn(String.format("'%s' price is too high. Current: $%d, recommended: $%d", this.type.getTitle(),
+                    this.price,
                     this.goodPrice));
             if (!this.notEnoughFuel()) {
                 return 0;
             } else {
                 logger.warn(String.format("Critical '%s' level (less than %d%%). Buy for current price: $%d",
-                        this.type, AirplaneFuel.criticalLevelPercent,
+                        this.type.getTitle(), AirplaneFuel.criticalLevelPercent,
                         this.price));
             }
         }
@@ -93,7 +82,7 @@ public final class AirplaneFuel {
         int fuelTotalPrice = Math.round((this.price * (needAmount / 1000)));
         logger.debug(String.format(
                 "'%s' available money: $%d,\ntotal price: $%d,\nneed amount: %d %s,\nmaximum available amount: %d %s",
-                this.type,
+                this.type.getTitle(),
                 availableMoney, fuelTotalPrice, needAmount, this.displayUnit, maxAvailableCapacity,
                 this.displayUnit));
 
@@ -117,5 +106,13 @@ public final class AirplaneFuel {
 
     public int getMaximumCapacity() {
         return this.maximumCapacity;
+    }
+
+    @Override
+    public final String toString() {
+        return String.format(
+                "%s{type='%s', price=%d, goodPrice=%d, budgetPercent=%d, currentCapacity=%d, maximumCapacity=%d, holdingCapacity=%d, displayUnit='%s'}",
+                this.getClass().getSimpleName(), this.type.getTitle(), this.price, this.goodPrice, this.budgetPercent,
+                this.currentCapacity, this.maximumCapacity, this.holdingCapacity, this.displayUnit);
     }
 }

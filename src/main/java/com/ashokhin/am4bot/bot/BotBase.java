@@ -62,7 +62,7 @@ public class BotBase implements Runnable {
         try {
             this.webDriver.findElement(By.xpath(buttonXpath)).click();
         } catch (ElementNotInteractableException e) {
-            logger.error(String.format("Button '%s' not active", buttonXpath));
+            logger.warn(String.format("Button '%s' not active", buttonXpath));
         }
 
         try {
@@ -73,7 +73,7 @@ public class BotBase implements Runnable {
     }
 
     protected void clickButton(WebElement webElement) {
-        logger.trace(String.format("Click button '%s' as WebElement", webElement.toString()));
+        logger.trace(String.format("Click button '%s' as WebElement", webElement));
         webElement.click();
         try {
             Thread.sleep(2000);
@@ -90,6 +90,7 @@ public class BotBase implements Runnable {
 
     protected String getTextFromElement(String elementXpath) {
         logger.trace(String.format("Get text from element '%s'", elementXpath));
+
         return this.webDriver.findElement(By.xpath(elementXpath)).getText();
     }
 
@@ -97,18 +98,21 @@ public class BotBase implements Runnable {
         logger.trace(String.format("Get int from element '%s'", elementXpath));
         String elementText = this.getTextFromElement(elementXpath);
         logger.trace(String.format("Got text '%s' from element '%s'", elementText, elementXpath));
+
         return Integer.parseInt(
                 CharMatcher.inRange('0', '9').retainFrom(elementText));
     }
 
     protected List<WebElement> getElements(String elementsXpath) {
         logger.trace(String.format("Get list of WebElements from '%s'", elementsXpath));
+
         return this.webDriver.findElements(By.xpath(elementsXpath));
     }
 
     protected String getAttribute(String elementXpath, String attributeName) {
         logger.trace(String.format("Get attribute '%s' from element '%s'", attributeName, elementXpath));
         String attributeString = this.webDriver.findElement(By.xpath(elementXpath)).getAttribute(attributeName);
+
         if (attributeString != null) {
             return attributeString;
         }
