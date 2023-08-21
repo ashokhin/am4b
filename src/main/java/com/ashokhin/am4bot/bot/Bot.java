@@ -213,18 +213,6 @@ public final class Bot extends BotBase {
         this.buyFuelAmount(currentFuel);
     }
 
-    private final void checkFuel() {
-        logger.info("Check fuel");
-
-        this.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonFuelMenu"));
-
-        for (FuelType fuelType : FuelType.values()) {
-            this.checkFuelType(fuelType);
-        }
-
-        this.clickButton(APIXpath.xpathButtonPopupClose);
-    }
-
     private final void buyFuel() {
         this.checkMoney();
         logger.info("Buy fuel");
@@ -519,7 +507,8 @@ public final class Bot extends BotBase {
     }
 
     private final void startMarketingCompanies() {
-        this.checkFuel();
+        logger.debug("Try to start marketing companies");
+
         for (FuelType fuelType : FuelType.values()) {
             if (this.fuelDataMap.get(fuelType).notEnoughFuel()) {
                 logger.warn(String.format("Not enough %s (%d / %d). Skip marketing companies.",
