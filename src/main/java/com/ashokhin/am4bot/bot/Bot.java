@@ -255,29 +255,78 @@ public final class Bot extends BotBase {
         return aircraftForMaintenance;
     }
 
-    private final boolean aCheckAircraft(Aircraft aircraftForACheck) {
-        logger.debug(String.format("Try to A-Check '%s'", aircraftForACheck));
+    private final WebElement findChildButton(
+            MaintenanceOperation maintenanceOperation,
+            Aircraft aircraftForMaintenance) {
+
+        logger.debug(String.format("Find child button for '%s' operation for '%s'", maintenanceOperation.getTitle(),
+                aircraftForMaintenance.getRegNumber()));
+
+        String xpathButtonSort = null;
+        String xpathButtonForSearchChild = null;
+
+        switch (maintenanceOperation) {
+            case A_CHECK:
+                xpathButtonSort = APIXpath.xpathButtonMaintenanceSortByACheck;
+                xpathButtonForSearchChild = APIXpath.xpathButtonMaintenanceACheckPlan;
+                break;
+            case REPAIR:
+                xpathButtonSort = APIXpath.xpathButtonMaintenanceSortByWear;
+                xpathButtonForSearchChild = APIXpath.xpathButtonMaintenanceRepairPlan;
+                break;
+
+            case MODIFY:
+                xpathButtonForSearchChild = APIXpath.xpathButtonMaintenanceModifyPlan;
+                break;
+
+            default:
+                break;
+        }
 
         this.clickButton(APIXpath.xpathButtonMaintenancePlan);
-        this.clickButton(APIXpath.xpathButtonMaintenanceSortByACheck);
+        if (xpathButtonSort != null) {
+            this.clickButton(xpathButtonSort);
+        }
 
-        WebElement aCheckButton = null;
+        WebElement childButton = null;
 
         for (WebElement aircraftFromList : this.getElements(APIXpath.xpathElementListMaintenanceToBase)) {
-            if (aircraftFromList.getAttribute(Aircraft.REG_NUMBER).equals(aircraftForACheck.getRegNumber())) {
-                // Find A-Check button
-                aCheckButton = aircraftFromList.findElement(By.xpath(APIXpath.xpathButtonMaintenanceACheckPlan));
-                break;
+            if (aircraftFromList.getAttribute(Aircraft.REG_NUMBER).equals(aircraftForMaintenance.getRegNumber())) {
+                // Find child button
+                childButton = aircraftFromList.findElement(By.xpath(xpathButtonForSearchChild));
+                return childButton;
             }
         }
 
-        if (aCheckButton == null) {
-            logger.warn(String.format("Aircraft '%s' not found", aircraftForACheck.getRegNumber()));
+        return childButton;
+    }
+
+    private final boolean clickMaintenanceButton(WebElement maintenanceButton) {
+        if (maintenanceButton == null) {
+            logger.warn("Child maintenance button not found");
 
             return false;
         }
 
-        this.clickButton(aCheckButton);
+        try {
+            this.clickButton(maintenanceButton);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    private final boolean aCheckAircraft(Aircraft aircraftForACheck) {
+        logger.debug(String.format("Try to A-Check '%s'", aircraftForACheck));
+
+        if (!this.clickMaintenanceButton(
+                this.findChildButton(MaintenanceOperation.A_CHECK, aircraftForACheck))) {
+            logger.warn(String.format("Button for aircraft '%s' not found", aircraftForACheck.getRegNumber()));
+
+            return false;
+        }
 
         int aCheckPrice = this.getIntFromElement(APIXpath.xpathTextMaintenanceACheckPrice);
         int availableMoney = (int) Math.round((Bot.accountMoney * (this.maintenanceBudgetPercent * 0.01)));
@@ -291,8 +340,10 @@ public final class Bot extends BotBase {
         }
 
         this.clickButton(APIXpath.xpathButtonMaintenanceACheckDo);
-        logger.info(String.format("Aircraft '%s' planed to A-Check for $%d", aircraftForACheck.getRegNumber(),
+
+        logger.info(String.format("Aircraft '%s' planed for A-Check for $%d", aircraftForACheck.getRegNumber(),
                 aCheckPrice));
+
         Bot.decreaseMoney(aCheckPrice);
 
         return true;
@@ -302,6 +353,7 @@ public final class Bot extends BotBase {
         logger.info("Search aircraft which need A-Check");
 
         List<Aircraft> aircraftNeedACheck = new ArrayList<Aircraft>();
+
         for (Aircraft aircraftForMaintenance : this.findAllAircraftForMaintenance(MaintenanceOperation.A_CHECK)) {
             if (aircraftForMaintenance.getACheckHours() < this.maximumHoursBeforeACheck) {
                 aircraftNeedACheck.add(aircraftForMaintenance);
@@ -322,32 +374,17 @@ public final class Bot extends BotBase {
         }
 
         logger.info(String.format("Aircraft planed for A-Check: %d", aCheckedAircraftCount));
-
     }
 
     private final boolean repairAircraft(Aircraft aircraftForRepair) {
         logger.debug(String.format("Try to repair '%s'", aircraftForRepair));
 
-        this.clickButton(APIXpath.xpathButtonMaintenancePlan);
-        this.clickButton(APIXpath.xpathButtonMaintenanceSortByWear);
-
-        WebElement repairButton = null;
-
-        for (WebElement aircraftFromList : this.getElements(APIXpath.xpathElementListMaintenanceToBase)) {
-            if (aircraftFromList.getAttribute(Aircraft.REG_NUMBER).equals(aircraftForRepair.getRegNumber())) {
-                // Find 'Repair' button
-                repairButton = aircraftFromList.findElement(By.xpath(APIXpath.xpathButtonMaintenanceRepairPlan));
-                break;
-            }
-        }
-
-        if (repairButton == null) {
-            logger.warn(String.format("Aircraft '%s' not found", aircraftForRepair));
+        if (!this.clickMaintenanceButton(
+                this.findChildButton(MaintenanceOperation.REPAIR, aircraftForRepair))) {
+            logger.warn(String.format("Button for aircraft '%s' not found", aircraftForRepair.getRegNumber()));
 
             return false;
         }
-
-        this.clickButton(repairButton);
 
         int repairPrice = this.getIntFromElement(APIXpath.xpathTextMaintenanceRepairPrice);
         int availableMoney = (int) Math.round((Bot.accountMoney * (this.maintenanceBudgetPercent * 0.01)));
@@ -361,7 +398,9 @@ public final class Bot extends BotBase {
         }
 
         this.clickButton(APIXpath.xpathButtonMaintenanceRepairDo);
+
         logger.info(String.format("Aircraft '%s' planed to repair for $%d", aircraftForRepair, repairPrice));
+
         Bot.decreaseMoney(repairPrice);
 
         return true;
@@ -396,25 +435,12 @@ public final class Bot extends BotBase {
     private final boolean modifyAircraft(Aircraft aircraftForModify) {
         logger.debug(String.format("Try to modify '%s'", aircraftForModify));
 
-        this.clickButton(APIXpath.xpathButtonMaintenancePlan);
-
-        WebElement modifyButton = null;
-
-        for (WebElement aircraftFromList : this.getElements(APIXpath.xpathElementListMaintenanceToBase)) {
-            if (aircraftFromList.getAttribute(Aircraft.REG_NUMBER).equals(aircraftForModify.getRegNumber())) {
-                // Find 'Modify' button
-                modifyButton = aircraftFromList.findElement(By.xpath(APIXpath.xpathButtonMaintenanceModifyPlan));
-                break;
-            }
-        }
-
-        if (modifyButton == null) {
-            logger.warn(String.format("Aircraft '%s' not found", aircraftForModify));
+        if (!this.clickMaintenanceButton(
+                this.findChildButton(MaintenanceOperation.MODIFY, aircraftForModify))) {
+            logger.warn(String.format("Button for aircraft '%s' not found", aircraftForModify.getRegNumber()));
 
             return false;
         }
-
-        this.clickButton(modifyButton);
 
         for (WebElement modifyCheckboxRow : this.getElements(APIXpath.xpathElementListMaintenanceModifyCheckbox)) {
             for (String modifyCheckboxXPath : APIXpath.xpathCheckboxMaintenanceModifyList) {
@@ -429,6 +455,7 @@ public final class Bot extends BotBase {
                 if (checkboxWebElem.getAttribute("checked") != null) {
                     // checkbox already checked
                     logger.trace(String.format("The checkbox '%s' is already checked", checkboxWebElem));
+
                     break;
                 }
 
@@ -461,7 +488,9 @@ public final class Bot extends BotBase {
         }
 
         this.clickButton(APIXpath.xpathButtonMaintenanceModifyDo);
-        logger.info(String.format("Aircraft '%s' planed to modify for $%d", aircraftForModify, modifyPrice));
+
+        logger.info(String.format("Aircraft '%s' planed for modification for $%d", aircraftForModify, modifyPrice));
+
         Bot.decreaseMoney(modifyPrice);
 
         return true;
@@ -469,10 +498,13 @@ public final class Bot extends BotBase {
 
     private final void modifyAllAircraft() {
         logger.info("Search aircraft which need modification");
+
         List<Aircraft> aircraftNeedModify = this.findAllAircraftForMaintenance(MaintenanceOperation.MODIFY);
         // Sort Aircraft list by 'aircraftRegNumber'
         Collections.sort(aircraftNeedModify, new AircraftSortingComparator());
         // Get only last N (Maintenance.MODIFY_AIRCRAFT_NUMBER) aircraft for modify
+        logger.debug(String.format("Check only last %d aircraft", Maintenance.MODIFY_AIRCRAFT_NUMBER));
+
         List<Aircraft> aircraftListForModify = aircraftNeedModify.subList(
                 Math.max((aircraftNeedModify.size() - Maintenance.MODIFY_AIRCRAFT_NUMBER), 0),
                 aircraftNeedModify.size());
@@ -491,7 +523,11 @@ public final class Bot extends BotBase {
             }
         }
 
-        logger.info(String.format("Aircraft planed for modification: %d", modifiedAircraftCount));
+        if (modifiedAircraftCount > 0) {
+            logger.info(String.format("Aircraft planed for modification: %d", modifiedAircraftCount));
+        } else {
+            logger.info(String.format("No aircraft modified"));
+        }
     }
 
     private final void maintenanceAircraft() {
