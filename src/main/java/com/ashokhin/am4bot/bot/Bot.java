@@ -688,7 +688,7 @@ public final class Bot extends BotBase {
 
         // try to depart all available aircraft
         // repeat because 'Depart' button departs only first 20 by click
-        while (readyForDepartCount > 0 || maxDepartTries > 0) {
+        while (readyForDepartCount > 0 && maxDepartTries > 0) {
             logger.debug("Depart available aircraft");
             this.clickButton(APIXpath.xpathButtonDepart);
             readyForDepartCount = this.getReadyForDepartCount();
