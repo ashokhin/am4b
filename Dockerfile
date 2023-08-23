@@ -2,15 +2,9 @@ FROM maven:3.8.6-openjdk-8 AS MAVEN_BUILD
 
 COPY ./ ./
 
-RUN pwd
-
-RUN ls -al ./
-
 RUN mvn clean package assembly:single
 
 FROM openjdk:8-jre-slim-buster
-
-COPY --from=MAVEN_BUILD /target/am4bot-jar-with-dependencies.jar /app/am4bot.jar
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \
@@ -24,6 +18,8 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 # Updating apt to see and install Google Chrome
 RUN apt-get -y update
 RUN apt-get install -y google-chrome-stable
+
+COPY --from=MAVEN_BUILD /target/am4bot-jar-with-dependencies.jar /app/am4bot.jar
 
 COPY src/main/resources/log4j2.properties /app
 
