@@ -684,15 +684,15 @@ public final class Bot extends BotBase {
         logger.info(String.format("Aircraft ready for depart: %d", readyForDepartCount));
 
         int aircraftDeparted = this.getReadyForDepartCount();
-        int departRepeatThreshold = 10;
+        int maxDepartTries = (int) (Math.round((readyForDepartCount / 20)) + 1);
 
         // try to depart all available aircraft
         // repeat because 'Depart' button departs only first 20 by click
-        while (readyForDepartCount > 0 || departRepeatThreshold <= 0) {
+        while (readyForDepartCount > 0 || maxDepartTries <= 0) {
             logger.debug("Depart available aircraft");
             this.clickButton(APIXpath.xpathButtonDepart);
             readyForDepartCount = this.getReadyForDepartCount();
-            departRepeatThreshold--;
+            maxDepartTries--;
             // Buy fuel after each depart
             this.buyFuel();
         }
