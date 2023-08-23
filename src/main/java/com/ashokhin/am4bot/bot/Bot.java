@@ -153,19 +153,19 @@ public final class Bot extends BotBase {
         int fuelPrice = this.getIntFromElement(APIXpath.xpathAllFuelElementsMap
                 .get(fuelType.getTitle()).get("xpathTextPrice"));
 
-        logger.info(String.format("Price for '%s' is $%d", fuelType.getTitle(), fuelPrice));
+        logger.debug(String.format("Price for '%s' is $%d", fuelType.getTitle(), fuelPrice));
 
         int fuelCurrentCapacity = this.getIntFromElement(APIXpath.xpathAllFuelElementsMap
                 .get(fuelType.getTitle()).get("xpathTextCurrentCapacity"));
 
-        logger.info(
+        logger.debug(
                 String.format("Current capacity for '%s' is %d %s", fuelType.getTitle(), fuelCurrentCapacity,
                         fuelType.getUnit()));
 
         int fuelMaxCapacity = this.getIntFromElement(APIXpath.xpathAllFuelElementsMap
                 .get(fuelType.getTitle()).get("xpathTextMaxCapacity"));
 
-        logger.info(String.format("Maximum capacity for '%s' is %d %s", fuelType.getTitle(), fuelMaxCapacity,
+        logger.debug(String.format("Maximum capacity for '%s' is %d %s", fuelType.getTitle(), fuelMaxCapacity,
                 fuelType.getUnit()));
 
         if (this.fuelDataMap.containsKey(fuelType)) {
@@ -174,6 +174,11 @@ public final class Bot extends BotBase {
             this.fuelDataMap.put(fuelType, new AirplaneFuel(fuelType, fuelPrice, this.fuelPricesMap.get(fuelType),
                     this.fuelBudgetPercent, fuelCurrentCapacity, fuelMaxCapacity));
         }
+
+        logger.info(
+                String.format("'%s' price: $%d, holding capacity: %d / %d %s", fuelType.getTitle(),
+                        this.fuelDataMap.get(fuelType).getPrice(), this.fuelDataMap.get(fuelType).getHoldingCapacity(),
+                        this.fuelDataMap.get(fuelType).getMaximumCapacity(), fuelType.getUnit()));
     }
 
     private final void buyFuelAmount(AirplaneFuel airplaneFuel) {
@@ -184,13 +189,13 @@ public final class Bot extends BotBase {
             return;
         }
 
-        logger.debug(String.format("%s buy: %d", airplaneFuel.getFuelType(), needFuelAmount));
+        logger.debug(String.format("%s buy: %d", airplaneFuel.getType(), needFuelAmount));
 
         this.typeTextInField(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathTextFieldAmount"),
                 String.valueOf(needFuelAmount));
 
         this.clickButton(
-                APIXpath.xpathAllFuelElementsMap.get(airplaneFuel.getFuelType()).get("xpathButtonPurchase"));
+                APIXpath.xpathAllFuelElementsMap.get(airplaneFuel.getType()).get("xpathButtonPurchase"));
         airplaneFuel.buyFuelAmount(needFuelAmount);
     }
 
@@ -650,21 +655,29 @@ public final class Bot extends BotBase {
         return this.getElements(APIXpath.xpathElementListLanded).size();
     }
 
-    private final int departAllAircraft() {
+    private final void departAllAircraft() {
         logger.info("Depart all available aircraft...");
         int readyForDepartCount = this.getReadyForDepartCount();
 
         if (readyForDepartCount == 0) {
             logger.info("No aircraft ready for depart");
 
-            return readyForDepartCount;
+            return;
         }
 
         logger.info(String.format("Aircraft ready for depart: %d", readyForDepartCount));
-        this.clickButton(APIXpath.xpathButtonDepart);
-        logger.info(String.format("Aircraft departed: %d", (readyForDepartCount - this.getReadyForDepartCount())));
 
-        return readyForDepartCount;
+        int aircraftDeparted = this.getReadyForDepartCount();
+
+        while (readyForDepartCount > 0) {
+            logger.debug("Depart available aircraft");
+            this.clickButton(APIXpath.xpathButtonDepart);
+            readyForDepartCount = this.getReadyForDepartCount();
+            // Buy fuel after each depart
+            this.buyFuel();
+        }
+
+        logger.info(String.format("Aircraft departed: %d", aircraftDeparted));
     }
 
     public final void startOnce() {
@@ -673,9 +686,7 @@ public final class Bot extends BotBase {
         this.buyFuel();
         this.startMarketingCompanies();
         this.maintenanceAircraft();
-        if (this.departAllAircraft() > 0) {
-            this.buyFuel();
-        }
+        this.departAllAircraft();
     }
 
     @Override

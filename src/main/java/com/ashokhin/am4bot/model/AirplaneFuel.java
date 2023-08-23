@@ -36,15 +36,19 @@ public final class AirplaneFuel {
         this.holdingCapacity = (this.maximumCapacity - this.currentCapacity);
     }
 
-    public final String getFuelType() {
+    public final String getType() {
         return this.type.getTitle();
+    }
+
+    public final int getPrice() {
+        return this.price;
     }
 
     public static final void setCriticalLevelPercent(int criticalFuelLevelPercent) {
         AirplaneFuel.criticalLevelPercent = criticalFuelLevelPercent;
     }
 
-    public final String getFuelInfo() {
+    public final String getInfo() {
         return String.format(
                 "Fuel type: %s\nFuel price: $%d\nFuel good price: $%d\nFuel budget percent: %d%%\nCurrent capacity: %d %s\nMaximum capacity: %d %s\nHolding capacity: %d %s (%d%%)",
                 this.type.getTitle(), this.price, this.goodPrice, this.budgetPercent,
