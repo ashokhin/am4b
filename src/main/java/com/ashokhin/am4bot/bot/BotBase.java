@@ -132,6 +132,9 @@ public class BotBase implements Runnable {
         this.waitPage();
     }
 
+    /**
+     * Create WebDriver and login
+     */
     protected void startBot() {
         this.webDriver = new ChromeDriver(this.setChromeOptions());
         this.login();

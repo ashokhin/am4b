@@ -218,6 +218,12 @@ public final class Bot extends BotBase {
         this.buyFuelAmount(currentFuel);
     }
 
+    /**
+     * Check fuel/co2 prices, level and amount of money based on budget and good
+     * price.
+     * Than buy fuel/co2 if have enough money, good price OR buy fuel if have
+     * critical fuel level.
+     */
     private final void buyFuel() {
         this.checkMoney();
         logger.info("Buy fuel");
@@ -535,6 +541,11 @@ public final class Bot extends BotBase {
         }
     }
 
+    /**
+     * Search aircraft which are toward to base and than A-Check, Repair and
+     * Modification aircraft which are need maintenance. Based on maintenance
+     * budget, minimum hours for A-Check and maximum wear percent
+     */
     private final void maintenanceAircraft() {
         this.checkMoney();
         logger.info("Maintenance aircraft");
@@ -547,6 +558,10 @@ public final class Bot extends BotBase {
         this.clickButton(APIXpath.xpathButtonPopupClose);
     }
 
+    /**
+     * Check marketing companies than activate, based on fuel level and budget
+     * percent
+     */
     private final void startMarketingCompanies() {
         logger.debug("Try to start marketing companies");
 
@@ -655,6 +670,7 @@ public final class Bot extends BotBase {
         return this.getElements(APIXpath.xpathElementListLanded).size();
     }
 
+    /** Depart all available aircraft and buy fuel after each depart */
     private final void departAllAircraft() {
         logger.info("Depart all available aircraft...");
         int readyForDepartCount = this.getReadyForDepartCount();
@@ -668,11 +684,15 @@ public final class Bot extends BotBase {
         logger.info(String.format("Aircraft ready for depart: %d", readyForDepartCount));
 
         int aircraftDeparted = this.getReadyForDepartCount();
+        int departRepeatThreshold = 10;
 
-        while (readyForDepartCount > 0) {
+        // try to depart all available aircraft
+        // repeat because 'Depart' button departs only first 20 by click
+        while (readyForDepartCount > 0 || departRepeatThreshold <= 0) {
             logger.debug("Depart available aircraft");
             this.clickButton(APIXpath.xpathButtonDepart);
             readyForDepartCount = this.getReadyForDepartCount();
+            departRepeatThreshold--;
             // Buy fuel after each depart
             this.buyFuel();
         }
