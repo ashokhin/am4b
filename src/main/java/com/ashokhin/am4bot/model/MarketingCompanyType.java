@@ -36,7 +36,7 @@ public enum MarketingCompanyType {
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format("%s{name='%s', rowXpath='%s', buttonXpath='%s'}", this.getClass().getSimpleName(),
                 this.name, this.rowXpath, this.buttonXpath);
     }

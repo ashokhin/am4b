@@ -1,4 +1,4 @@
-package com.ashokhin.am4bot.bot;
+package com.ashokhin.am4bot.model;
 
 public enum BotMode {
     ALL("ALL"),
@@ -13,7 +13,7 @@ public enum BotMode {
         this.title = title;
     }
 
-    public String getTitle() {
+    public final String getTitle() {
         return this.title;
     }
 }

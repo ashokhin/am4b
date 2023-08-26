@@ -11,12 +11,12 @@ public enum MaintenanceOperation {
         this.title = title;
     }
 
-    public String getTitle() {
+    public final String getTitle() {
         return this.title;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format("%s{title='%s'}", this.getClass().getSimpleName(), this.title);
     }
 }

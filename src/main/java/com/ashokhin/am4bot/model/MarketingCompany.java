@@ -47,7 +47,7 @@ public final class MarketingCompany {
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format("%s{type='%s', price='%s', active='%s'}", this.getClass().getSimpleName(), this.type,
                 this.price);
     }

@@ -12,16 +12,16 @@ public enum FuelType {
         this.unit = unit;
     }
 
-    public String getTitle() {
+    public final String getTitle() {
         return this.title;
     }
 
-    public String getUnit() {
+    public final String getUnit() {
         return this.unit;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format("%s{title='%s', unit='%s'}", this.getClass().getSimpleName(), this.title, this.unit);
     }
 }

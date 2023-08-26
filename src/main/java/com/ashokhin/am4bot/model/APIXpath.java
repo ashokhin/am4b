@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class APIXpath {
+public final class APIXpath {
     // Login page
     //
     // xpath for button 'login' on main page
@@ -159,18 +159,30 @@ public class APIXpath {
     public static final String xpathButtonFleetAndRoutes_order = "//div[@id='popup']//button[@id='popBtn2']";
     //
     public static final String xpathButtonFleetAndRoutes_list_sort = "//div[@id='routeAction']//button[@id='listSort']";
-    //
-    public static final String xelem_list_fl_ac = "//div[@id='sortManu']//div[@id='acListDetail']//div[contains(@onclick, '#modelSelection') and contains(@onclick, '#acModel')]";
-    //
-    public static final String xtxt_fl_ac_model_name = ".//div[@class='col-6']/b";
-    //
-    public static final String xtxt_fl_ac_speed = "//div[@id='acModel']//div[@id='acModelList']//span[@id='acSpeed']";
-    //
-    public static final String xtxt_fl_ac_capacity = "//div[@id='acModel']//div[@id='acModelList']//span[@id='acCapacity']";
-    //
-    public static final String xtxt_fl_ac_price = "//div[@id='acModel']//div[@id='acModelList']//span[@id='acCost']";
-    //
-    public static final String xtxt_fl_ac_range = "//div[@id='acModel']//div[@id='acModelList']//div[@class='col-sm-6']//table[@class='table m-text']//b[contains(text(), ' km')]";
-    //
-    public static final String xtxt_fl_ac_runway = "//div[@id='acModel']//div[@id='acModelList']//div[@class='col-sm-6']//table[@class='table m-text']//td[@style='width:25%;']/b[contains(text(), ' ft')]";
+
+    /**
+     * public static final String xelem_list_fl_ac =
+     * "//div[@id='sortManu']//div[@id='acListDetail']//div[contains(@onclick,
+     * '#modelSelection') and contains(@onclick, '#acModel')]";
+     * //
+     * public static final String xtxt_fl_ac_model_name =
+     * ".//div[@class='col-6']/b";
+     * //
+     * public static final String xtxt_fl_ac_speed =
+     * "//div[@id='acModel']//div[@id='acModelList']//span[@id='acSpeed']";
+     * //
+     * public static final String xtxt_fl_ac_capacity =
+     * "//div[@id='acModel']//div[@id='acModelList']//span[@id='acCapacity']";
+     * //
+     * public static final String xtxt_fl_ac_price =
+     * "//div[@id='acModel']//div[@id='acModelList']//span[@id='acCost']";
+     * //
+     * public static final String xtxt_fl_ac_range =
+     * "//div[@id='acModel']//div[@id='acModelList']//div[@class='col-sm-6']//table[@class='table
+     * m-text']//b[contains(text(), ' km')]";
+     * //
+     * public static final String xtxt_fl_ac_runway =
+     * "//div[@id='acModel']//div[@id='acModelList']//div[@class='col-sm-6']//table[@class='table
+     * m-text']//td[@style='width:25%;']/b[contains(text(), ' ft')]";
+     */
 }

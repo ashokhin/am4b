@@ -104,11 +104,11 @@ public final class AirplaneFuel {
         this.updateHoldingCapacity();
     }
 
-    public int getHoldingCapacity() {
+    public final int getHoldingCapacity() {
         return this.holdingCapacity;
     }
 
-    public int getMaximumCapacity() {
+    public final int getMaximumCapacity() {
         return this.maximumCapacity;
     }
 

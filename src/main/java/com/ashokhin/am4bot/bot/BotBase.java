@@ -3,6 +3,7 @@ package com.ashokhin.am4bot.bot;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,13 +24,20 @@ import com.google.common.base.CharMatcher;
 
 public class BotBase implements Runnable {
     private static final Logger logger = LogManager.getLogger(BotBase.class);
+    private static final long LOGIN_TIMEOUT_SEC = 30;
+    private static final int MAX_LOGIN_ATTEMPTS = 5;
+    private static final long MAX_TIME_DELTA_SEC = 60;
+    private static final List<String> GOOGLE_PARAMETERS = new ArrayList<String>() {
+        {
+            add("--headless");
+            add("--no-sandbox");
+            add("--disable-dev-shm-usage");
+        }
+    };
 
-    private final int maxLoginAttempts = 5;
-    private final long maxTimeDeltaSec = 60;
     private int loginAttempts = 0;
     private Instant loginLastAttemptTimestamp = Instant.now();
     private boolean isLoggedIn = false;
-    private long loginTimeoutSeconds = 30;
     private String login;
     private String password;
     private String baseURL;
@@ -45,18 +53,28 @@ public class BotBase implements Runnable {
     public void run() {
     }
 
-    private ChromeOptions setChromeOptions() {
+    /**
+     * Set options for Google Chrome
+     * 
+     * @param arguments The arguments to use when starting Chrome.
+     */
+    private final ChromeOptions setChromeOptions(List<String> arguments) {
         logger.info("Set chrome options");
 
         ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless");
-        chromeOptions.addArguments("--no-sandbox");
-        chromeOptions.addArguments("--disable-dev-shm-usage");
+
+        for (String argument : arguments) {
+            logger.debug(String.format("Set Google Chrome argument '%s'", argument));
+
+            chromeOptions.addArguments(argument);
+        }
+
         chromeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
         return chromeOptions;
     }
 
+    /** Click button which found by xPath */
     protected void clickButton(String buttonXpath) {
         logger.trace(String.format("Click button '%s' as xPath", buttonXpath));
         try {
@@ -72,6 +90,7 @@ public class BotBase implements Runnable {
         }
     }
 
+    /** Click button which found as WebElement */
     protected void clickButton(WebElement webElement) {
         logger.trace(String.format("Click button '%s' as WebElement", webElement));
         webElement.click();
@@ -82,12 +101,14 @@ public class BotBase implements Runnable {
         }
     }
 
+    /** Type given text in text field found by xPath */
     protected void typeTextInField(String textFieldXpath, String enteredText) {
         logger.trace(String.format("Enter '%s' in text field '%s'", enteredText, textFieldXpath));
         this.webDriver.findElement(By.xpath(textFieldXpath)).clear();
         this.webDriver.findElement(By.xpath(textFieldXpath)).sendKeys(enteredText);
     }
 
+    /** Find and return text from text field which given as xPath */
     protected String getTextFromElement(String elementXpath) {
         logger.trace(String.format("Get text from element '%s'", elementXpath));
 
@@ -136,13 +157,13 @@ public class BotBase implements Runnable {
      * Create WebDriver and login
      */
     protected void startBot() {
-        this.webDriver = new ChromeDriver(this.setChromeOptions());
+        this.webDriver = new ChromeDriver(this.setChromeOptions(BotBase.GOOGLE_PARAMETERS));
         this.login();
     }
 
     protected void waitPage() {
         try {
-            new WebDriverWait(this.webDriver, Duration.ofSeconds(loginTimeoutSeconds))
+            new WebDriverWait(this.webDriver, Duration.ofSeconds(LOGIN_TIMEOUT_SEC))
                     .until(ExpectedConditions.presenceOfElementLocated(
                             By.xpath(APIXpath.xpathElementLoadingOverlay)));
         } catch (Exception e) {
@@ -150,16 +171,16 @@ public class BotBase implements Runnable {
         }
     }
 
-    private void login() {
+    private final void login() {
         logger.info(String.format("Login to '%s'", this.baseURL));
         this.webDriver.manage().deleteAllCookies();
         this.isLoggedIn = false;
 
-        if (this.loginAttempts > this.maxLoginAttempts) {
+        if (this.loginAttempts > BotBase.MAX_LOGIN_ATTEMPTS) {
             long timeDeltaSec = ChronoUnit.SECONDS.between(loginLastAttemptTimestamp, Instant.now());
 
-            if (timeDeltaSec < this.maxTimeDeltaSec) {
-                logger.error(String.format("Maximum (%d) login attempts reached", this.maxLoginAttempts));
+            if (timeDeltaSec < BotBase.MAX_TIME_DELTA_SEC) {
+                logger.error(String.format("Maximum (%d) login attempts reached", BotBase.MAX_LOGIN_ATTEMPTS));
                 return;
             } else {
                 this.loginAttempts = 0;

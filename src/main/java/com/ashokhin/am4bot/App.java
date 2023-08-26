@@ -8,13 +8,13 @@ import org.apache.logging.log4j.Logger;
 
 import com.ashokhin.am4bot.bot.Bot;
 
-public class App {
+public final class App {
     private static final Logger logger = LogManager.getLogger(App.class);
-    private static final String baseURLString = "https://www.airlinemanager.com/";
+    private static final String BASE_URL_STRING = "https://www.airlinemanager.com/";
     private static String loginString;
     private static String passwordString;
 
-    public static void main(String[] args) {
+    public static final void main(String[] args) {
         logger.info("Start App");
         App.loginString = System.getenv("AM4_USERNAME");
 
@@ -31,7 +31,7 @@ public class App {
 
         Instant start = Instant.now();
 
-        Bot bot = new Bot(baseURLString, App.loginString, App.passwordString);
+        Bot bot = new Bot(BASE_URL_STRING, App.loginString, App.passwordString);
         bot.setSettings(500, 120, 20, 70,
                 50, 70, 90,
                 24);

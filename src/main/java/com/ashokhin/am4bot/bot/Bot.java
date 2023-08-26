@@ -14,6 +14,7 @@ import org.openqa.selenium.WebElement;
 import com.ashokhin.am4bot.model.APIXpath;
 import com.ashokhin.am4bot.model.Aircraft;
 import com.ashokhin.am4bot.model.AirplaneFuel;
+import com.ashokhin.am4bot.model.BotMode;
 import com.ashokhin.am4bot.model.FuelType;
 import com.ashokhin.am4bot.model.Maintenance;
 import com.ashokhin.am4bot.model.MaintenanceOperation;
@@ -94,7 +95,7 @@ public final class Bot extends BotBase {
     }
 
     @Override
-    public void run() {
+    public final void run() {
         switch (this.botMode) {
             case ALL:
                 this.startOnce();
@@ -607,7 +608,7 @@ public final class Bot extends BotBase {
         this.clickButton(APIXpath.xpathButtonPopupClose);
     }
 
-    private void checkMarketingCompanies() {
+    private final void checkMarketingCompanies() {
         logger.info("Check marketing companies");
 
         this.clickButton(APIXpath.xpathButtonFinanceMarketingNewCampaign);
@@ -691,13 +692,14 @@ public final class Bot extends BotBase {
         while (readyForDepartCount > 0 && maxDepartTries > 0) {
             logger.debug("Depart available aircraft");
             this.clickButton(APIXpath.xpathButtonDepart);
+            logger.info("Aircraft departed: %d", (readyForDepartCount - this.getReadyForDepartCount()));
             readyForDepartCount = this.getReadyForDepartCount();
             maxDepartTries--;
             // Buy fuel after each depart
             this.buyFuel();
         }
 
-        logger.info(String.format("Aircraft departed: %d", aircraftDeparted));
+        logger.info(String.format("Aircraft total departed: %d", aircraftDeparted));
     }
 
     public final void startOnce() {
