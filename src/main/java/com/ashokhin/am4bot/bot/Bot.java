@@ -333,8 +333,6 @@ public final class Bot extends BotBase {
     private final boolean aCheckAircraft(Aircraft aircraftForACheck) {
         logger.debug(String.format("Try to A-Check '%s'", aircraftForACheck));
 
-        this.clickButton(APIXpath.xpathButtonMaintenanceSortByACheck);
-
         if (!this.clickMaintenanceButton(
                 this.findChildButton(MaintenanceOperation.A_CHECK, aircraftForACheck))) {
             logger.warn(String.format("Button for aircraft '%s' not found", aircraftForACheck.getRegNumber()));

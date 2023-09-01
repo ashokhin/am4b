@@ -124,7 +124,7 @@ public final class APIXpath {
     //
     public static final String xpathButtonMaintenanceRepairDo = "//div[@id='typeRepair']//button[contains(@onclick, 'maint_plan_do.php?mode=do&type=repair&id=')]";
     //
-    public static final String xpathButtonMaintenanceACheckPlan = "//div[@id='acListView']//button[contains(@onclick, 'maint_plan_do.php?type=check&id=')]";
+    public static final String xpathButtonMaintenanceACheckPlan = ".//button[contains(@onclick, 'maint_plan_do.php?type=check&id=')]";
     //
     public static final String xpathTextMaintenanceACheckPrice = "//div[@id='typeCheck']//div[contains(text(), '$ ')]";
     //
