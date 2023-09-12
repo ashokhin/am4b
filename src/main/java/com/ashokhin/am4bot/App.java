@@ -32,8 +32,8 @@ public final class App {
         Instant start = Instant.now();
 
         Bot bot = new Bot(BASE_URL_STRING, App.loginString, App.passwordString);
-        bot.setSettings(500, 120, 20, 70,
-                50, 70, 90,
+        bot.setSettings(450, 120, 20, 50,
+                50, 50, 90,
                 24);
 
         try {
