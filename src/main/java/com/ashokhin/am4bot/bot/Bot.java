@@ -623,8 +623,9 @@ public final class Bot extends BotBase {
     }
 
     private final boolean enableMarketingCompany(MarketingCompany marketingCompany) {
-        logger.debug("Try to activate marketing company '%s'", marketingCompany.getName());
+        logger.debug(String.format("Try to activate marketing company '%s'", marketingCompany.getName()));
 
+        this.clickButton(APIXpath.xpathButtonFinanceMarketingTab);
         this.clickButton(APIXpath.xpathButtonFinanceMarketingNewCampaign);
         this.clickButton(marketingCompany.getRowXpath());
 
