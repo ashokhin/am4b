@@ -33,7 +33,7 @@ public final class App {
 
         Bot bot = new Bot(BASE_URL_STRING, App.loginString, App.passwordString);
         bot.setSettings(450, 120, 20, 50,
-                50, 50, 50,
+                50, 50, 80,
                 24);
 
         try {
