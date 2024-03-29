@@ -54,6 +54,12 @@ public final class APIXpath {
     public static final String xpathButtonFinanceMarketingCompany2Do = "//div[@id='campaign-2']//button[contains(@onclick, 'marketing_new.php?type=5&mode=do&c=1')]";
     //
     public static final String xpathElementListFinanceMarketingCompanies = "//div[@id='active-campaigns']//td[@class='hasCountdown']";
+    //////
+    public static final String xpathElementFinanceMarketingCompany3 = "//div[@id='campaign-1']//tr[contains(@onclick, 'marketing_new.php?type=2')]";
+    //
+    public static final String xpathElementFinanceMarketingCompany3Select = "//div[@id='campaign-2']//select[@id='dSelector']";
+    //
+    public static final String xpathButtonFinanceMarketingCompany3Do = "//div[@id='campaign-2']//button[contains(@onclick, 'marketing_new.php?type=2&c=4&mode=do')]";
     // 'Fuel & CO2' popup
     //
     //
@@ -149,6 +155,8 @@ public final class APIXpath {
     };
     //
     public static final String xpathTextMaintenanceModifyPrice = "//div[@id='typeModify']//span[@id='acCost']";
+    //
+    public static final String xpathTextMaintenanceModifyCargoPrice = "//div[@id='typeModify']//span[@id='totalCost']";
     //
     public static final String xpathButtonMaintenanceModifyDo = "//div[@id='typeModify']//button[contains(@onclick, 'modifyAction')]";
     // 'Fleet & routes' popup

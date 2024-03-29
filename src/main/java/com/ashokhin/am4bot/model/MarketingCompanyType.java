@@ -8,7 +8,11 @@ public enum MarketingCompanyType {
     ECO_FRIENDLY(
             "Eco friendly",
             APIXpath.xpathElementFinanceMarketingCompany2,
-            APIXpath.xpathButtonFinanceMarketingCompany2Do);
+            APIXpath.xpathButtonFinanceMarketingCompany2Do),
+    CARGO_REPUTATION(
+            "Cargo reputation",
+            APIXpath.xpathElementFinanceMarketingCompany3,
+            APIXpath.xpathButtonFinanceMarketingCompany3Do);
 
     private String name;
     private String rowXpath;

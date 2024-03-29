@@ -282,6 +282,7 @@ public final class Bot extends BotBase {
                 xpathButtonSort = APIXpath.xpathButtonMaintenanceSortByACheck;
                 xpathButtonForSearchChild = APIXpath.xpathButtonMaintenanceACheckPlan;
                 break;
+
             case REPAIR:
                 xpathButtonSort = APIXpath.xpathButtonMaintenanceSortByWear;
                 xpathButtonForSearchChild = APIXpath.xpathButtonMaintenanceRepairPlan;
@@ -481,7 +482,15 @@ public final class Bot extends BotBase {
             }
         }
 
-        int modifyPrice = this.getIntFromElement(APIXpath.xpathTextMaintenanceModifyPrice);
+        int modifyPrice = 0;
+
+        try {
+            // for PAX aircrafts
+            modifyPrice = this.getIntFromElement(APIXpath.xpathTextMaintenanceModifyPrice);
+        } catch (org.openqa.selenium.NoSuchElementException e) {
+            // for CARGO aircrafts
+            modifyPrice = this.getIntFromElement(APIXpath.xpathTextMaintenanceModifyCargoPrice);
+        }
 
         if (modifyPrice == 0) {
             logger.debug(String.format("The aircraft '%s' already fully modified", aircraftForModify));
@@ -641,6 +650,14 @@ public final class Bot extends BotBase {
 
         if (marketingCompany.getType() == MarketingCompanyType.ECO_FRIENDLY) {
             marketingCompanyCostFullXpath = String.format("%s",
+                    marketingCompany.getButtonXpath());
+        }
+
+        if (marketingCompany.getType() == MarketingCompanyType.CARGO_REPUTATION) {
+            this.selectFromDropdown(APIXpath.xpathElementFinanceMarketingCompany3Select,
+                    Marketing.MARKETING_COMPANY_REPUTATION_DURATION);
+
+            marketingCompanyCostFullXpath = String.format("%s//span[@id='c4']",
                     marketingCompany.getButtonXpath());
         }
 
