@@ -2,6 +2,7 @@ package com.ashokhin.am4bot.model;
 
 public enum BotMode {
     ALL("ALL"),
+    UPDATE_STUFF_MORALE("UPDATE_STUFF_MORALE"),
     BUY_FUEL("BUY_FUEL"),
     MAINTENANCE("MAINTENANCE"),
     DEPART("DEPART"),

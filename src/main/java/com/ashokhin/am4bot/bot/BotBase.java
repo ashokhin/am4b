@@ -115,6 +115,7 @@ public class BotBase implements Runnable {
         return this.webDriver.findElement(By.xpath(elementXpath)).getText();
     }
 
+    @SuppressWarnings("null")
     protected int getIntFromElement(String elementXpath) {
         logger.trace(String.format("Get int from element '%s'", elementXpath));
         String elementText = this.getTextFromElement(elementXpath);

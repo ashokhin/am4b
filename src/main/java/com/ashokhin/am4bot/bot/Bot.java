@@ -41,6 +41,12 @@ public final class Bot extends BotBase {
         fuelDataMap = new HashMap<FuelType, AirplaneFuel>();
     }
 
+    public Bot(String baseUrl, String login, String password, BotMode botMode) {
+        super(baseUrl, login, password);
+        this.botMode = botMode;
+        fuelDataMap = new HashMap<FuelType, AirplaneFuel>();
+    }
+
     public Bot(
             String baseUrl,
             String login,
@@ -101,6 +107,11 @@ public final class Bot extends BotBase {
                 this.startOnce();
                 this.quit();
                 break;
+            case UPDATE_STUFF_MORALE:
+                super.startBot();
+                this.updateStuffMorale();
+                this.quit();
+                break;
             case BUY_FUEL:
                 super.startBot();
                 this.buyFuel();
@@ -121,6 +132,63 @@ public final class Bot extends BotBase {
                 this.startMarketingCompanies();
                 this.quit();
                 break;
+        }
+    }
+
+    private final void updateStuffMorale() {
+        logger.info("Check stuff morale");
+
+        this.refreshPage();
+
+        this.clickButton(APIXpath.xpathButtonCompanyMenu);
+        this.clickButton(APIXpath.xpathButtonCompanyStruffTab);
+
+        for (Map.Entry<String, Map<String, String>> entry : APIXpath.xpathAllStuffMoraleElementsMap.entrySet()) {
+            String stuffType = entry.getKey();
+            Map<String, String> stuffMap = entry.getValue();
+
+            logger.debug(String.format("Check '%s' morale", stuffType));
+            int moralePercent = this.getIntFromElement(stuffMap.get("xpathTextMorale"));
+
+            logger.debug(String.format("'%s' morale: %d%%", stuffType, moralePercent));
+
+            if (moralePercent == 100) {
+                continue;
+            }
+
+            logger.debug(String.format("Check '%s' salary", stuffType));
+
+            int startSalary = this.getIntFromElement(stuffMap.get("xpathTextSalary"));
+            int newSalary = 0;
+
+            logger.info(
+                    String.format("Before: '%s' salary: $%d, morale: %d%%", stuffType, startSalary, moralePercent));
+
+            this.clickButton(stuffMap.get("xpathButtonSalaryRaise"));
+            this.clickButton(stuffMap.get("xpathButtonSalaryRaise"));
+            this.clickButton(stuffMap.get("xpathButtonSalaryPaycut"));
+            this.clickButton(stuffMap.get("xpathButtonSalaryPaycut"));
+
+            while (moralePercent < 100) {
+                logger.debug(String.format("'moralePercent' < 100 (%d < 100)", moralePercent));
+                this.clickButton(stuffMap.get("xpathButtonSalaryRaise"));
+                moralePercent = this.getIntFromElement(stuffMap.get("xpathTextMorale"));
+                newSalary = this.getIntFromElement(stuffMap.get("xpathTextSalary"));
+
+                logger.debug(String.format("In progress 1: '%s' salary: $%d, morale: %d%%", stuffType, newSalary,
+                        moralePercent));
+
+                if (newSalary > startSalary) {
+                    logger.debug(String.format("'newSalary' > 'startSalary' (%d > %d)", newSalary, startSalary));
+                    this.clickButton(stuffMap.get("xpathButtonSalaryPaycut"));
+                    moralePercent = this.getIntFromElement(stuffMap.get("xpathTextMorale"));
+                    newSalary = this.getIntFromElement(stuffMap.get("xpathTextSalary"));
+                    logger.debug(String.format("In progress 2: '%s' salary: $%d, morale: %d%%", stuffType, newSalary,
+                            moralePercent));
+                }
+            }
+
+            logger.info(String.format("After: '%s' salary: $%d, morale: %d%%", stuffType, newSalary, moralePercent));
         }
     }
 
@@ -723,6 +791,7 @@ public final class Bot extends BotBase {
     public final void startOnce() {
         logger.info("Start Bot");
         super.startBot();
+        this.updateStuffMorale();
         this.buyFuel();
         this.startMarketingCompanies();
         this.maintenanceAircraft();
