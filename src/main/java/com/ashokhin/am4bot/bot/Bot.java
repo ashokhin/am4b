@@ -27,6 +27,7 @@ public final class Bot extends BotBase {
     private static final Logger logger = LogManager.getLogger(Bot.class);
     private static int accountMoney;
     private BotMode botMode;
+    private long daemonSecondsWaitInterval;
     private int fuelBudgetPercent;
     private int maintenanceBudgetPercent;
     private int marketingBudgetPercent;
@@ -100,38 +101,55 @@ public final class Bot extends BotBase {
         this.maximumHoursBeforeACheck = aircraftMaximumHoursBeforeACheck;
     }
 
-    @Override
-    public final void run() {
+    public final void setDaemon(BotMode botMode, long daemonSecondsWaitInterval) {
+        this.botMode = botMode;
+        this.daemonSecondsWaitInterval = daemonSecondsWaitInterval;
+    }
+
+    private final void runDaemon() {
         switch (this.botMode) {
             case ALL:
-                this.startOnce();
-                this.quit();
+                this.updateStuffMorale();
+                this.buyFuel();
+                this.startMarketingCompanies();
+                this.maintenanceAircraft();
+                this.departAllAircraft();
+                break;
+            case REPAIR_LOUNGE:
+                this.repairLounges();
                 break;
             case UPDATE_STUFF_MORALE:
-                super.startBot();
                 this.updateStuffMorale();
-                this.quit();
                 break;
             case BUY_FUEL:
-                super.startBot();
                 this.buyFuel();
-                this.quit();
                 break;
             case DEPART:
-                super.startBot();
                 this.departAllAircraft();
-                this.quit();
                 break;
             case MAINTENANCE:
-                super.startBot();
                 this.maintenanceAircraft();
-                this.quit();
                 break;
             case MARKETING:
-                super.startBot();
                 this.startMarketingCompanies();
-                this.quit();
                 break;
+        }
+    }
+
+    @Override
+    public final void run() {
+        super.startBot();
+        long daemonMillisWaitInterval = daemonSecondsWaitInterval * 1000;
+
+        while (true) {
+            this.runDaemon();
+            try {
+                logger.info(String.format("Sleeping for %d seconds", daemonSecondsWaitInterval));
+                Thread.sleep(daemonMillisWaitInterval);
+            } catch (InterruptedException e) {
+                // TODO: handle exception
+            }
+
         }
     }
 
@@ -150,7 +168,7 @@ public final class Bot extends BotBase {
             logger.debug(String.format("Check '%s' morale", stuffType));
             int moralePercent = this.getIntFromElement(stuffMap.get("xpathTextMorale"));
 
-            logger.debug(String.format("'%s' morale: %d%%", stuffType, moralePercent));
+            logger.info(String.format("'%s' morale: %d%%", stuffType, moralePercent));
 
             if (moralePercent == 100) {
                 continue;
@@ -190,6 +208,71 @@ public final class Bot extends BotBase {
 
             logger.info(String.format("After: '%s' salary: $%d, morale: %d%%", stuffType, newSalary, moralePercent));
         }
+    }
+
+    private final Boolean loungesNeedRepair() {
+        logger.debug("Try to find loungeAlertIcon");
+
+        this.refreshPage();
+        List<WebElement> loungeAlertIcon = this.getElements(APIXpath.xpathElementLoungeAlertIcon);
+
+        return loungeAlertIcon.size() > 0;
+    }
+
+    private final void repairLounges() {
+        logger.info("Check lounges state");
+
+        if (!this.loungesNeedRepair()) {
+            return;
+        }
+
+        this.checkMoney();
+        this.clickButton(APIXpath.xpathButtonHubs);
+        this.clickButton(APIXpath.xpathButtonLounges);
+        List<WebElement> loungesList = this.getElements(APIXpath.xpathElementListLoungeLine);
+
+        for (WebElement loungeWebElement : loungesList) {
+            String loungeName = "N/A";
+            WebElement loungeNameElement = this.getSubElement(loungeWebElement, APIXpath.xpathElementLoungeLine, 0);
+
+            if (loungeNameElement != null) {
+                loungeName = this.getTextFromElement(loungeNameElement);
+            }
+
+            int loungeRepairPrice = -1;
+            WebElement loungeWearPriceTag = this.getSubElement(loungeWebElement, APIXpath.xpathElementLoungeLine, 1);
+
+            if (loungeWearPriceTag != null) {
+                WebElement loungeWearPriceElement = this.getSubElement(loungeWearPriceTag, "./span");
+                loungeRepairPrice = this.getIntFromElement(loungeWearPriceElement);
+            }
+
+            if (loungeRepairPrice <= 0) {
+                logger.warn(String.format("Repair price not found for '%s' lounge", loungeName));
+
+                continue;
+            }
+
+            WebElement repairLoungeButton = this.getSubElement(loungeWebElement,
+                    ".//button[contains(@onclick, 'lounge_action.php?id=')]");
+
+            if (repairLoungeButton == null) {
+                logger.warn(String.format("Repair button not found for the lounge '%s'", loungeName));
+
+                continue;
+            }
+
+            int availableMoney = (int) Math.round((Bot.accountMoney * (this.maintenanceBudgetPercent * 0.01)));
+
+            if (availableMoney > loungeRepairPrice) {
+                logger.debug(String.format("Repair lounge '%s' for $%d", loungeName, loungeRepairPrice));
+                this.clickButton(repairLoungeButton);
+
+                Bot.decreaseMoney(loungeRepairPrice);
+            }
+        }
+
+        this.clickButton(APIXpath.xpathButtonPopupClose);
     }
 
     private final synchronized void checkMoney() {
@@ -655,7 +738,7 @@ public final class Bot extends BotBase {
 
         this.clickButton(APIXpath.xpathButtonFinanceMarketingMenu);
         this.clickButton(APIXpath.xpathButtonFinanceMarketingTab);
-        logger.info("Search marketing companies for enabling...");
+        logger.info("Search marketing companies for enabling");
 
         this.checkMarketingCompanies();
 
@@ -759,7 +842,7 @@ public final class Bot extends BotBase {
 
     /** Depart all available aircraft and buy fuel after each depart */
     private final void departAllAircraft() {
-        logger.info("Depart all available aircraft...");
+        logger.info("Depart all available aircraft");
         int readyForDepartCount = this.getReadyForDepartCount();
 
         if (readyForDepartCount == 0) {
@@ -791,6 +874,7 @@ public final class Bot extends BotBase {
     public final void startOnce() {
         logger.info("Start Bot");
         super.startBot();
+        repairLounges();
         this.updateStuffMorale();
         this.buyFuel();
         this.startMarketingCompanies();

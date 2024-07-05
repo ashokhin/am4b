@@ -35,7 +35,17 @@ public final class APIXpath {
     /*
      * Menu: 'Flight Info'
      */
-    // xpath for the button 'landed' in side menu
+    // xpath for the button 'Hubs' in the side menu
+    public static final String xpathButtonHubs = "//div[@id='flightInfo']//button[contains(@onclick, 'hubs.php') and contains(@onclick, 'Hubs')]";
+    // xpath for the lounges alert icon element
+    public static final String xpathElementLoungeAlertIcon = "//div[@id='flightInfo']//span[@id='loungeAlertIcon' and @class='glyphicons glyphicons-exclamation-sign text-warning']";
+    //
+    public static final String xpathButtonLounges = "//div[@id='popup']//button[@id='loungeBtn']";
+    //
+    public static final String xpathElementListLoungeLine = "//div[@id='popup']//div[@id='popContent']//table[@class='table table-sm m-text']/tbody/tr[contains(@id, 'lList')]";
+    //
+    public static final String xpathElementLoungeLine = "./td";
+    // xpath for the button 'landed' in the side menu
     public static final String xpathButtonLanded = "//div[@id='flightInfo']//button[@id='flightStatusLanded']";
     // xpath for a list of landed aircraft in the 'landed' list
     public static final String xpathElementListLanded = "//div[@id='landedList']/div[contains(@id, 'flightStatus') and contains(@onclick, 'showFlightInfo') and contains(@data-grounded, '0')]";

@@ -92,7 +92,7 @@ public class BotBase implements Runnable {
 
     /** Click button which found as WebElement */
     protected void clickButton(WebElement webElement) {
-        logger.trace(String.format("Click button '%s' as WebElement", webElement));
+        logger.trace(String.format("Click button '%s' as WebElement", webElement.toString()));
         webElement.click();
         try {
             Thread.sleep(2000);
@@ -115,7 +115,13 @@ public class BotBase implements Runnable {
         return this.webDriver.findElement(By.xpath(elementXpath)).getText();
     }
 
-    @SuppressWarnings("null")
+    /** Find and return text from text field which given as xPath */
+    protected String getTextFromElement(WebElement webElement) {
+        logger.trace(String.format("Get text from element '%s'", webElement.toString()));
+
+        return webElement.getText();
+    }
+
     protected int getIntFromElement(String elementXpath) {
         logger.trace(String.format("Get int from element '%s'", elementXpath));
         String elementText = this.getTextFromElement(elementXpath);
@@ -125,10 +131,50 @@ public class BotBase implements Runnable {
                 CharMatcher.inRange('0', '9').retainFrom(elementText));
     }
 
+    protected int getIntFromElement(WebElement webElement) {
+        logger.trace(String.format("Get int from element '%s'", webElement.toString()));
+        String elementText = this.getTextFromElement(webElement);
+        logger.trace(String.format("Got text '%s' from element '%s'", elementText, webElement.toString()));
+
+        return Integer.parseInt(
+                CharMatcher.inRange('0', '9').retainFrom(elementText));
+    }
+
     protected List<WebElement> getElements(String elementsXpath) {
         logger.trace(String.format("Get list of WebElements from '%s'", elementsXpath));
 
         return this.webDriver.findElements(By.xpath(elementsXpath));
+    }
+
+    protected WebElement getSubElement(WebElement webElement, String subElementXpath) {
+        logger.trace(
+                String.format("Get subelement '%s' from the webElement '%s'", subElementXpath, webElement.toString()));
+
+        try {
+            WebElement subElement = webElement.findElement(By.xpath(subElementXpath));
+            logger.trace(String.format("Sub element found: '%s' with text: '%s'", subElement.toString(),
+                    subElement.getText()));
+
+            return subElement;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    protected WebElement getSubElement(WebElement webElement, String subElementXpath, int elementIndex) {
+        logger.trace(
+                String.format("Get subelement '%s' from the webElement '%s'", subElementXpath, webElement.toString()));
+
+        try {
+            List<WebElement> subElement = webElement.findElements(By.xpath(subElementXpath));
+            for (WebElement webElement2 : subElement) {
+                logger.trace(String.format("Sub element found: '%s' with text: '%s'", webElement2.toString(),
+                        webElement2.getText()));
+            }
+            return subElement.get(elementIndex);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     protected String getAttribute(String elementXpath, String attributeName) {
