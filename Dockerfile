@@ -39,5 +39,6 @@ ENV AIRCRAFT_MAX_HOURS_TO_ACHECK=24
 ENV RUN_MODE="once"
 ENV SERVICE_SLEEP_SEC=300
 ENV SCANNER_FILE="am4scanner.csv"
+ENV AM4_BOT_JAVA_CLASS="com.ashokhin.am4bot.App"
 
-CMD java -cp am4bot.jar -Dlog4j.configurationFile=log4j2.properties com.ashokhin.am4bot.App
+CMD java -cp am4bot.jar -Dlog4j.configurationFile=log4j2.properties ${AM4_BOT_JAVA_CLASS}
