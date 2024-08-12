@@ -901,12 +901,12 @@ public final class Bot extends BotBase {
         return Bot.accountMoney;
     }
 
-    public final Map<String, Float> collectMetrics() throws InterruptedException {
+    public final MetricsCollector collectMetrics() throws InterruptedException {
         logger.debug("Creating AM4 metrics collector...");
         this.metricsCollector = new MetricsCollector(this);
         Thread mThread = new Thread(metricsCollector);
         mThread.start();
-        return metricsCollector.getMetrics();
+        return this.metricsCollector;
     }
 
     public final AtomicBoolean hasNewMetrics() {

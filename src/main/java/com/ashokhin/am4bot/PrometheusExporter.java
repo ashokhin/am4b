@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.ashokhin.am4bot.bot.Bot;
+import com.ashokhin.am4bot.bot.MetricsCollector;
 import com.ashokhin.am4bot.utils.CliArgumentParser;
 
 import io.prometheus.metrics.core.metrics.Gauge;
@@ -20,6 +21,7 @@ public class PrometheusExporter {
     private static final Logger logger = LogManager.getLogger(PrometheusExporter.class);
     private static final String PROMETHEUS_MAMESPACE = "am4";
     private static final int REGISTRY_UPDATE_INTERVAL_SEC = 10;
+    private static MetricsCollector metricsCollector;
     private static AtomicBoolean metricsRegistired = new AtomicBoolean(false);
     private static CommandLine cmd;
     private static String baseUrl = "https://www.airlinemanager.com/";
@@ -169,6 +171,7 @@ public class PrometheusExporter {
             if (bot.hasNewMetrics().getAndSet(false)) {
                 logger.debug("Updating registry...");
 
+                metrics = PrometheusExporter.metricsCollector.getMetrics();
                 acFleetSize.set(metrics.get("FleetSize"));
                 acHangarCapacity.set(metrics.get("HangarCapacity"));
                 acRoutes.set(metrics.get("Routes"));
@@ -238,7 +241,8 @@ public class PrometheusExporter {
         try {
             // start parallel thread of MetricsCollector which will collect metrics every
             // 5 min.
-            metrics = bot.collectMetrics();
+            PrometheusExporter.metricsCollector = bot.collectMetrics();
+            metrics = PrometheusExporter.metricsCollector.getMetrics();
         } catch (InterruptedException e) {
             logger.debug("Prometheus execution interrupted");
             bot.quit();
