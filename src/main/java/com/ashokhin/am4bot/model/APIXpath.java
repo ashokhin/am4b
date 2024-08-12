@@ -278,4 +278,50 @@ public final class APIXpath {
     public static final String xpathButtonFleetAndRoutes_order = "//div[@id='popup']//button[@id='popBtn2']";
     //
     public static final String xpathButtonFleetAndRoutes_list_sort = "//div[@id='routeAction']//button[@id='listSort']";
+
+    /*
+     * Pop-up window 'Overview'
+     */
+    // xpath for button 'Overview' in the main window
+    public static final String xpathButtonOverviewMenu = "//div[@id='flightInfo']//div[@id='flightInfoSecContainer']//button[contains(@onclick, 'overview.php')]";
+    // xpath for text element 'Airline Reputation'
+    public static final String xpathTextOverviewAirlineReputation = "//div[@id='popup']//div[@id='popContent']//div[contains(text(),'Airline Reputation')]";
+    // xpath for text element 'Cargo reputation'
+    public static final String xpathTextOverviewCargoReputation = "//div[@id='popup']//div[@id='popContent']//div[contains(text(),'Cargo reputation')]";
+    // xpath for text element 'Fuel cost'
+    public static final String xpathTextOverviewFuelCost = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[1]/td[2]/span[1]";
+    // xpath for text element 'Co2 quota cost'
+    public static final String xpathTextOverviewCo2Cost = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[2]/td[2]/span[1]";
+    // xpath for text element 'Fleet size'
+    public static final String xpathTextOverviewFleetSize = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[3]/td[2]";
+    // xpath for text element 'Pending delivery'
+    public static final String xpathTextOverviewPendingDelivery = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[4]/td[2]";
+    // xpath for text element 'Routes'
+    public static final String xpathTextOverviewRoutes = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[5]/td[2]";
+    // xpath for text element 'Hubs'
+    public static final String xpathTextOverviewHubs = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[6]/td[2]";
+    // xpath for text element 'Pending maintenance'
+    public static final String xpathTextOverviewPendingMaintenance = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[7]/td[2]";
+    // xpath for text element 'Fuel holding'
+    public static final String xpathTextOverviewFuelHolding = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[8]/td[2]";
+    // xpath for text element 'Hangar capacity'
+    public static final String xpathTextOverviewHangarCapacity = "//div[@id='popup']//div[@id='popContent']/div[1]/div[6]/table/tbody/tr[9]/td[2]";
+    // xpath for text element 'Co2 quotas'
+    public static final String xpathTextOverviewCo2Quotas = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[1]/td[2]";
+    // xpath for text element 'A/C Inflight'
+    public static final String xpathTextOverviewACInflight = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[2]/td[2]";
+    // xpath for text element 'Share value'
+    public static final String xpathTextOverviewShareValue = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[3]/td[2]/div";
+    // xpath for text element 'Flights operated'
+    public static final String xpathTextOverviewFlightsOperated = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[4]/td[2]";
+    // xpath for text element 'Y class pax'
+    public static final String xpathTextOverviewYClassPax = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[5]/td[2]";
+    // xpath for text element 'J class pax'
+    public static final String xpathTextOverviewJClassPax = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[6]/td[2]";
+    // xpath for text element 'F class pax'
+    public static final String xpathTextOverviewFClassPax = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[7]/td[2]";
+    // xpath for text element 'Large load'
+    public static final String xpathTextOverviewLargeLoad = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[8]/td[2]";
+    // xpath for text element 'Heavy load'
+    public static final String xpathTextOverviewHeavyLoad = "//div[@id='popup']//div[@id='popContent']/div[1]/div[7]/table/tbody/tr[9]/td[2]";
 }

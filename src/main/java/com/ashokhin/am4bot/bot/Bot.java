@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,6 +37,7 @@ public final class Bot extends BotBase {
     private Map<FuelType, Integer> fuelPricesMap;
     private Map<FuelType, AirplaneFuel> fuelDataMap;
     private ArrayList<MarketingCompany> marketingDataList = new ArrayList<MarketingCompany>();
+    private MetricsCollector metricsCollector;
 
     public Bot(String baseUrl, String login, String password) {
         super(baseUrl, login, password);
@@ -139,6 +141,10 @@ public final class Bot extends BotBase {
     @Override
     public final void run() {
         super.startBot();
+        this.runAsDaemon();
+    }
+
+    private final void runAsDaemon() {
         long daemonMillisWaitInterval = daemonSecondsWaitInterval * 1000;
 
         while (true) {
@@ -147,9 +153,10 @@ public final class Bot extends BotBase {
                 logger.info(String.format("Sleeping for %d seconds", daemonSecondsWaitInterval));
                 Thread.sleep(daemonMillisWaitInterval);
             } catch (InterruptedException e) {
-                // TODO: handle exception
+                logger.debug("Daemon iterrupted");
+                Thread.currentThread().interrupt();
+                this.quit();
             }
-
         }
     }
 
@@ -276,13 +283,13 @@ public final class Bot extends BotBase {
     }
 
     private final synchronized void checkMoney() {
-        logger.debug("Check money");
+        logger.trace("Checking money...");
 
         this.refreshPage();
 
         Bot.accountMoney = this.getIntFromElement(APIXpath.xpathTextAccount);
 
-        logger.debug(String.format("Account money $%d", Bot.accountMoney));
+        logger.trace(String.format("Account money $%d", Bot.accountMoney));
     }
 
     private static final synchronized void decreaseMoney(int moneySpent) {
@@ -884,6 +891,25 @@ public final class Bot extends BotBase {
 
     @Override
     public final void quit() {
+        logger.trace("Quit BotBase");
         super.quit();
+    }
+
+    public final Integer getMoney() {
+        this.checkMoney();
+
+        return Bot.accountMoney;
+    }
+
+    public final Map<String, Float> collectMetrics() throws InterruptedException {
+        logger.debug("Creating AM4 metrics collector...");
+        this.metricsCollector = new MetricsCollector(this);
+        Thread mThread = new Thread(metricsCollector);
+        mThread.start();
+        return metricsCollector.getMetrics();
+    }
+
+    public final AtomicBoolean hasNewMetrics() {
+        return metricsCollector.isUpdated();
     }
 }

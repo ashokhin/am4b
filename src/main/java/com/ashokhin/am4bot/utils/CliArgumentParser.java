@@ -39,7 +39,7 @@ public final class CliArgumentParser {
         options.addOption("h", "help", false, "Print this help");
 
         try {
-            logger.info("Parse arguments");
+            logger.debug("Parsing arguments...");
             cmd = parser.parse(options, args);
             boolean help = cmd.hasOption("help");
             if (help) {

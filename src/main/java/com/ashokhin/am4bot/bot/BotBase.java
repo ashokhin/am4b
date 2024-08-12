@@ -103,7 +103,13 @@ public class BotBase implements Runnable {
 
     /** Type given text in text field found by xPath */
     protected void typeTextInField(String textFieldXpath, String enteredText) {
-        logger.trace(String.format("Enter '%s' in text field '%s'", enteredText, textFieldXpath));
+        // If text field looks like password - mask password
+        String enteredTextPrint = enteredText;
+        if (textFieldXpath.matches(".+id='lPass'.+")) {
+            enteredTextPrint = "[PASSWORD_HIDDEN]";
+        }
+
+        logger.trace(String.format("Enter '%s' in text field '%s'", enteredTextPrint, textFieldXpath));
         this.webDriver.findElement(By.xpath(textFieldXpath)).clear();
         this.webDriver.findElement(By.xpath(textFieldXpath)).sendKeys(enteredText);
     }
@@ -122,7 +128,7 @@ public class BotBase implements Runnable {
         return webElement.getText();
     }
 
-    protected int getIntFromElement(String elementXpath) {
+    protected Integer getIntFromElement(String elementXpath) {
         logger.trace(String.format("Get int from element '%s'", elementXpath));
         String elementText = this.getTextFromElement(elementXpath);
         logger.trace(String.format("Got text '%s' from element '%s'", elementText, elementXpath));
@@ -131,13 +137,29 @@ public class BotBase implements Runnable {
                 CharMatcher.inRange('0', '9').retainFrom(elementText));
     }
 
-    protected int getIntFromElement(WebElement webElement) {
+    protected Integer getIntFromElement(WebElement webElement) {
         logger.trace(String.format("Get int from element '%s'", webElement.toString()));
         String elementText = this.getTextFromElement(webElement);
         logger.trace(String.format("Got text '%s' from element '%s'", elementText, webElement.toString()));
 
         return Integer.parseInt(
                 CharMatcher.inRange('0', '9').retainFrom(elementText));
+    }
+
+    protected Float getFloatFromElement(String elementXpath) {
+        logger.trace(String.format("Get float from element '%s'", elementXpath));
+        String elementText = this.getTextFromElement(elementXpath);
+        logger.trace(String.format("Got text '%s' from element '%s'", elementText, elementXpath));
+
+        return Float.valueOf(elementText.replaceAll("[^\\d.]+|\\.(?!\\d)", ""));
+    }
+
+    protected Float getFloatFromElement(WebElement webElement) {
+        logger.trace(String.format("Get float from element '%s'", webElement.toString()));
+        String elementText = this.getTextFromElement(webElement);
+        logger.trace(String.format("Got text '%s' from element '%s'", elementText, webElement.toString()));
+
+        return Float.valueOf(elementText.replaceAll("[^\\d.]+|\\.(?!\\d)", ""));
     }
 
     protected List<WebElement> getElements(String elementsXpath) {
@@ -195,7 +217,7 @@ public class BotBase implements Runnable {
     }
 
     protected void refreshPage() {
-        logger.debug("Refresh page");
+        logger.trace("Refresh page");
         this.webDriver.navigate().refresh();
         this.waitPage();
     }
@@ -253,7 +275,9 @@ public class BotBase implements Runnable {
     }
 
     protected void quit() {
+        logger.trace("Close webDriver");
         this.webDriver.close();
+        logger.trace("Quit webDriver");
         this.webDriver.quit();
     }
 }
