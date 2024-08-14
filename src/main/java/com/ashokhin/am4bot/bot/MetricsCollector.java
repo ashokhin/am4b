@@ -58,7 +58,7 @@ public final class MetricsCollector implements Runnable {
         }
     }
 
-    private final void collect() throws InterruptedException {
+    private final void collect() throws Exception {
         logger.debug("Collecting AM4 metrics...");
         bot.startBot();
 
@@ -188,8 +188,12 @@ public final class MetricsCollector implements Runnable {
         try {
             this.collect();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            e.printStackTrace();
+            bot.quit();
+            System.exit(1);
         }
     }
 
