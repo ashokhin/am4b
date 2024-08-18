@@ -241,7 +241,7 @@ public class PrometheusExporter {
         try {
             // start parallel thread of MetricsCollector which will collect metrics every
             // 5 min.
-            PrometheusExporter.metricsCollector = bot.collectMetrics();
+            PrometheusExporter.metricsCollector = bot.startMetricsCollector();
             metrics = PrometheusExporter.metricsCollector.getMetrics();
         } catch (InterruptedException e) {
             logger.debug("Prometheus execution interrupted");

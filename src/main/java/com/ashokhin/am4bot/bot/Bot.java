@@ -901,11 +901,12 @@ public final class Bot extends BotBase {
         return Bot.accountMoney;
     }
 
-    public final MetricsCollector collectMetrics() throws InterruptedException {
+    public final MetricsCollector startMetricsCollector() throws Exception {
         logger.debug("Creating AM4 metrics collector...");
         this.metricsCollector = new MetricsCollector(this);
         Thread mThread = new Thread(metricsCollector);
         mThread.start();
+
         return this.metricsCollector;
     }
 
