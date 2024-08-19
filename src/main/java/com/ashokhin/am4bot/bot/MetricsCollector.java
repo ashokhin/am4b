@@ -43,6 +43,8 @@ public final class MetricsCollector implements Runnable {
         metricsMap.put("FClassPax", 0.0f);
         metricsMap.put("LargeLoad", 0.0f);
         metricsMap.put("HeavyLoad", 0.0f);
+        metricsMap.put("FuelLimit", 0.0f);
+        metricsMap.put("Co2Limit", 0.0f);
 
         return metricsMap;
     }
@@ -58,6 +60,142 @@ public final class MetricsCollector implements Runnable {
         }
     }
 
+    private final void checkOverview() throws Exception {
+        logger.trace("Opening 'Overview' popup...");
+        bot.clickButton(APIXpath.xpathButtonOverviewMenu);
+
+        logger.trace("Getting 'AirlineReputation'...");
+        metricsMap.put(
+                "AirlineReputation",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewAirlineReputation)
+                        .floatValue());
+
+        logger.trace("Getting 'CargoReputation'...");
+        metricsMap.put(
+                "CargoReputation",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewCargoReputation).floatValue());
+
+        logger.trace("Getting 'FuelCost'...");
+        metricsMap.put(
+                "FuelCost",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewFuelCost).floatValue());
+
+        logger.trace("Getting 'Co2Cost'...");
+        metricsMap.put(
+                "Co2Cost",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewCo2Cost).floatValue());
+
+        logger.trace("Getting 'FleetSize'...");
+        metricsMap.put(
+                "FleetSize",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewFleetSize).floatValue());
+
+        logger.trace("Getting 'PendingDelivery'...");
+        metricsMap.put(
+                "PendingDelivery",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewPendingDelivery).floatValue());
+
+        logger.trace("Getting 'Routes'...");
+        metricsMap.put(
+                "Routes",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewRoutes).floatValue());
+
+        logger.trace("Getting 'Hubs'...");
+        metricsMap.put(
+                "Hubs",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewHubs).floatValue());
+
+        logger.trace("Getting 'PendingMaintenance'...");
+        metricsMap.put(
+                "PendingMaintenance",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewPendingMaintenance)
+                        .floatValue());
+
+        logger.trace("Getting 'FuelHolding'...");
+        metricsMap.put(
+                "FuelHolding",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewFuelHolding).floatValue());
+
+        logger.trace("Getting 'HangarCapacity'...");
+        metricsMap.put(
+                "HangarCapacity",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewHangarCapacity).floatValue());
+
+        logger.trace("Getting 'Co2Quota'...");
+        metricsMap.put(
+                "Co2Quota",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewCo2Quotas).floatValue());
+
+        logger.trace("Getting 'ACInflight'...");
+        metricsMap.put(
+                "ACInflight",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewACInflight).floatValue());
+
+        logger.trace("Getting 'ShareValue'...");
+        metricsMap.put(
+                "ShareValue",
+                bot.getFloatFromElement(APIXpath.xpathTextOverviewShareValue));
+
+        logger.trace("Getting 'FlightsOperated'...");
+        metricsMap.put(
+                "FlightsOperated",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewFlightsOperated).floatValue());
+
+        logger.trace("Getting 'YClassPax'...");
+        metricsMap.put(
+                "YClassPax",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewYClassPax).floatValue());
+
+        logger.trace("Getting 'JClassPax'...");
+        metricsMap.put(
+                "JClassPax",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewJClassPax).floatValue());
+
+        logger.trace("Getting 'FClassPax'...");
+        metricsMap.put(
+                "FClassPax",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewFClassPax).floatValue());
+
+        logger.trace("Getting 'LargeLoad'...");
+        metricsMap.put(
+                "LargeLoad",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewLargeLoad).floatValue());
+
+        logger.trace("Getting 'HeavyLoad'...");
+        metricsMap.put(
+                "HeavyLoad",
+                bot.getIntFromElement(APIXpath.xpathTextOverviewHeavyLoad).floatValue());
+
+        bot.clickButton(APIXpath.xpathButtonPopupClose);
+
+        return;
+    }
+
+    private final void checkFuel() throws Exception {
+        logger.trace("Getting 'FuelLimit'...");
+
+        bot.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonFuelMenu"));
+        bot.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonFuelTab"));
+
+        metricsMap.put(
+                "FuelLimit",
+                bot.getIntFromElement(APIXpath.xpathAllFuelElementsMap
+                        .get("fuel").get("xpathTextMaxCapacity")).floatValue());
+
+        logger.trace("Getting 'Co2Limit'...");
+
+        bot.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonCO2Tab"));
+
+        metricsMap.put(
+                "Co2Limit",
+                bot.getIntFromElement(APIXpath.xpathAllFuelElementsMap
+                        .get("co2").get("xpathTextMaxCapacity")).floatValue());
+
+        bot.clickButton(APIXpath.xpathButtonPopupClose);
+
+        return;
+    }
+
     private final void collect() throws Exception {
         logger.debug("Collecting AM4 metrics...");
         bot.startBot();
@@ -69,112 +207,8 @@ public final class MetricsCollector implements Runnable {
                     "AirlineAccountMoney",
                     bot.getMoney().floatValue());
 
-            logger.trace("Opening 'Overview' popup...");
-            bot.clickButton(APIXpath.xpathButtonOverviewMenu);
-
-            logger.trace("Getting 'AirlineReputation'...");
-            metricsMap.put(
-                    "AirlineReputation",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewAirlineReputation)
-                            .floatValue());
-
-            logger.trace("Getting 'CargoReputation'...");
-            metricsMap.put(
-                    "CargoReputation",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewCargoReputation).floatValue());
-
-            logger.trace("Getting 'FuelCost'...");
-            metricsMap.put(
-                    "FuelCost",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewFuelCost).floatValue());
-
-            logger.trace("Getting 'Co2Cost'...");
-            metricsMap.put(
-                    "Co2Cost",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewCo2Cost).floatValue());
-
-            logger.trace("Getting 'FleetSize'...");
-            metricsMap.put(
-                    "FleetSize",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewFleetSize).floatValue());
-
-            logger.trace("Getting 'PendingDelivery'...");
-            metricsMap.put(
-                    "PendingDelivery",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewPendingDelivery).floatValue());
-
-            logger.trace("Getting 'Routes'...");
-            metricsMap.put(
-                    "Routes",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewRoutes).floatValue());
-
-            logger.trace("Getting 'Hubs'...");
-            metricsMap.put(
-                    "Hubs",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewHubs).floatValue());
-
-            logger.trace("Getting 'PendingMaintenance'...");
-            metricsMap.put(
-                    "PendingMaintenance",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewPendingMaintenance)
-                            .floatValue());
-
-            logger.trace("Getting 'FuelHolding'...");
-            metricsMap.put(
-                    "FuelHolding",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewFuelHolding).floatValue());
-
-            logger.trace("Getting 'HangarCapacity'...");
-            metricsMap.put(
-                    "HangarCapacity",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewHangarCapacity).floatValue());
-
-            logger.trace("Getting 'Co2Quota'...");
-            metricsMap.put(
-                    "Co2Quota",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewCo2Quotas).floatValue());
-
-            logger.trace("Getting 'ACInflight'...");
-            metricsMap.put(
-                    "ACInflight",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewACInflight).floatValue());
-
-            logger.trace("Getting 'ShareValue'...");
-            metricsMap.put(
-                    "ShareValue",
-                    bot.getFloatFromElement(APIXpath.xpathTextOverviewShareValue));
-
-            logger.trace("Getting 'FlightsOperated'...");
-            metricsMap.put(
-                    "FlightsOperated",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewFlightsOperated).floatValue());
-
-            logger.trace("Getting 'YClassPax'...");
-            metricsMap.put(
-                    "YClassPax",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewYClassPax).floatValue());
-
-            logger.trace("Getting 'JClassPax'...");
-            metricsMap.put(
-                    "JClassPax",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewJClassPax).floatValue());
-
-            logger.trace("Getting 'FClassPax'...");
-            metricsMap.put(
-                    "FClassPax",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewFClassPax).floatValue());
-
-            logger.trace("Getting 'LargeLoad'...");
-            metricsMap.put(
-                    "LargeLoad",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewLargeLoad).floatValue());
-
-            logger.trace("Getting 'HeavyLoad'...");
-            metricsMap.put(
-                    "HeavyLoad",
-                    bot.getIntFromElement(APIXpath.xpathTextOverviewHeavyLoad).floatValue());
-
-            bot.clickButton(APIXpath.xpathButtonPopupClose);
+            this.checkOverview();
+            this.checkFuel();
 
             MetricsCollector.metricsCollected = new AtomicBoolean(true);
 

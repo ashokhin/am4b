@@ -36,6 +36,7 @@ public class PrometheusExporter {
     private static Gauge acStatus;
     private static Gauge acRoutes;
     private static Gauge companyFuelHolding;
+    private static Gauge companyFuelLimit;
     private static Gauge companyHubs;
     private static Gauge companyMoney;
     private static Gauge companyReputation;
@@ -116,6 +117,12 @@ public class PrometheusExporter {
                 .labelNames("type")
                 .register(registry);
 
+        companyFuelLimit = Gauge.builder()
+                .name(String.format("%s_company_fuel_limit", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .help("company fuel holding limit by fuel type")
+                .labelNames("type")
+                .register(registry);
+
         companyHubs = Gauge.builder()
                 .name(String.format("%s_company_hubs", PrometheusExporter.PROMETHEUS_MAMESPACE))
                 .help("company hubs")
@@ -180,6 +187,8 @@ public class PrometheusExporter {
                 acStatus.labelValues("pending_maintenance").set(metrics.get("PendingMaintenance"));
                 companyFuelHolding.labelValues("co2").set(metrics.get("Co2Quota"));
                 companyFuelHolding.labelValues("fuel").set(metrics.get("FuelHolding"));
+                companyFuelLimit.labelValues("co2").set(metrics.get("Co2Limit"));
+                companyFuelLimit.labelValues("fuel").set(metrics.get("FuelLimit"));
                 companyHubs.set(metrics.get("Hubs"));
                 companyMoney.labelValues("airline").set(metrics.get("AirlineAccountMoney"));
                 companyReputation.labelValues("cargo").set(metrics.get("CargoReputation"));
