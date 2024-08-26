@@ -30,6 +30,7 @@ public class BotBase implements Runnable {
     private static final List<String> GOOGLE_PARAMETERS = new ArrayList<String>() {
         {
             add("--headless");
+            add("--start-maximized");
             add("--no-sandbox");
             add("--disable-dev-shm-usage");
         }
@@ -75,12 +76,17 @@ public class BotBase implements Runnable {
     }
 
     /** Click button which found by xPath */
-    protected void clickButton(String buttonXpath) {
-        logger.trace(String.format("Click button '%s' as xPath", buttonXpath));
+    protected void clickButton(String buttonXpath) throws Exception {
+        logger.trace(String.format("Search button '%s' as xPath", buttonXpath));
         try {
-            this.webDriver.findElement(By.xpath(buttonXpath)).click();
+            WebElement button = this.webDriver.findElement(By.xpath(buttonXpath));
+            logger.trace(String.format("Button found '%s' as WebElement '%b, %s'", button.toString(),
+                    button.isDisplayed(), button.getAccessibleName()));
+            this.clickButton(button);
         } catch (ElementNotInteractableException e) {
+            e.printStackTrace();
             logger.warn(String.format("Button '%s' not active", buttonXpath));
+            throw e;
         }
 
         try {
@@ -93,7 +99,13 @@ public class BotBase implements Runnable {
     /** Click button which found as WebElement */
     protected void clickButton(WebElement webElement) {
         logger.trace(String.format("Click button '%s' as WebElement", webElement.toString()));
-        webElement.click();
+        try {
+            webElement.click();
+        } catch (Exception e) {
+            logger.trace(String.format("Got exception: %s", e.toString()));
+            throw e;
+        }
+
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
@@ -224,8 +236,10 @@ public class BotBase implements Runnable {
 
     /**
      * Create WebDriver and login
+     * 
+     * @throws Exception
      */
-    protected void startBot() {
+    protected void startBot() throws Exception {
         this.webDriver = new ChromeDriver(this.setChromeOptions(BotBase.GOOGLE_PARAMETERS));
         this.login();
     }
@@ -240,7 +254,7 @@ public class BotBase implements Runnable {
         }
     }
 
-    private final void login() {
+    private final void login() throws Exception {
         logger.info(String.format("Login to '%s'", this.baseURL));
         this.webDriver.manage().deleteAllCookies();
         this.isLoggedIn = false;
@@ -274,7 +288,7 @@ public class BotBase implements Runnable {
         return this.isLoggedIn;
     }
 
-    protected void quit() {
+    protected void quit() throws Exception {
         logger.trace("Close webDriver");
         this.webDriver.close();
         logger.trace("Quit webDriver");

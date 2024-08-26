@@ -58,7 +58,7 @@ public final class APIXpath {
     // xpath for the button 'Company' in the main window
     public static final String xpathButtonCompanyMenu = "//div[@id='mapAcList' and @data-original-title='Company, staff & highscore']";
     // xpath for tab 'Stuff' in the popup window 'Company'
-    public static final String xpathButtonCompanyStruffTab = "//div[@id='popup']//button[@id='popBtn2']";
+    public static final String xpathButtonCompanyStuffTab = "//div[@id='popup']//button[@id='popBtn2']";
     // hashmap for pilots morale elements
     private static final Map<String, String> xpathStuffPilotsMoraleElements = new HashMap<String, String>() {
         {

@@ -56,7 +56,7 @@ public final class App {
         return result;
     }
 
-    public static final void main(String[] args) {
+    public static final void main(String[] args) throws Exception {
         if (args.length > 0) {
             cmd = CliArgumentParser.parseArgs(args);
         }

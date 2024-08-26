@@ -108,7 +108,7 @@ public final class Bot extends BotBase {
         this.daemonSecondsWaitInterval = daemonSecondsWaitInterval;
     }
 
-    private final void runDaemon() {
+    private final void runDaemon() throws Exception {
         switch (this.botMode) {
             case ALL:
                 this.updateStuffMorale();
@@ -140,11 +140,15 @@ public final class Bot extends BotBase {
 
     @Override
     public final void run() {
-        super.startBot();
-        this.runAsDaemon();
+        try {
+            super.startBot();
+            this.runAsDaemon();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private final void runAsDaemon() {
+    private final void runAsDaemon() throws Exception {
         long daemonMillisWaitInterval = daemonSecondsWaitInterval * 1000;
 
         while (true) {
@@ -153,20 +157,23 @@ public final class Bot extends BotBase {
                 logger.info(String.format("Sleeping for %d seconds", daemonSecondsWaitInterval));
                 Thread.sleep(daemonMillisWaitInterval);
             } catch (InterruptedException e) {
-                logger.debug("Daemon iterrupted");
+                logger.debug("Daemon interrupted");
                 Thread.currentThread().interrupt();
                 this.quit();
             }
         }
     }
 
-    private final void updateStuffMorale() {
+    private final void updateStuffMorale() throws Exception {
         logger.info("Check stuff morale");
 
         this.refreshPage();
 
+        logger.trace("Open 'Company' menu");
         this.clickButton(APIXpath.xpathButtonCompanyMenu);
-        this.clickButton(APIXpath.xpathButtonCompanyStruffTab);
+
+        logger.trace("Click 'Stuff' tab");
+        this.clickButton(APIXpath.xpathButtonCompanyStuffTab);
 
         for (Map.Entry<String, Map<String, String>> entry : APIXpath.xpathAllStuffMoraleElementsMap.entrySet()) {
             String stuffType = entry.getKey();
@@ -226,7 +233,7 @@ public final class Bot extends BotBase {
         return loungeAlertIcon.size() > 0;
     }
 
-    private final void repairLounges() {
+    private final void repairLounges() throws Exception {
         logger.info("Check lounges state");
 
         if (!this.loungesNeedRepair()) {
@@ -296,7 +303,7 @@ public final class Bot extends BotBase {
         Bot.accountMoney -= moneySpent;
     }
 
-    private final void checkFuelType(FuelType fuelType) {
+    private final void checkFuelType(FuelType fuelType) throws Exception {
         logger.info(String.format("Check '%s' price and capacity", fuelType.getTitle()));
 
         switch (fuelType) {
@@ -340,7 +347,7 @@ public final class Bot extends BotBase {
                         this.fuelDataMap.get(fuelType).getMaximumCapacity(), fuelType.getUnit()));
     }
 
-    private final void buyFuelAmount(AirplaneFuel airplaneFuel) {
+    private final void buyFuelAmount(AirplaneFuel airplaneFuel) throws Exception {
         int needFuelAmount = airplaneFuel.getNeedAmount(Bot.accountMoney);
 
         if (needFuelAmount == 0) {
@@ -358,7 +365,7 @@ public final class Bot extends BotBase {
         airplaneFuel.buyFuelAmount(needFuelAmount);
     }
 
-    private final void buyFuelType(FuelType fuelType) {
+    private final void buyFuelType(FuelType fuelType) throws Exception {
         this.checkFuelType(fuelType);
         AirplaneFuel currentFuel = this.fuelDataMap.get(fuelType);
 
@@ -382,8 +389,10 @@ public final class Bot extends BotBase {
      * price.
      * Than buy fuel/co2 if have enough money, good price OR buy fuel if have
      * critical fuel level.
+     * 
+     * @throws Exception
      */
-    private final void buyFuel() {
+    private final void buyFuel() throws Exception {
         this.checkMoney();
         logger.info("Buy fuel");
 
@@ -396,7 +405,8 @@ public final class Bot extends BotBase {
         this.clickButton(APIXpath.xpathButtonPopupClose);
     }
 
-    private final List<Aircraft> findAllAircraftForMaintenance(MaintenanceOperation maintenanceOperation) {
+    private final List<Aircraft> findAllAircraftForMaintenance(MaintenanceOperation maintenanceOperation)
+            throws Exception {
         List<Aircraft> aircraftForMaintenance = new ArrayList<Aircraft>();
 
         this.clickButton(APIXpath.xpathButtonMaintenancePlan);
@@ -427,7 +437,7 @@ public final class Bot extends BotBase {
 
     private final WebElement findChildButton(
             MaintenanceOperation maintenanceOperation,
-            Aircraft aircraftForMaintenance) {
+            Aircraft aircraftForMaintenance) throws Exception {
 
         logger.debug(String.format("Find child button for '%s' operation for '%s'", maintenanceOperation.getTitle(),
                 aircraftForMaintenance.getRegNumber()));
@@ -489,7 +499,7 @@ public final class Bot extends BotBase {
 
     }
 
-    private final boolean aCheckAircraft(Aircraft aircraftForACheck) {
+    private final boolean aCheckAircraft(Aircraft aircraftForACheck) throws Exception {
         logger.debug(String.format("Try to A-Check '%s'", aircraftForACheck));
 
         if (!this.clickMaintenanceButton(
@@ -520,7 +530,7 @@ public final class Bot extends BotBase {
         return true;
     }
 
-    private final void aCheckAllAircraft() {
+    private final void aCheckAllAircraft() throws Exception {
         logger.info("Search aircraft which need A-Check");
 
         List<Aircraft> aircraftNeedACheck = new ArrayList<Aircraft>();
@@ -547,7 +557,7 @@ public final class Bot extends BotBase {
         logger.info(String.format("Aircraft planed for A-Check: %d", aCheckedAircraftCount));
     }
 
-    private final boolean repairAircraft(Aircraft aircraftForRepair) {
+    private final boolean repairAircraft(Aircraft aircraftForRepair) throws Exception {
         logger.debug(String.format("Try to repair '%s'", aircraftForRepair));
 
         if (!this.clickMaintenanceButton(
@@ -577,7 +587,7 @@ public final class Bot extends BotBase {
         return true;
     }
 
-    private final void repairAllAircraft() {
+    private final void repairAllAircraft() throws Exception {
         logger.info("Search aircraft which need repair");
 
         List<Aircraft> aircraftNeedRepair = new ArrayList<Aircraft>();
@@ -603,7 +613,7 @@ public final class Bot extends BotBase {
         logger.info(String.format("Aircraft planed for repair: %d", repairedAircraftCount));
     }
 
-    private final boolean modifyAircraft(Aircraft aircraftForModify) {
+    private final boolean modifyAircraft(Aircraft aircraftForModify) throws Exception {
         logger.debug(String.format("Try to modify '%s'", aircraftForModify));
 
         if (!this.clickMaintenanceButton(
@@ -675,7 +685,7 @@ public final class Bot extends BotBase {
         return true;
     }
 
-    private final void modifyAllAircraft() {
+    private final void modifyAllAircraft() throws Exception {
         logger.info("Search aircraft which need modification");
 
         List<Aircraft> aircraftNeedModify = this.findAllAircraftForMaintenance(MaintenanceOperation.MODIFY);
@@ -713,8 +723,10 @@ public final class Bot extends BotBase {
      * Search aircraft which are toward to base and than A-Check, Repair and
      * Modification aircraft which are need maintenance. Based on maintenance
      * budget, minimum hours for A-Check and maximum wear percent
+     * 
+     * @throws Exception
      */
-    private final void maintenanceAircraft() {
+    private final void maintenanceAircraft() throws Exception {
         this.checkMoney();
         logger.info("Maintenance aircraft");
         this.clickButton(APIXpath.xpathButtonMaintenanceMenu);
@@ -729,8 +741,10 @@ public final class Bot extends BotBase {
     /**
      * Check marketing companies than activate, based on fuel level and budget
      * percent
+     * 
+     * @throws Exception
      */
-    private final void startMarketingCompanies() {
+    private final void startMarketingCompanies() throws Exception {
         logger.debug("Try to start marketing companies");
 
         for (FuelType fuelType : FuelType.values()) {
@@ -774,7 +788,7 @@ public final class Bot extends BotBase {
         this.clickButton(APIXpath.xpathButtonPopupClose);
     }
 
-    private final void checkMarketingCompanies() {
+    private final void checkMarketingCompanies() throws Exception {
         logger.info("Check marketing companies");
 
         this.clickButton(APIXpath.xpathButtonFinanceMarketingNewCampaign);
@@ -789,7 +803,7 @@ public final class Bot extends BotBase {
         }
     }
 
-    private final boolean enableMarketingCompany(MarketingCompany marketingCompany) {
+    private final boolean enableMarketingCompany(MarketingCompany marketingCompany) throws Exception {
         logger.debug(String.format("Try to activate marketing company '%s'", marketingCompany.getName()));
 
         this.clickButton(APIXpath.xpathButtonFinanceMarketingTab);
@@ -841,14 +855,18 @@ public final class Bot extends BotBase {
         return true;
     }
 
-    private final int getReadyForDepartCount() {
+    private final int getReadyForDepartCount() throws Exception {
         this.clickButton(APIXpath.xpathButtonLanded);
 
         return this.getElements(APIXpath.xpathElementListLanded).size();
     }
 
-    /** Depart all available aircraft and buy fuel after each depart */
-    private final void departAllAircraft() {
+    /**
+     * Depart all available aircraft and buy fuel after each depart
+     * 
+     * @throws Exception
+     */
+    private final void departAllAircraft() throws Exception {
         logger.info("Depart all available aircraft");
         int readyForDepartCount = this.getReadyForDepartCount();
 
@@ -878,7 +896,7 @@ public final class Bot extends BotBase {
         logger.info(String.format("Aircraft total departed: %d", aircraftDeparted));
     }
 
-    public final void startOnce() {
+    public final void startOnce() throws Exception {
         logger.info("Start Bot");
         super.startBot();
         repairLounges();
@@ -890,7 +908,7 @@ public final class Bot extends BotBase {
     }
 
     @Override
-    public final void quit() {
+    public final void quit() throws Exception {
         logger.trace("Quit BotBase");
         super.quit();
     }

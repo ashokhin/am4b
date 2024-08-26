@@ -226,7 +226,11 @@ public final class MetricsCollector implements Runnable {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             e.printStackTrace();
-            bot.quit();
+            try {
+                bot.quit();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
             System.exit(1);
         }
     }

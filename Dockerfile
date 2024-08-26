@@ -1,10 +1,14 @@
-FROM maven:3.8.6-openjdk-8 AS MAVEN_BUILD
+FROM openjdk:21-jdk-slim AS maven_build
+
+RUN apt -y update && \
+    apt -y upgrade && \
+    apt -y install wget gnupg2 maven
 
 COPY ./ ./
 
 RUN mvn clean package assembly:single
 
-FROM openjdk:8-jre-slim-buster
+FROM openjdk:21-jdk-slim
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \
@@ -19,7 +23,7 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 RUN apt-get -y update && \
     apt-get install -y google-chrome-stable
 
-COPY --from=MAVEN_BUILD /target/am4bot-jar-with-dependencies.jar /app/am4bot.jar
+COPY --from=maven_build /target/am4bot-jar-with-dependencies.jar /app/am4bot.jar
 
 COPY src/main/resources/log4j2.properties /app
 
