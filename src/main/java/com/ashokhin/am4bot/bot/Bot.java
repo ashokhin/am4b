@@ -899,7 +899,7 @@ public final class Bot extends BotBase {
     public final void startOnce() throws Exception {
         logger.info("Start Bot");
         super.startBot();
-        repairLounges();
+        this.repairLounges();
         this.updateStuffMorale();
         this.buyFuel();
         this.startMarketingCompanies();

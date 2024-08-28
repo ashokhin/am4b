@@ -272,8 +272,8 @@ public class BotBase implements Runnable {
 
         this.loginAttempts++;
         this.loginLastAttemptTimestamp = Instant.now();
-        // this.webDriver.manage().window().maximize();
         this.webDriver.get(this.baseURL);
+        this.clickButton(APIXpath.xpathButtonPlayNow);
         this.clickButton(APIXpath.xpathButtonLogin);
         this.typeTextInField(APIXpath.xpathTextFieldUsername, this.login);
         this.typeTextInField(APIXpath.xpathTextFieldPassword, this.password);

@@ -9,8 +9,10 @@ public final class APIXpath {
     /*
      * Login page
      */
+    // xpath for the button 'play-now' on the main page
+    public static final String xpathButtonPlayNow = "//div[@class='button-container']//button[@class='play-now']";
     // xpath for the button 'login' on the main page
-    public static final String xpathButtonLogin = "//div[@class='button-container']//button[@class='play-now']";
+    public static final String xpathButtonLogin = "//div[@class='login-container']//button[@onclick=\"login('show');\"]";
     // xpath for a text field 'username' in the popup window
     public static final String xpathTextFieldUsername = "//form[@id='loginForm']//input[@id='lEmail']";
     // xpath for a text field 'password' in the popup window
