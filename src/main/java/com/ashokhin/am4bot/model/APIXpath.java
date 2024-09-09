@@ -33,6 +33,12 @@ public final class APIXpath {
     // xpath for a text 'Account' on the main game page, which contains available
     // money
     public static final String xpathTextAccount = "//nav[@id='topMenu']//span[@id='headerAccount']";
+    // xpath for the button 'Account' on the main game page
+    public static final String xpathButtonAccount = "//nav[@id='topMenu']//li[contains(@onclick,'banking.php')]";
+    //
+    public static final String xpathElementListAccountLines = "//div[@id='popup']//div[@id='popContent']//div[@id='bankingAction']//tbody//tr[contains(@onclick, 'banking_account.php?id=')]";
+    //
+    public static final String xpathElementAccountLine = "./td";
 
     /*
      * Menu: 'Flight Info'

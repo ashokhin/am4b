@@ -640,11 +640,11 @@ public final class Bot extends BotBase {
                     break;
                 }
 
-                WebElement checkboxCheckmarkWebElem = modifyCheckboxRow
+                WebElement checkboxCheckerWebElem = modifyCheckboxRow
                         .findElement(By.xpath(".//span[@class=\"checkmark\"]"));
 
-                if (checkboxCheckmarkWebElem != null) {
-                    this.clickButton(checkboxCheckmarkWebElem);
+                if (checkboxCheckerWebElem != null) {
+                    this.clickButton(checkboxCheckerWebElem);
                     break;
                 }
             }
@@ -653,10 +653,10 @@ public final class Bot extends BotBase {
         int modifyPrice = 0;
 
         try {
-            // for PAX aircrafts
+            // for PAX aircraft
             modifyPrice = this.getIntFromElement(APIXpath.xpathTextMaintenanceModifyPrice);
         } catch (org.openqa.selenium.NoSuchElementException e) {
-            // for CARGO aircrafts
+            // for CARGO aircraft
             modifyPrice = this.getIntFromElement(APIXpath.xpathTextMaintenanceModifyCargoPrice);
         }
 

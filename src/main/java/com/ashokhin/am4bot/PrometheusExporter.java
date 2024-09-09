@@ -1,6 +1,6 @@
 package com.ashokhin.am4bot;
 
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -19,16 +19,17 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 
 public class PrometheusExporter {
     private static final Logger logger = LogManager.getLogger(PrometheusExporter.class);
-    private static final String PROMETHEUS_MAMESPACE = "am4";
+    private static final String PROMETHEUS_NAMESPACE = "am4";
     private static final int REGISTRY_UPDATE_INTERVAL_SEC = 10;
     private static MetricsCollector metricsCollector;
-    private static AtomicBoolean metricsRegistired = new AtomicBoolean(false);
+    private static AtomicBoolean metricsRegistered = new AtomicBoolean(false);
     private static CommandLine cmd;
     private static String baseUrl = "https://www.airlinemanager.com/";
     private static String username;
     private static String password;
     // am4 metrics
-    private static Map<String, Float> metrics;
+    private static HashMap<String, Float> metrics;
+    private static HashMap<String, HashMap<String, Float>> complexMetrics;
     private static PrometheusRegistry registry = new PrometheusRegistry();
     // prometheus metrics
     private static Gauge acFleetSize;
@@ -77,7 +78,7 @@ public class PrometheusExporter {
 
     private static void registerMetrics() throws Exception {
         // Avoid of try to register multiple times
-        if (metricsRegistired.get()) {
+        if (metricsRegistered.get()) {
 
             return;
         }
@@ -91,84 +92,84 @@ public class PrometheusExporter {
         logger.debug("Registering AM4 metrics...");
 
         acFleetSize = Gauge.builder()
-                .name(String.format("%s_ac_fleet_size", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_ac_fleet_size", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("aircraft fleet size")
                 .register(registry);
 
         acHangarCapacity = Gauge.builder()
-                .name(String.format("%s_ac_hangar_capacity", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_ac_hangar_capacity", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("aircraft hangar capacity")
                 .register(registry);
 
         acRoutes = Gauge.builder()
-                .name(String.format("%s_ac_routes", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_ac_routes", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("aircraft routes created")
                 .register(registry);
 
         acStatus = Gauge.builder()
-                .name(String.format("%s_ac_status", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_ac_status", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("aircraft status by type")
                 .labelNames("type")
                 .register(registry);
 
         companyFuelHolding = Gauge.builder()
-                .name(String.format("%s_company_fuel_holding", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_company_fuel_holding", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("company fuel holding by fuel type")
                 .labelNames("type")
                 .register(registry);
 
         companyFuelLimit = Gauge.builder()
-                .name(String.format("%s_company_fuel_limit", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_company_fuel_limit", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("company fuel holding limit by fuel type")
                 .labelNames("type")
                 .register(registry);
 
         companyHubs = Gauge.builder()
-                .name(String.format("%s_company_hubs", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_company_hubs", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("company hubs")
                 .register(registry);
 
         companyMoney = Gauge.builder()
-                .name(String.format("%s_company_money", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_company_money", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("company money by account")
                 .labelNames("account")
                 .register(registry);
 
         companyReputation = Gauge.builder()
-                .name(String.format("%s_company_reputation", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_company_reputation", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("company reputation by type")
                 .labelNames("type")
                 .register(registry);
 
         companyShareValue = Gauge.builder()
-                .name(String.format("%s_company_share_value", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_company_share_value", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("company share value")
                 .register(registry);
 
         marketFuelPrice = Gauge.builder()
-                .name(String.format("%s_market_fuel_price", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_market_fuel_price", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("market fuel price by fuel type")
                 .labelNames("type")
                 .register(registry);
 
         statsCargoTransported = Gauge.builder()
-                .name(String.format("%s_stats_cargo_transported", PrometheusExporter.PROMETHEUS_MAMESPACE))
-                .help("statistics cargo trasported by load type")
+                .name(String.format("%s_stats_cargo_transported", PrometheusExporter.PROMETHEUS_NAMESPACE))
+                .help("statistics cargo transported by load type")
                 .labelNames("type")
                 .register(registry);
 
         statsFlightsOperated = Gauge.builder()
-                .name(String.format("%s_stats_flights_operated", PrometheusExporter.PROMETHEUS_MAMESPACE))
+                .name(String.format("%s_stats_flights_operated", PrometheusExporter.PROMETHEUS_NAMESPACE))
                 .help("statistics flights operated")
                 .register(registry);
 
         statsPassengersTransported = Gauge.builder()
-                .name(String.format("%s_stats_passengers_transported", PrometheusExporter.PROMETHEUS_MAMESPACE))
-                .help("statistics assengers trasported by class type")
+                .name(String.format("%s_stats_passengers_transported", PrometheusExporter.PROMETHEUS_NAMESPACE))
+                .help("statistics passengers transported by class type")
                 .labelNames("type")
                 .register(registry);
 
-        metricsRegistired = new AtomicBoolean(true);
+        metricsRegistered = new AtomicBoolean(true);
 
         logger.debug("AM4 metrics registered.");
     }
@@ -177,6 +178,18 @@ public class PrometheusExporter {
         while (true) {
             if (bot.hasNewMetrics().getAndSet(false)) {
                 logger.debug("Updating registry...");
+
+                complexMetrics = PrometheusExporter.metricsCollector.getComplexMetrics();
+                for (HashMap.Entry<String, HashMap<String, Float>> entry : complexMetrics.entrySet()) {
+                    String keyName = entry.getKey();
+                    HashMap<String, Float> innerHashMap = entry.getValue();
+
+                    if (keyName == "AccountMoney") {
+                        for (HashMap.Entry<String, Float> innerHashMapEntry : innerHashMap.entrySet()) {
+                            companyMoney.labelValues(innerHashMapEntry.getKey()).set(innerHashMapEntry.getValue());
+                        }
+                    }
+                }
 
                 metrics = PrometheusExporter.metricsCollector.getMetrics();
                 acFleetSize.set(metrics.get("FleetSize"));
@@ -190,7 +203,6 @@ public class PrometheusExporter {
                 companyFuelLimit.labelValues("co2").set(metrics.get("Co2Limit"));
                 companyFuelLimit.labelValues("fuel").set(metrics.get("FuelLimit"));
                 companyHubs.set(metrics.get("Hubs"));
-                companyMoney.labelValues("airline").set(metrics.get("AirlineAccountMoney"));
                 companyReputation.labelValues("cargo").set(metrics.get("CargoReputation"));
                 companyReputation.labelValues("airline").set(metrics.get("AirlineReputation"));
                 companyShareValue.set(metrics.get("ShareValue"));
