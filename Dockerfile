@@ -1,4 +1,14 @@
-FROM python:3.11-slim-bookworm
+FROM openjdk:21-jdk-slim AS maven_build
+
+RUN apt -y update && \
+    apt -y upgrade && \
+    apt -y install wget gnupg2 maven
+
+COPY ./ ./
+
+RUN mvn clean package assembly:single
+
+FROM openjdk:21-jdk-slim
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \
@@ -10,18 +20,19 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
 
 # Updating apt to see and install Google Chrome
-RUN apt-get -y update
-RUN apt-get install -y google-chrome-stable
+RUN apt-get -y update && \
+    apt-get install -y google-chrome-stable
 
-COPY . /app
+COPY --from=maven_build /target/am4bot-jar-with-dependencies.jar /app/am4bot.jar
+
+COPY src/main/resources/log4j2.properties /app
+
 WORKDIR /app
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
 
 VOLUME [ "/app" ]
 
-ENV USERNAME=""
-ENV PASSWORD=""
+ENV AM4_USERNAME=""
+ENV AM4_PASSWORD=""
 ENV FUEL_GOOD_PRICE=500
 ENV CO2_GOOD_PRICE=120
 ENV FUEL_BUDGET_PERCENT=70
@@ -32,18 +43,6 @@ ENV AIRCRAFT_MAX_HOURS_TO_ACHECK=24
 ENV RUN_MODE="once"
 ENV SERVICE_SLEEP_SEC=300
 ENV SCANNER_FILE="am4scanner.csv"
+ENV AM4_BOT_JAVA_CLASS="com.ashokhin.am4bot.App"
 
-
-CMD python ./app.py \
-    --username="${USERNAME}" \
-    --password="${PASSWORD}" \
-    --fuel-good-price=${FUEL_GOOD_PRICE} \
-    --co2-good-price=${CO2_GOOD_PRICE} \
-    --fuel-budget-percent=${FUEL_BUDGET_PERCENT} \
-    --maintenance-budget-percent=${MAINTANANCE_BUDGET_PERCENT} \
-    --marketing-budget-percent=${MARKETING_BUDGET_PERCENT} \
-    --aircraft-wear-percent=${AIRCRAFT_WEAR_PERCENT} \
-    --aircraft-max-hours-to-acheck=${AIRCRAFT_MAX_HOURS_TO_ACHECK} \
-    --run-mode=${RUN_MODE} \
-    --service-sleep-sec=${SERVICE_SLEEP_SEC} \
-    --scanner-file=${SCANNER_FILE}
+CMD java -cp am4bot.jar -Dlog4j.configurationFile=log4j2.properties ${AM4_BOT_JAVA_CLASS}
