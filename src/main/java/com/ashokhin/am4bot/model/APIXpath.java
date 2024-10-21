@@ -61,6 +61,28 @@ public final class APIXpath {
     public static final String xpathButtonDepart = "//div[@id='flightInfo']//button[contains(@onclick, 'route_depart.php?mode=all&ids=x')]";
 
     /*
+     * Side panel menu
+     */
+    // 'Hubs' list
+    public static final String xpathElementListHubs = "//div[@id='hubList']//div[contains(@onclick, 'hub_details.php?id=')]";
+    // Hub's name
+    public static final String xpathTextHubName = "./div[1]/b";
+    // 'Catering' icon
+    public static final String xpathElementCateringIcon = "./div[2]/span[contains(@class, 'glyphicons-fast-food')]";
+    // '+ Add catering' button
+    public static final String xpathButtonAddCatering = "//div[@id='hubDetail']//button[contains(@onclick, 'catering.php?hub=')]";
+    // 'Type #3' catering option
+    public static final String xpathButtonCateringOptionNo3 = "//div[@id='caterMain']//div[@onclick='setCatering(3,this);']";
+    // 'Select duration' dropdown
+    public static final String xpathDropdownCateringDuration = "//div[@id='caterMain']//select[@id='durationSelector']";
+    // 'Select amount' dropdown
+    public static final String xpathDropdownCateringAmount = "//div[@id='caterMain']//select[@id='caterAmount']";
+    // '+ Purchase' button
+    public static final String xpathButtonCateringPurchase = "//div[@id='caterMain']//button[@id='btnCaterDo']";
+    // '<- Hubs' button
+    public static final String xpathButtonBackToHubs = "//button[contains(@onclick, '#hubReturnBtn')]";
+
+    /*
      * Menu: 'Company'
      */
     // xpath for the button 'Company' in the main window

@@ -29,7 +29,7 @@ public class BotBase implements Runnable {
     private static final long MAX_TIME_DELTA_SEC = 60;
     private static final List<String> GOOGLE_PARAMETERS = new ArrayList<String>() {
         {
-            add("--headless");
+            // add("--headless");
             add("--start-maximized");
             add("--no-sandbox");
             add("--disable-dev-shm-usage");
@@ -284,6 +284,7 @@ public class BotBase implements Runnable {
     protected void startBot() throws Exception {
         this.webDriver = new ChromeDriver(this.setChromeOptions(BotBase.GOOGLE_PARAMETERS));
         this.login();
+        this.refreshPage();
     }
 
     protected void waitPage() {

@@ -16,6 +16,7 @@ import com.ashokhin.am4bot.model.APIXpath;
 import com.ashokhin.am4bot.model.Aircraft;
 import com.ashokhin.am4bot.model.AirplaneFuel;
 import com.ashokhin.am4bot.model.BotMode;
+import com.ashokhin.am4bot.model.Catering;
 import com.ashokhin.am4bot.model.FuelType;
 import com.ashokhin.am4bot.model.Maintenance;
 import com.ashokhin.am4bot.model.MaintenanceOperation;
@@ -165,7 +166,7 @@ public final class Bot extends BotBase {
     }
 
     private final void updateStuffMorale() throws Exception {
-        logger.info("Check stuff morale");
+        logger.info("Checking stuff morale");
 
         this.refreshPage();
 
@@ -179,7 +180,7 @@ public final class Bot extends BotBase {
             String stuffType = entry.getKey();
             Map<String, String> stuffMap = entry.getValue();
 
-            logger.debug(String.format("Check '%s' morale", stuffType));
+            logger.debug(String.format("Checking '%s' morale", stuffType));
             int moralePercent = this.getIntFromElement(stuffMap.get("xpathTextMorale"));
 
             logger.info(String.format("'%s' morale: %d%%", stuffType, moralePercent));
@@ -188,7 +189,7 @@ public final class Bot extends BotBase {
                 continue;
             }
 
-            logger.debug(String.format("Check '%s' salary", stuffType));
+            logger.debug(String.format("Checking '%s' salary", stuffType));
 
             int startSalary = this.getIntFromElement(stuffMap.get("xpathTextSalary"));
             int newSalary = 0;
@@ -234,7 +235,7 @@ public final class Bot extends BotBase {
     }
 
     private final void repairLounges() throws Exception {
-        logger.info("Check lounges state");
+        logger.info("Checking lounges state");
 
         if (!this.loungesNeedRepair()) {
             return;
@@ -289,6 +290,40 @@ public final class Bot extends BotBase {
         this.clickButton(APIXpath.xpathButtonPopupClose);
     }
 
+    /*
+     * Buy catering
+     */
+    private final void buyCatering() throws Exception {
+        logger.info("Buying catering");
+
+        this.clickButton(APIXpath.xpathButtonHubs);
+        List<WebElement> hubsList = this.getElements(APIXpath.xpathElementListHubs);
+
+        for (WebElement hubWebElement : hubsList) {
+            WebElement hubCateringIconElement = this.getSubElement(hubWebElement, APIXpath.xpathElementCateringIcon);
+            WebElement hubNameElement = this.getSubElement(hubWebElement, APIXpath.xpathTextHubName);
+
+            String hubName = this.getTextFromElement(hubNameElement);
+
+            if (hubCateringIconElement != null) {
+                logger.debug(String.format("Hub '%s' has catering", hubName));
+                continue;
+            }
+
+            logger.debug(String.format("Buying catering for hub '%s'", hubName));
+            this.clickButton(hubWebElement);
+            this.clickButton(APIXpath.xpathButtonAddCatering);
+            this.clickButton(APIXpath.xpathButtonCateringOptionNo3);
+            this.selectFromDropdown(APIXpath.xpathDropdownCateringDuration,
+                    Catering.CATERING_DURATION);
+            this.selectFromDropdown(APIXpath.xpathDropdownCateringAmount, Catering.CATERING_AMOUNT);
+            this.clickButton(APIXpath.xpathButtonCateringPurchase);
+            this.clickButton(APIXpath.xpathButtonBackToHubs);
+        }
+
+        this.clickButton(APIXpath.xpathButtonPopupClose);
+    }
+
     private final synchronized void checkMoney() {
         logger.trace("Checking money...");
 
@@ -304,7 +339,7 @@ public final class Bot extends BotBase {
     }
 
     private final void checkFuelType(FuelType fuelType) throws Exception {
-        logger.info(String.format("Check '%s' price and capacity", fuelType.getTitle()));
+        logger.info(String.format("Checking '%s' price and capacity", fuelType.getTitle()));
 
         switch (fuelType) {
             case FUEL:
@@ -394,7 +429,7 @@ public final class Bot extends BotBase {
      */
     private final void buyFuel() throws Exception {
         this.checkMoney();
-        logger.info("Buy fuel");
+        logger.info("Buying fuel");
 
         this.clickButton(APIXpath.xpathAllFuelElementsMap.get("common").get("xpathButtonFuelMenu"));
 
@@ -789,7 +824,7 @@ public final class Bot extends BotBase {
     }
 
     private final void checkMarketingCompanies() throws Exception {
-        logger.info("Check marketing companies");
+        logger.info("Checking marketing companies");
 
         this.clickButton(APIXpath.xpathButtonFinanceMarketingNewCampaign);
 
@@ -900,6 +935,7 @@ public final class Bot extends BotBase {
         logger.info("Start Bot");
         super.startBot();
         this.repairLounges();
+        this.buyCatering();
         this.updateStuffMorale();
         this.buyFuel();
         this.startMarketingCompanies();
