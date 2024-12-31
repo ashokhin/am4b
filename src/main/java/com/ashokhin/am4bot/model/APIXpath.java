@@ -67,6 +67,14 @@ public final class APIXpath {
     public static final String xpathElementListHubs = "//div[@id='hubList']//div[contains(@onclick, 'hub_details.php?id=')]";
     // Hub's name
     public static final String xpathTextHubName = "./div[1]/b";
+    // Hub's 'Departures' stat
+    public static final String xpathTextHubDepartures = "./div[3]/div[1]/div[1]//span[@class='s-text']";
+    // Hub's 'Arrivals' stat
+    public static final String xpathTextHubArrivals = "./div[3]/div[1]/div[2]//span[@class='s-text']";
+    // Hub's 'PAX Departed' stat
+    public static final String xpathTextHubPaxDeparted = "./div[4]/div[1]/div[1]//span[@class='s-text']";
+    // Hub's 'PAX Arrived' stat
+    public static final String xpathTextHubPaxArrived = "./div[4]/div[1]/div[2]//span[@class='s-text']";
     // 'Catering' icon
     public static final String xpathElementCateringIcon = "./div[2]/span[contains(@class, 'glyphicons-fast-food')]";
     // '+ Add catering' button

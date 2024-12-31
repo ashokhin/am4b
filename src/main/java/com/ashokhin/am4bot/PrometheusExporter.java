@@ -1,6 +1,7 @@
 package com.ashokhin.am4bot;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -10,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.ashokhin.am4bot.bot.Bot;
 import com.ashokhin.am4bot.bot.MetricsCollector;
+import com.ashokhin.am4bot.model.HubsStats;
 import com.ashokhin.am4bot.utils.CliArgumentParser;
 
 import io.prometheus.metrics.core.metrics.Gauge;
@@ -30,6 +32,7 @@ public class PrometheusExporter {
     // am4 metrics
     private static HashMap<String, Float> metrics;
     private static HashMap<String, HashMap<String, Float>> complexMetrics;
+    private static List<HubsStats> hubsMetricsList;
     private static PrometheusRegistry registry = new PrometheusRegistry();
     // prometheus metrics
     private static Gauge acFleetSize;
@@ -46,6 +49,7 @@ public class PrometheusExporter {
     private static Gauge statsCargoTransported;
     private static Gauge statsFlightsOperated;
     private static Gauge statsPassengersTransported;
+    private static Gauge statsHubs;
 
     private static Bot bot;
 
@@ -169,6 +173,12 @@ public class PrometheusExporter {
                 .labelNames("type")
                 .register(registry);
 
+        statsHubs = Gauge.builder()
+                .name(String.format("%s_hubs_stats", PrometheusExporter.PROMETHEUS_NAMESPACE))
+                .help("hubs statistics by hub's name and stat's type")
+                .labelNames("name", "type")
+                .register(registry);
+
         metricsRegistered = new AtomicBoolean(true);
 
         logger.debug("AM4 metrics registered.");
@@ -189,6 +199,11 @@ public class PrometheusExporter {
                             companyMoney.labelValues(innerHashMapEntry.getKey()).set(innerHashMapEntry.getValue());
                         }
                     }
+                }
+
+                hubsMetricsList = PrometheusExporter.metricsCollector.getHubsMetricsList();
+                for (HubsStats entry : hubsMetricsList) {
+                    statsHubs.labelValues(entry.getLabels()).set(entry.getValue());
                 }
 
                 metrics = PrometheusExporter.metricsCollector.getMetrics();

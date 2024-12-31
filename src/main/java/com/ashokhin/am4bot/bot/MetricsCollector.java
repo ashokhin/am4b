@@ -1,5 +1,6 @@
 package com.ashokhin.am4bot.bot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -9,12 +10,14 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebElement;
 
 import com.ashokhin.am4bot.model.APIXpath;
+import com.ashokhin.am4bot.model.HubsStats;
 
 public final class MetricsCollector implements Runnable {
     private static final int COLLECTION_INTERVAL_SEC = 60;
     private static final Logger logger = LogManager.getLogger(Bot.class);
     private static HashMap<String, Float> metricsMap = buildMetricsMap();
     private static HashMap<String, HashMap<String, Float>> complexMetricsMap = buildComplexMap();
+    private static List<HubsStats> hubsStatsList = new ArrayList<HubsStats>();
     private static AtomicBoolean metricsCollected = new AtomicBoolean(false);
     private Bot bot;
 
@@ -103,6 +106,50 @@ public final class MetricsCollector implements Runnable {
         }
 
         complexMetricsMap.put("AccountMoney", accountData);
+        bot.clickButton(APIXpath.xpathButtonPopupClose);
+    }
+
+    private final void checkHubs() throws Exception {
+        logger.trace("Open 'Hubs' popup...");
+
+        bot.clickButton(APIXpath.xpathButtonHubs);
+        List<WebElement> hubsList = bot.getElements(APIXpath.xpathElementListHubs);
+
+        for (WebElement hubWebElement : hubsList) {
+            WebElement hubNameElement = bot.getSubElement(hubWebElement, APIXpath.xpathTextHubName);
+
+            String hubName = bot.getTextFromElement(hubNameElement);
+
+            // Departures
+            logger.debug(String.format("Get 'Departures' for the hub '%s'", hubName));
+            WebElement hubStatWebElement = bot.getSubElement(hubWebElement, APIXpath.xpathTextHubDepartures);
+            Float HubStat = bot.getIntFromElement(hubStatWebElement).floatValue();
+            logger.trace(String.format("The 'Departures' stat for the hub '%s': %f", hubName, HubStat));
+            HubsStats hubStat = new HubsStats(hubName, "Departures", HubStat);
+            hubsStatsList.add(hubStat);
+            // Arrivals
+            logger.debug(String.format("Get 'Arrivals' for the hub '%s'", hubName));
+            hubStatWebElement = bot.getSubElement(hubWebElement, APIXpath.xpathTextHubArrivals);
+            HubStat = bot.getIntFromElement(hubStatWebElement).floatValue();
+            logger.trace(String.format("The 'Arrivals' stat for the hub '%s': %f", hubName, HubStat));
+            hubStat = new HubsStats(hubName, "Arrivals", HubStat);
+            hubsStatsList.add(hubStat);
+            // PAX Departed
+            logger.debug(String.format("Get 'PAX Departed' for the hub '%s'", hubName));
+            hubStatWebElement = bot.getSubElement(hubWebElement, APIXpath.xpathTextHubPaxDeparted);
+            HubStat = bot.getIntFromElement(hubStatWebElement).floatValue();
+            logger.trace(String.format("The 'PAX Departed' stat for the hub '%s': %f", hubName, HubStat));
+            hubStat = new HubsStats(hubName, "PAX Departed", HubStat);
+            hubsStatsList.add(hubStat);
+            // PAX Arrived
+            logger.debug(String.format("Get 'PAX Arrived' for the hub '%s'", hubName));
+            hubStatWebElement = bot.getSubElement(hubWebElement, APIXpath.xpathTextHubPaxArrived);
+            HubStat = bot.getIntFromElement(hubStatWebElement).floatValue();
+            logger.trace(String.format("The 'PAX Arrived' stat for the hub '%s': %f", hubName, HubStat));
+            hubStat = new HubsStats(hubName, "PAX Arrived", HubStat);
+            hubsStatsList.add(hubStat);
+        }
+
         bot.clickButton(APIXpath.xpathButtonPopupClose);
     }
 
@@ -250,6 +297,7 @@ public final class MetricsCollector implements Runnable {
             logger.debug("Collecting metrics...");
             bot.refreshPage();
             this.checkMoney();
+            this.checkHubs();
             this.checkOverview();
             this.checkFuel();
 
@@ -284,6 +332,10 @@ public final class MetricsCollector implements Runnable {
 
     public final HashMap<String, HashMap<String, Float>> getComplexMetrics() {
         return MetricsCollector.complexMetricsMap;
+    }
+
+    public final List<HubsStats> getHubsMetricsList() {
+        return MetricsCollector.hubsStatsList;
     }
 
     public final AtomicBoolean isUpdated() {
