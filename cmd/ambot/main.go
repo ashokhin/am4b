@@ -3,128 +3,117 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
-	"os"
-	"strings"
+	"net/http"
+	"path/filepath"
 	"time"
 
-	"github.com/ashokhin/am4bot/auth"
-	"github.com/chromedp/cdproto/cdp"
-	"github.com/chromedp/chromedp"
+	"github.com/ashokhin/am4bot/internal/bot"
+	"github.com/ashokhin/am4bot/internal/config"
+
+	"github.com/alecthomas/kingpin/v2"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	versionCollector "github.com/prometheus/client_golang/prometheus/collectors/version"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/promslog"
+	"github.com/prometheus/common/promslog/flag"
+	"github.com/prometheus/common/version"
+	"github.com/robfig/cron/v3"
 )
 
-type Product struct {
-	Name, Price, Image, URL string
-}
+const (
+	APP_NAME      string = "ambot"
+	EXPORTER_NAME string = "ambot_exporter"
+)
 
-var logger slog.Logger
-
-func init() {
-	logger = *slog.New(slog.NewTextHandler(os.Stderr, nil))
-	slog.SetDefault(&logger)
-}
+var (
+	configFile   = kingpin.Flag("app.config", "YAML file with configuration.").Short('c').Default("config.yaml").String()
+	webAddr      = kingpin.Flag("web.listen-address", "Addresses on which to expose metrics and web interface.").Default(":9150").String()
+	webTelemetry = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
+)
 
 func main() {
-	timeStart := time.Now()
-	a := auth.New(&logger)
-	a.Auth()
-	// initialize the Chrome instance
-	ctx, cancel := chromedp.NewContext(
-		context.Background(),
-		chromedp.WithLogf(log.Printf),
-	)
+	var err error
+	var conf *config.Config
+
+	promslogConfig := &promslog.Config{}
+	flag.AddFlags(kingpin.CommandLine, promslogConfig)
+	kingpin.Version(version.Print(APP_NAME))
+	kingpin.HelpFlag.Short('h')
+	kingpin.Parse()
+	logger := promslog.New(promslogConfig)
+	slog.SetDefault(logger)
+
+	slog.Info(fmt.Sprintf("starting application %s", APP_NAME), "version", version.Info())
+	slog.Info("build context", "build_context", version.BuildContext())
+
+	// load configuration
+	confPath, _ := filepath.Abs(*configFile)
+
+	if conf, err = config.New(confPath); err != nil {
+		slog.Error("config loading error", "error", err)
+
+		return
+	}
+
+	prometheusRegistry := prometheus.NewRegistry()
+	prometheusRegistry.MustRegister(versionCollector.NewCollector(EXPORTER_NAME))
+	prometheusRegistry.MustRegister(collectors.NewGoCollector())
+
+	bot := bot.New(conf, prometheusRegistry)
+
+	handler := promhttp.HandlerFor(
+		prometheusRegistry,
+		promhttp.HandlerOpts{
+			Registry: prometheusRegistry,
+		})
+
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var products []Product
+	// start it once in the blocking mode (not inside a goroutine)
+	// for collecting initial Prometheus metrics
+	if err := bot.Run(ctx); err != nil {
+		slog.Warn("error in Bot.Run", "error", err)
 
-	// create a channel to receive products
-	productChan := make(chan Product)
-	done := make(chan bool)
-
-	// start a goroutine to collect products
-	go func() {
-		for product := range productChan {
-			logger.Info("product found", "name", product.Name, "price", product.Price)
-			products = append(products, product)
-		}
-		done <- true
-	}()
-
-	// navigate and scrape
-	err := chromedp.Run(ctx,
-		chromedp.Navigate("https://www.scrapingcourse.com/infinite-scrolling"),
-		scrapeProducts(productChan),
-	)
-	if err != nil {
-		log.Fatalf("err: %v", err)
+		bot.PrometheusMetrics.Up.Set(0)
+	} else {
+		bot.PrometheusMetrics.Up.Set(1)
 	}
 
-	close(productChan)
-	<-done
+	// now start it inside "cronjob" (goroutine with schedule)
 
-	// print results
-	logger.Info("scrape completed", "scraped_products", len(products))
-	for _, p := range products {
-		logger.Info("product info", "name", p.Name, "price", p.Price, "image_url", p.Image, "product_url", p.URL)
-	}
+	// create cron object
+	c := cron.New()
+	// create cron job
+	c.AddFunc(bot.Conf.CronSchedule, func() {
+		slog.Warn("start job", "start_time", time.Now().UTC())
 
-	logger.Info("checks success", "elapsed_time", fmt.Sprintf("%v", time.Since(timeStart)))
-}
+		if err := bot.Run(ctx); err != nil {
+			slog.Warn("error in Bot.Run", "error", err)
 
-func scrapeProducts(productChan chan<- Product) chromedp.ActionFunc {
-	return func(ctx context.Context) error {
-		var previousHeight int
-		for {
-			// get all product nodes
-			var nodes []*cdp.Node
-			if err := chromedp.Nodes(".product-item", &nodes).Do(ctx); err != nil {
-				return err
-			}
-
-			// extract data from each product
-			for _, node := range nodes {
-				var product Product
-
-				// using chromedp's node selection to extract data
-				if err := chromedp.Run(ctx,
-					chromedp.Text(".product-name", &product.Name, chromedp.ByQuery, chromedp.FromNode(node)),
-					chromedp.Text(".product-price", &product.Price, chromedp.ByQuery, chromedp.FromNode(node)),
-					chromedp.AttributeValue("img", "src", &product.Image, nil, chromedp.ByQuery, chromedp.FromNode(node)),
-					chromedp.AttributeValue("a", "href", &product.URL, nil, chromedp.ByQuery, chromedp.FromNode(node)),
-				); err != nil {
-					continue
-				}
-
-				// clean price text
-				product.Price = strings.TrimSpace(product.Price)
-
-				// send product to channel if not empty
-				if product.Name != "" {
-					productChan <- product
-				}
-			}
-
-			// scroll to bottom
-			var height int
-			if err := chromedp.Evaluate(`document.documentElement.scrollHeight`, &height).Do(ctx); err != nil {
-				return err
-			}
-
-			// break if we've reached the bottom (no height change after scroll)
-			if height == previousHeight {
-				break
-			}
-			previousHeight = height
-
-			// scroll and wait for content to load
-			if err := chromedp.Run(ctx,
-				chromedp.Evaluate(`window.scrollTo(0, document.documentElement.scrollHeight)`, nil),
-				chromedp.Sleep(3*time.Second), // Wait for new content to load
-			); err != nil {
-				return err
-			}
+			bot.PrometheusMetrics.Up.Set(0)
+		} else {
+			bot.PrometheusMetrics.Up.Set(1)
 		}
-		return nil
+
+		slog.Warn("job done", "end_time", time.Now().UTC(), "next_run", c.Entry(1).Next.UTC())
+	})
+
+	// start cron object, schedule jobs
+	c.Start()
+
+	slog.Info("job scheduled", "next_run", c.Entry(1).Next.UTC())
+
+	// register handler for the webTelemetry page
+	http.Handle(*webTelemetry, handler)
+
+	slog.Info(fmt.Sprintf("starting Prometheus exporter %s", EXPORTER_NAME), "address", *webAddr, "location", *webTelemetry)
+
+	if err := http.ListenAndServe(*webAddr, nil); err != nil {
+		slog.Error("error in http server", "error", err)
+
+		return
 	}
 }
