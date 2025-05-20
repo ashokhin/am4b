@@ -27,6 +27,13 @@ jobs:
       with:
         images: ${{ secrets.DOCKERHUB_REPO_ORG }}/${{ secrets.DOCKERHUB_REPO_NAME }}
     
+    - name: Build application
+      run: make
+    
+    - name: Check version
+      run:
+        ./bin/ambot --version
+    
     - name: Build and push Docker image
       uses: docker/build-push-action@v6
       with:

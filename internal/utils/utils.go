@@ -25,9 +25,9 @@ func intFromString(str string) (int, error) {
 	str = strings.Join(allNumRegex.FindAllString(str, -1), "")
 	i, err = strconv.Atoi(str)
 	if err != nil {
-		slog.Warn("error in utils.intFromString", "string", str, "error", err)
+		slog.Debug("error in utils.intFromString", "string", str, "error", err)
 
-		return i, err
+		return 0, nil
 	}
 
 	return i, nil
@@ -188,6 +188,28 @@ func GetFloatFromChildElement(sel string, resultFloat *float64, node *cdp.Node) 
 	}
 }
 
+func GetFloatFromChildElementAttribute(sel string, resultFloat *float64, node *cdp.Node) chromedp.Tasks {
+	var resultStr string
+	var err error
+
+	slog.Debug("get float from child element attribute", "element", sel)
+
+	return chromedp.Tasks{
+		chromedp.Text(sel, &resultStr, chromedp.ByQuery, chromedp.FromNode(node)),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			*resultFloat, err = floatFromString(resultStr)
+			if err != nil {
+				slog.Warn("error in utils.GetIntFromElement > utils.floatFromString",
+					"string", resultStr, "error", err)
+
+				return err
+			}
+
+			return nil
+		}),
+	}
+}
+
 // ClickElement is an element query action that sends a mouse click event to the first element
 // node matching the selector and waits for 1sec.
 func ClickElement(sel string) chromedp.Tasks {
@@ -195,7 +217,7 @@ func ClickElement(sel string) chromedp.Tasks {
 
 	return chromedp.Tasks{
 		chromedp.Click(sel, chromedp.ByQuery),
-		chromedp.Sleep(1 * time.Second),
+		chromedp.Sleep(2 * time.Second),
 	}
 }
 
@@ -204,7 +226,7 @@ func DoClickElement(ctx context.Context, sel string) error {
 
 	if err := chromedp.Run(ctx,
 		chromedp.Click(sel, chromedp.ByQuery),
-		chromedp.Sleep(1*time.Second),
+		chromedp.Sleep(2*time.Second),
 	); err != nil {
 		slog.Warn("error in utils.DoClickElement", "error", err)
 

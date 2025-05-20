@@ -34,6 +34,7 @@ type Config struct {
 	FuelPrice               Price    `yaml:"good_price"`
 	AircraftWearPercent     float64  `yaml:"aircraft_wear_percent"`
 	AircraftMaxHoursToCheck float64  `yaml:"aircraft_max_hours_to_check"`
+	AircraftModifyLimit     float64  `yaml:"aircraft_modify_limit"`
 	FuelCriticalPercent     float64  `yaml:"fuel_critical_percent"`
 	CronSchedule            string   `yaml:"service_cron_string"`
 	Services                []string `yaml:"services"`

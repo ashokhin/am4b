@@ -16,4 +16,4 @@ EXPOSE 9150/tcp
 
 VOLUME /app/conf
 
-CMD ["/app/bin/ambot", "--config", "/app/conf/config.yaml"]
+CMD ["/app/bin/ambot", "--app.config", "/app/conf/config.yaml"]

@@ -31,7 +31,7 @@ func New(conf *config.Config, registry *prometheus.Registry) Bot {
 		chromedp.NoDefaultBrowserCheck,
 		chromedp.WindowSize(1920, 1080),
 		// Change to 'false' for displaying Chrome window
-		chromedp.Flag("headless", false),
+		chromedp.Flag("headless", true),
 		chromedp.Flag("start-maximized", true),
 		chromedp.Flag("disable-dev-shm-usage", true),
 		chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"),
@@ -47,8 +47,8 @@ func New(conf *config.Config, registry *prometheus.Registry) Bot {
 func (b *Bot) Run(ctx context.Context) error {
 	timeStart := time.Now()
 
-	slog.Debug("create context with the 1 minute timeout")
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	slog.Debug("create context with the 2 minutes timeout")
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
 
 	ctx, cancel = chromedp.NewExecAllocator(ctx, b.chromeOpts...)
@@ -113,10 +113,23 @@ func (b *Bot) Run(ctx context.Context) error {
 				return err
 			}
 
+		case "ac_maintenance":
+			if err := b.maintenance(ctx); err != nil {
+				slog.Warn("error in Bot.Run > Bot.maintenance", "error", err)
+
+				return err
+			}
+		case "depart":
+			if err := b.depart(ctx); err != nil {
+				slog.Warn("error in Bot.Run > Bot.depart", "error", err)
+
+				return err
+			}
+
 		default:
 			slog.Warn("unknown service", "service", serviceName,
 				"available_services",
-				[]string{"company_stats, staff_morale, hubs, buy_fuel, marketing_companies"})
+				[]string{"company_stats, staff_morale, hubs, buy_fuel, marketing_companies, ac_maintenance", "depart"})
 		}
 	}
 

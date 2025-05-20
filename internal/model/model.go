@@ -1,5 +1,13 @@
 package model
 
+type MaintenanceType int
+
+const (
+	A_CHECK MaintenanceType = iota
+	REPAIR
+	MODIFY
+)
+
 type StaffEntry struct {
 	Name             string
 	TextSalary       string
@@ -37,4 +45,27 @@ var StaffEntires = []StaffEntry{
 		`button[onclick="Ajax('staff_action.php?type=tech&mode=raise','runme',this);"]`,
 		`button[onclick="Ajax('staff_action.php?type=tech&mode=cut','runme',this);"]`,
 	},
+}
+
+type Fuel struct {
+	FuelType string
+	Price    float64
+	Holding  float64
+	Capacity float64
+	IsFull   bool
+}
+
+type Aircraft struct {
+	RegNumber   string
+	AcType      string
+	WearPercent float64
+	HoursACheck float64
+}
+
+type MarketingCompany struct {
+	Name               string
+	CompanyRow         string
+	CompanyOptionValue string
+	CompanyCost        string
+	CompanyButton      string
 }
