@@ -57,7 +57,7 @@ func (b *Bot) hubs(ctx context.Context) error {
 	for _, hubElem := range hubsElemList {
 		var hub Hub
 
-		slog.Debug("hubElem", "elem", &hubElem)
+		slog.Debug("hubElem", "elem", hubElem)
 
 		if err := chromedp.Run(ctx,
 			chromedp.Text(model.TEXT_HUBS_HUB_NAME, &hub.name, chromedp.ByQuery, chromedp.FromNode(hubElem)),
@@ -133,20 +133,25 @@ func (b *Bot) repairLounge(ctx context.Context, hubElem *cdp.Node) error {
 		return err
 	}
 
-	slog.Debug("repair cost", "value", repairCost)
+	slog.Debug("repair cost", "value", int(repairCost))
 
-	slog.Debug("available money", "value", b.Conf.BudgetMoney.Maintenance)
+	slog.Debug("available money", "value", int(b.Conf.BudgetMoney.Maintenance))
 
-	if b.Conf.BudgetMoney.Maintenance > repairCost {
-		slog.Info("repair lounge", "repairCost", int(repairCost),
-			"BudgetMoney.Maintenance", int(b.Conf.BudgetMoney.Maintenance))
+	if repairCost > b.Conf.BudgetMoney.Maintenance {
+		slog.Warn("lounge repair is too expensive", "cost", int(repairCost),
+			"budget", int(b.Conf.BudgetMoney.Maintenance))
 
-		utils.DoClickElement(ctx, model.BUTTON_HUBS_HUB_MANAGE_REPAIR)
-
-		// reduce current account money and maintenance budged by repair cost
-		b.AccountBalance -= repairCost
-		b.Conf.BudgetMoney.Maintenance -= repairCost
+		return nil
 	}
+
+	slog.Info("repair lounge", "repairCost", int(repairCost),
+		"BudgetMoney.Maintenance", int(b.Conf.BudgetMoney.Maintenance))
+
+	utils.DoClickElement(ctx, model.BUTTON_HUBS_HUB_MANAGE_REPAIR)
+
+	// reduce current account money and maintenance budged by repair cost
+	b.AccountBalance -= repairCost
+	b.Conf.BudgetMoney.Maintenance -= repairCost
 
 	return nil
 }

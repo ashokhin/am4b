@@ -30,7 +30,7 @@ const (
 	BUTTON_COMMON_CLOSE_POPUP string = `span[onclick="closePop();"]`
 
 	// "Flight info" elements
-	ICON_FI_LOUNGE_ALERT  string = `div[id="flightInfo"] > span[id="loungeAlertIcon"]`
+	ICON_FI_LOUNGE_ALERT  string = "div#flightInfo span#loungeAlertIcon"
 	BUTTON_FI_OVERVIEW    string = `div#flightInfo div#flightInfoSecContainer button[onclick="popup('overview.php','Overview');"]`
 	BUTTON_FI_DEPART_ALL  string = "div#flightInfo button.btn-xs:nth-child(2)"
 	TEXT_FI_DEPART_AMOUNT string = "div#flightInfo span#listDepartAmount"
