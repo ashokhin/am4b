@@ -250,7 +250,33 @@ func IsElementVisible(ctx context.Context, sel string) bool {
 		chromedp.Nodes(sel, &nodesList, chromedp.ByQueryAll),
 	); err != nil {
 		// if not found for the ctx timeout then return false - element is not visible
-		slog.Debug("error in utils.IsElementVisible", "error", err, "selector", sel)
+		slog.Debug("error in utils.IsElementVisible", "selector", sel, "error", err)
+
+		return false
+	}
+
+	slog.Debug("current nodesList", "len", len(nodesList))
+
+	// if 1 or more elements found then return true - element is visible
+	return len(nodesList) > 0
+
+}
+
+func IsSubElementVisible(ctx context.Context, sel string, node *cdp.Node) bool {
+	var nodesList []*cdp.Node
+
+	slog.Debug("check if sub-element is visible", "element", sel)
+
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	slog.Debug("init nodesList", "len", len(nodesList))
+
+	if err := chromedp.Run(ctx,
+		chromedp.Nodes(sel, &nodesList, chromedp.ByQueryAll, chromedp.FromNode(node)),
+	); err != nil {
+		// if not found for the ctx timeout then return false - element is not visible
+		slog.Debug("error in utils.IsSubElementVisible", "selector", sel, "error", err)
 
 		return false
 	}

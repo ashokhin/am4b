@@ -69,3 +69,12 @@ type MarketingCompany struct {
 	CompanyCost        string
 	CompanyButton      string
 }
+
+type Hub struct {
+	Name        string
+	Departures  float64
+	Arrivals    float64
+	PaxDeparted float64
+	PaxArrived  float64
+	HasCatering bool
+}
