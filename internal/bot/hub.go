@@ -11,14 +11,6 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-type Hub struct {
-	name        string
-	departures  float64
-	arrivals    float64
-	paxDeparted float64
-	paxArrived  float64
-}
-
 func (b *Bot) hubs(ctx context.Context) error {
 	var needRepair bool
 
@@ -55,35 +47,45 @@ func (b *Bot) hubs(ctx context.Context) error {
 
 	// get metrics for all hubs in humElemList
 	for _, hubElem := range hubsElemList {
-		var hub Hub
+		var hub model.Hub
 
 		slog.Debug("hubElem", "elem", hubElem)
 
 		if err := chromedp.Run(ctx,
-			chromedp.Text(model.TEXT_HUBS_HUB_NAME, &hub.name, chromedp.ByQuery, chromedp.FromNode(hubElem)),
-			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_DEPARTURES, &hub.departures, hubElem),
-			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_ARRIVALS, &hub.arrivals, hubElem),
-			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_PAX_DEPARTED, &hub.paxDeparted, hubElem),
-			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_PAX_ARRIVED, &hub.paxArrived, hubElem),
+			chromedp.Text(model.TEXT_HUBS_HUB_NAME, &hub.Name, chromedp.ByQuery, chromedp.FromNode(hubElem)),
+			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_DEPARTURES, &hub.Departures, hubElem),
+			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_ARRIVALS, &hub.Arrivals, hubElem),
+			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_PAX_DEPARTED, &hub.PaxDeparted, hubElem),
+			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_PAX_ARRIVED, &hub.PaxArrived, hubElem),
 		); err != nil {
 			slog.Warn("error in Bot.hubs > get gub info", "error", err)
 
 			return err
 		}
 
-		slog.Debug("hub found", "name", hub.name)
+		slog.Debug("hub found", "name", hub.Name)
 
-		b.PrometheusMetrics.HubStats.WithLabelValues(hub.name, "departures").Set(hub.departures)
-		b.PrometheusMetrics.HubStats.WithLabelValues(hub.name, "arrivals").Set(hub.arrivals)
-		b.PrometheusMetrics.HubStats.WithLabelValues(hub.name, "paxDeparted").Set(hub.paxDeparted)
-		b.PrometheusMetrics.HubStats.WithLabelValues(hub.name, "paxArrived").Set(hub.paxArrived)
+		hub.HasCatering = utils.IsSubElementVisible(ctx, model.ICON_HUBS_CATERING, hubElem)
+
+		b.PrometheusMetrics.HubStats.WithLabelValues(hub.Name, "departures").Set(hub.Departures)
+		b.PrometheusMetrics.HubStats.WithLabelValues(hub.Name, "arrivals").Set(hub.Arrivals)
+		b.PrometheusMetrics.HubStats.WithLabelValues(hub.Name, "paxDeparted").Set(hub.PaxDeparted)
+		b.PrometheusMetrics.HubStats.WithLabelValues(hub.Name, "paxArrived").Set(hub.PaxArrived)
 
 		// repair lounge if global 'Alert icon' for lounges is displayed
 		if needRepair {
-			slog.Debug("repair lounge", "lounge", hub.name)
+			slog.Debug("repair lounge", "lounge", hub.Name)
 
 			if err := b.repairLounge(ctx, hubElem); err != nil {
 				slog.Warn("error in Bot.hubs > Bot.repairLounge", "error", err)
+
+				return err
+			}
+		}
+
+		if !hub.HasCatering {
+			if err := b.buyCatering(ctx, hub, hubElem); err != nil {
+				slog.Warn("error in Bot.hubs > Bot.buyCatering", "error", err)
 
 				return err
 			}
@@ -106,7 +108,7 @@ func (b *Bot) repairLounge(ctx context.Context, hubElem *cdp.Node) error {
 		return err
 	}
 
-	// return to list of hubs when editing from function
+	// return to list of hubs when exiting from function
 	defer utils.DoClickElement(ctx, model.BUTTON_HUBS_HUB_MANAGE_BACK)
 
 	if !utils.IsElementVisible(ctx, model.BUTTON_HUBS_HUB_MANAGE) {
@@ -156,5 +158,56 @@ func (b *Bot) repairLounge(ctx context.Context, hubElem *cdp.Node) error {
 	return nil
 }
 
-// BUTTON_HUBS_HUB_REPAIR
-// TEXT_HUBS_HUB_MANAGE_REPAIR_COST
+func (b *Bot) buyCatering(ctx context.Context, hub model.Hub, hubElem *cdp.Node) error {
+	slog.Debug("Buy catering", "hub", hub.Name)
+
+	if err := chromedp.Run(ctx,
+		chromedp.Click(model.ELEMENT_HUB, chromedp.ByQuery, chromedp.FromNode(hubElem)),
+	); err != nil {
+		slog.Warn("error in Bot.buyCatering > select hub", "error", err)
+
+		return err
+	}
+
+	// return to list of hubs when exiting from function
+	defer utils.DoClickElement(ctx, model.BUTTON_HUBS_HUB_MANAGE_BACK)
+
+	if !utils.IsElementVisible(ctx, model.BUTTON_HUBS_ADD_CATERING) {
+		slog.Warn("button '+ Add catering' isn't visible")
+
+		return nil
+	}
+
+	var cateringCost float64
+
+	if err := chromedp.Run(ctx,
+		utils.ClickElement(model.BUTTON_HUBS_ADD_CATERING),
+		chromedp.WaitReady(model.ELEM_HUBS_CATERING_OPTION_3, chromedp.ByQuery),
+		utils.ClickElement(model.ELEM_HUBS_CATERING_OPTION_3),
+		chromedp.SetValue(model.SELECT_HUBS_CATERING_DURATION, model.OPTION_HUBS_CATERING_DURATION_1W, chromedp.ByQuery),
+		chromedp.SetValue(model.SELECT_HUBS_CATERING_AMOUNT, model.OPTION_HUBS_CATERING_AMOUNT_20000, chromedp.ByQuery),
+		utils.GetFloatFromElement(model.TEXT_HUBS_CATERING_COST, &cateringCost),
+	); err != nil {
+		slog.Warn("error in Bot.buyCatering > select hub", "error", err)
+
+		return err
+	}
+
+	if cateringCost > b.Conf.BudgetMoney.Maintenance {
+		slog.Warn("catering is too expensive", "cost", int(cateringCost),
+			"budget", int(b.Conf.BudgetMoney.Maintenance), "hub", hub.Name)
+
+		return nil
+	}
+
+	// buy catering
+	if err := chromedp.Run(ctx,
+		utils.ClickElement(model.BUTTON_HUBS_CATERING_BUY),
+	); err != nil {
+		slog.Warn("error in Bot.buyCatering > buy catering", "hub", hub.Name, "error", err)
+
+		return err
+	}
+
+	return nil
+}
