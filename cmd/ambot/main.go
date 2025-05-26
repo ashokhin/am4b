@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -91,9 +92,9 @@ func main() {
 		slog.Warn("start job", "start_time", time.Now().UTC())
 
 		if err := bot.Run(ctx); err != nil {
-			slog.Warn("error in Bot.Run", "error", err)
+			slog.Error("error in Bot.Run", "error", err)
 
-			bot.PrometheusMetrics.Up.Set(0)
+			os.Exit(1)
 		} else {
 			bot.PrometheusMetrics.Up.Set(1)
 		}
