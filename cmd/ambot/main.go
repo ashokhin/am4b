@@ -43,6 +43,7 @@ func main() {
 	kingpin.Version(version.Print(APP_NAME))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
+
 	logger := promslog.New(promslogConfig)
 	slog.SetDefault(logger)
 
@@ -56,6 +57,12 @@ func main() {
 		slog.Error("config loading error", "error", err)
 
 		return
+	}
+
+	if len(conf.LogLevel) > 0 {
+		slog.Info("set log level by config", "level", conf.LogLevel)
+
+		promslogConfig.Level.Set(conf.LogLevel)
 	}
 
 	prometheusRegistry := prometheus.NewRegistry()

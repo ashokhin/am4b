@@ -29,6 +29,7 @@ type Config struct {
 	Url                     string `yaml:"url"`
 	User                    string `yaml:"username"`
 	Password                string `yaml:"password"`
+	LogLevel                string `yaml:"log_level"`
 	BudgetPercent           Budget `yaml:"budget_percent"`
 	BudgetMoney             Budget
 	FuelPrice               Price    `yaml:"good_price"`
