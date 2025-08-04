@@ -59,10 +59,18 @@ func main() {
 		return
 	}
 
-	if len(conf.LogLevel) > 0 {
-		slog.Info("set log level by config", "level", conf.LogLevel)
+	// The CLI's "log.level" and config's "log_level" by default are both "info"
+	// if they are not -- check further
+	if promslogConfig.Level.String() != conf.LogLevel {
+		// If CLI's "log.level" is not default (info) then prioritize CLI's value
+		if promslogConfig.Level.String() != "info" {
+			slog.Info("set log level from CLI", "level", promslogConfig.Level.String())
 
-		promslogConfig.Level.Set(conf.LogLevel)
+		} else { // else - set "log_level" from config
+			slog.Info("set log level from config", "level", conf.LogLevel)
+
+			promslogConfig.Level.Set(conf.LogLevel)
+		}
 	}
 
 	prometheusRegistry := prometheus.NewRegistry()

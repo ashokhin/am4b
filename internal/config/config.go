@@ -5,52 +5,36 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
 )
 
-// url: "https://www.airlinemanager.com/"
-// username: "z1odeypnd@gmail.com"
-// password: "tW+L-L9Xp7@,MFR"
-// budget_percent:
-//   maintenance: 50
-//   marketing: 70
-//   fuel: 70
-// good_price:
-//   fuel: 500
-//   co2: 120
-// aircraft_wear_percent: 80
-// aircraft_max_hours_to_check: 24
-// service_cron_string: "*/5 * * * *"
-// services:
-//   - "check_staff_morale"
-//   - "check_lounges"
-
 type Config struct {
-	Url                     string `yaml:"url"`
-	User                    string `yaml:"username"`
-	Password                string `yaml:"password"`
-	LogLevel                string `yaml:"log_level"`
-	BudgetPercent           Budget `yaml:"budget_percent"`
-	BudgetMoney             Budget
+	Url                     string   `default:"https://www.airlinemanager.com/" yaml:"url"`
+	User                    string   `yaml:"username"`
+	Password                string   `yaml:"password"`
+	LogLevel                string   `default:"info" yaml:"log_level"`
+	BudgetPercent           Budget   `yaml:"budget_percent"`
 	FuelPrice               Price    `yaml:"good_price"`
-	AircraftWearPercent     float64  `yaml:"aircraft_wear_percent"`
-	AircraftMaxHoursToCheck float64  `yaml:"aircraft_max_hours_to_check"`
-	AircraftModifyLimit     float64  `yaml:"aircraft_modify_limit"`
-	FuelCriticalPercent     float64  `yaml:"fuel_critical_percent"`
-	CronSchedule            string   `yaml:"service_cron_string"`
-	Services                []string `yaml:"services"`
-	passwordRunes           []rune   // most safe storage for password in memory
+	AircraftWearPercent     float64  `default:"80" yaml:"aircraft_wear_percent"`
+	AircraftMaxHoursToCheck float64  `default:"24" yaml:"aircraft_max_hours_to_check"`
+	AircraftModifyLimit     float64  `default:"3" yaml:"aircraft_modify_limit"`
+	FuelCriticalPercent     float64  `default:"20" yaml:"fuel_critical_percent"`
+	CronSchedule            string   `default:"*/5 * * * *" yaml:"service_cron_string"`
+	Services                []string `default:"[\"company_stats\",\"staff_morale\",\"hubs\",\"buy_fuel\",\"marketing_companies\",\"ac_maintenance\",\"depart\"]" yaml:"services"`
+	BudgetMoney             Budget
+	passwordRunes           []rune // most safe storage for password in memory
 }
 
 type Budget struct {
-	Maintenance float64 `yaml:"maintenance"`
-	Marketing   float64 `yaml:"marketing"`
-	Fuel        float64 `yaml:"fuel"`
+	Maintenance float64 `default:"50" yaml:"maintenance"`
+	Marketing   float64 `default:"70" yaml:"marketing"`
+	Fuel        float64 `default:"70" yaml:"fuel"`
 }
 
 type Price struct {
-	Fuel float64 `yaml:"fuel"`
-	Co2  float64 `yaml:"co2"`
+	Fuel float64 `default:"500" yaml:"fuel"`
+	Co2  float64 `default:"120" yaml:"co2"`
 }
 
 func (c *Config) String() string {
@@ -73,6 +57,8 @@ func New(filePath string) (*Config, error) {
 	var c Config
 
 	slog.Info("loading config file", "file", filePath)
+
+	defaults.Set(&c)
 
 	if err := loadYaml(filePath, &c); err != nil {
 		return &c, err
