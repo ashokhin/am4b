@@ -33,7 +33,7 @@ func (b *Bot) staffMorale(ctx context.Context) error {
 
 	slog.Debug("rank", "value", rank)
 
-	b.PrometheusMetrics.CompanyRank.Set(rank)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.CompanyRank, rank)
 
 	slog.Debug("staff training points", "value", trainingPoints)
 

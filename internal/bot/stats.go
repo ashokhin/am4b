@@ -54,30 +54,30 @@ func (b *Bot) companyStats(ctx context.Context) error {
 		chromedp.Click(model.BUTTON_COMMON_CLOSE_POPUP, chromedp.ByQuery),
 		//utils.Screenshot(),
 	); err != nil {
-		slog.Debug("error in Bot.staffMorale", "error", err)
+		slog.Debug("error in Bot.companyStats", "error", err)
 
 		return err
 	}
 
 	acWithoutRoute := (fleetSize - (acPendingDelivery + routes))
 
-	b.PrometheusMetrics.CompanyReputation.WithLabelValues("airline").Set(airlineReputation)
-	b.PrometheusMetrics.CompanyReputation.WithLabelValues("cargo").Set(cargoReputation)
-	b.PrometheusMetrics.CompanyFleetSize.Set(fleetSize)
-	b.PrometheusMetrics.AircraftStatus.WithLabelValues("in_flight").Set(acInflight)
-	b.PrometheusMetrics.AircraftStatus.WithLabelValues("pending_delivery").Set(acPendingDelivery)
-	b.PrometheusMetrics.AircraftStatus.WithLabelValues("pending_maintenance").Set(acPendingMaintenance)
-	b.PrometheusMetrics.AircraftStatus.WithLabelValues("wo_route").Set(acWithoutRoute)
-	b.PrometheusMetrics.RoutesNumber.Set(routes)
-	b.PrometheusMetrics.HubsNumber.Set(hubs)
-	b.PrometheusMetrics.HangarCapacity.Set(hangarCapacity)
-	b.PrometheusMetrics.SharePrice.Set(sharePrice)
-	b.PrometheusMetrics.FlightsOperated.Set(flightsOperated)
-	b.PrometheusMetrics.PassengersTransported.WithLabelValues("economy").Set(passengersEconomyTransported)
-	b.PrometheusMetrics.PassengersTransported.WithLabelValues("business").Set(passengersBusinessTransported)
-	b.PrometheusMetrics.PassengersTransported.WithLabelValues("first").Set(passengersFirstTransported)
-	b.PrometheusMetrics.CargoTransported.WithLabelValues("large").Set(cargoTransportedLarge)
-	b.PrometheusMetrics.CargoTransported.WithLabelValues("heavy").Set(cargoTransportedHeavy)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.CompanyReputation.WithLabelValues("airline"), airlineReputation)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.CompanyReputation.WithLabelValues("cargo"), cargoReputation)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.CompanyFleetSize, fleetSize)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AircraftStatus.WithLabelValues("in_flight"), acInflight)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AircraftStatus.WithLabelValues("pending_delivery"), acPendingDelivery)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AircraftStatus.WithLabelValues("pending_maintenance"), acPendingMaintenance)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AircraftStatus.WithLabelValues("wo_route"), acWithoutRoute)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.RoutesNumber, routes)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.HubsNumber, hubs)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.HangarCapacity, hangarCapacity)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.SharePrice, sharePrice)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.FlightsOperated, flightsOperated)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.PassengersTransported.WithLabelValues("economy"), passengersEconomyTransported)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.PassengersTransported.WithLabelValues("business"), passengersBusinessTransported)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.PassengersTransported.WithLabelValues("first"), passengersFirstTransported)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.CargoTransported.WithLabelValues("large"), cargoTransportedLarge)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.CargoTransported.WithLabelValues("heavy"), cargoTransportedHeavy)
 
 	return nil
 }

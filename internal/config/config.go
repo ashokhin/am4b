@@ -71,7 +71,7 @@ func New(filePath string) (*Config, error) {
 	return &c, err
 }
 
-func loadYaml(filePath string, out interface{}) error {
+func loadYaml(filePath string, out any) error {
 	var err error
 	var f []byte
 

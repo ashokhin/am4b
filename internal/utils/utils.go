@@ -14,6 +14,7 @@ import (
 	"github.com/ashokhin/am4bot/internal/model"
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // intFromString deletes all non-digit values like words, letters, signs, spaces etc. and returns Integer value.
@@ -27,7 +28,7 @@ func intFromString(str string) (int, error) {
 	if err != nil {
 		slog.Debug("error in utils.intFromString", "string", str, "error", err)
 
-		return 0, nil
+		return -1, nil
 	}
 
 	return i, nil
@@ -286,4 +287,16 @@ func IsSubElementVisible(ctx context.Context, sel string, node *cdp.Node) bool {
 	// if 1 or more elements found then return true - element is visible
 	return len(nodesList) > 0
 
+}
+
+// set non-negative Prometheus metrics
+func SetPromGaugeNonNeg(promMetric prometheus.Gauge, value float64) {
+
+	if value < 0 {
+		slog.Error("value for Prometheus metric is negative", "metric", promMetric.Desc().String(), "value", value)
+
+		return
+	}
+
+	promMetric.Set(value)
 }
