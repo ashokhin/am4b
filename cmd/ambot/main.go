@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	APP_NAME      string = "ambot"
-	EXPORTER_NAME string = "ambot_exporter"
+	APP_NAME           string = "ambot"
+	EXPORTER_NAME      string = "ambot_exporter"
+	EXPORTER_NAMESPACE string = "am4"
 )
 
 var (
@@ -74,7 +75,7 @@ func main() {
 	}
 
 	prometheusRegistry := prometheus.NewRegistry()
-	prometheusRegistry.MustRegister(versionCollector.NewCollector(EXPORTER_NAME))
+	prometheusRegistry.MustRegister(versionCollector.NewCollector(EXPORTER_NAMESPACE))
 	prometheusRegistry.MustRegister(collectors.NewGoCollector())
 
 	bot := bot.New(conf, prometheusRegistry)
