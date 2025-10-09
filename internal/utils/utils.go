@@ -19,36 +19,38 @@ import (
 
 // intFromString deletes all non-digit values like words, letters, signs, spaces etc. and returns Integer value.
 func intFromString(str string) (int, error) {
-	var i int
+	var intValue int
 	var err error
 
-	allNumRegex := regexp.MustCompile("[0-9]+")
-	str = strings.Join(allNumRegex.FindAllString(str, -1), "")
-	i, err = strconv.Atoi(str)
+	intString := strings.ReplaceAll(strings.Split(str, ".")[0], ",", "")
+	allNumRegex := regexp.MustCompile(`(-)?(\d)+`)
+	intString = strings.Join(allNumRegex.FindAllString(intString, -1), "")
+	intValue, err = strconv.Atoi(intString)
 	if err != nil {
 		slog.Debug("error in utils.intFromString", "string", str, "error", err)
 
 		return -1, nil
 	}
 
-	return i, nil
+	return intValue, nil
 }
 
-// floatFromString deletes all non-digit values like words, letters, signs, spaces etc. and returns Integer value.
+// floatFromString deletes all non-digit values like words, letters, signs, spaces etc. and returns float value.
 func floatFromString(str string) (float64, error) {
-	var f float64
+	var floatValue float64
 	var err error
 
-	allNumRegex := regexp.MustCompile(`[0-9]+(\.[0-9]+)?`)
-	str = strings.Join(allNumRegex.FindAllString(str, -1), "")
-	f, err = strconv.ParseFloat(str, 64)
+	floatString := strings.ReplaceAll(str, ",", "")
+	allNumRegex := regexp.MustCompile(`(-)?(\d)+(\.\d+)?`)
+	floatString = strings.Join(allNumRegex.FindAllString(floatString, -1), "")
+	floatValue, err = strconv.ParseFloat(floatString, 64)
 	if err != nil {
 		slog.Warn("error in utils.floatFromString", "string", str, "error", err)
 
-		return f, err
+		return floatValue, err
 	}
 
-	return f, nil
+	return floatValue, nil
 }
 
 func getCallerFunctionName() string {

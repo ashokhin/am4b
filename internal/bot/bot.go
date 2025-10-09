@@ -48,18 +48,18 @@ func (b *Bot) Run(ctx context.Context) error {
 	timeStart := time.Now()
 
 	slog.Debug("create context with the 2 minutes timeout")
-	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
-	defer cancel()
+	ctx, cancelToCtx := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancelToCtx()
 
-	ctx, cancel = chromedp.NewExecAllocator(ctx, b.chromeOpts...)
-	defer cancel()
+	ctx, cancelChrExecCtx := chromedp.NewExecAllocator(ctx, b.chromeOpts...)
+	defer cancelChrExecCtx()
 
-	ctx, cancel = chromedp.NewContext(
+	ctx, cancelChrCtx := chromedp.NewContext(
 		ctx,
 		chromedp.WithLogf(log.Printf),
 		//chromedp.WithDebugf(log.Printf),
 	)
-	defer cancel()
+	defer cancelChrCtx()
 
 	slog.Debug("run bot", "start_time", timeStart.UTC())
 	slog.Info("authentication")
