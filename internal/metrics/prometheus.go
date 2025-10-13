@@ -43,9 +43,9 @@ func New() *Metrics {
 		),
 		StartTime: prometheus.NewGauge(
 			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Name:      "process_start_time_seconds",
-				Help:      "Start time of the process since unix epoch in seconds.",
+				// Namespace: namespace,
+				Name: "process_start_time_seconds",
+				Help: "Start time of the process since unix epoch in seconds.",
 			},
 		),
 		Duration: prometheus.NewGauge(
