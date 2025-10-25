@@ -56,6 +56,8 @@ func (b *Bot) checkStaffEntry(ctx context.Context, e model.StaffEntry) error {
 	if err := chromedp.Run(ctx,
 		utils.GetIntFromElement(e.TextMorale, &moralePercent),
 	); err != nil {
+		slog.Error("error in morale.checkStaffEntry", "error", err)
+
 		return err
 	}
 	startSalary := 0.0
@@ -100,6 +102,8 @@ func (b *Bot) checkStaffEntry(ctx context.Context, e model.StaffEntry) error {
 			// check salary
 			utils.GetFloatFromElement(e.TextSalary, &newSalary),
 		); err != nil {
+			slog.Error("error in morale.checkStaffEntry", "error", err)
+
 			return err
 		}
 
@@ -118,6 +122,8 @@ func (b *Bot) checkStaffEntry(ctx context.Context, e model.StaffEntry) error {
 				// check salary
 				utils.GetFloatFromElement(e.TextSalary, &newSalary),
 			); err != nil {
+				slog.Error("error in morale.checkStaffEntry", "error", err)
+
 				return err
 			}
 

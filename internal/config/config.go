@@ -22,8 +22,11 @@ type Config struct {
 	FuelCriticalPercent     float64  `default:"20" yaml:"fuel_critical_percent"`
 	CronSchedule            string   `default:"*/5 * * * *" yaml:"service_cron_string"`
 	Services                []string `default:"[\"company_stats\",\"staff_morale\",\"hubs\",\"buy_fuel\",\"marketing_companies\",\"ac_maintenance\",\"depart\"]" yaml:"services"`
-	BudgetMoney             Budget
-	passwordRunes           []rune // most safe storage for password in memory
+	TimeoutSeconds          int      `default:"120" yaml:"timeout_seconds"`
+	ChromeHeadless          bool     `default:"true" yaml:"chrome_headless"`
+	// internal fields
+	BudgetMoney   Budget
+	passwordRunes []rune // most safe storage for password in memory
 }
 
 type Budget struct {

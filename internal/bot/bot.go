@@ -31,7 +31,7 @@ func New(conf *config.Config, registry *prometheus.Registry) Bot {
 		chromedp.NoDefaultBrowserCheck,
 		chromedp.WindowSize(1920, 1080),
 		// Change to 'false' for displaying Chrome window
-		chromedp.Flag("headless", true),
+		chromedp.Flag("headless", conf.ChromeHeadless),
 		chromedp.Flag("start-maximized", true),
 		chromedp.Flag("disable-dev-shm-usage", true),
 		chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"),
@@ -47,8 +47,8 @@ func New(conf *config.Config, registry *prometheus.Registry) Bot {
 func (b *Bot) Run(ctx context.Context) error {
 	timeStart := time.Now()
 
-	slog.Debug("create context with the 2 minutes timeout")
-	ctx, cancelToCtx := context.WithTimeout(ctx, 2*time.Minute)
+	slog.Debug("create context with timeout", "timeout_seconds", b.Conf.TimeoutSeconds)
+	ctx, cancelToCtx := context.WithTimeout(ctx, time.Duration(b.Conf.TimeoutSeconds)*time.Second)
 	defer cancelToCtx()
 
 	ctx, cancelChrExecCtx := chromedp.NewExecAllocator(ctx, b.chromeOpts...)

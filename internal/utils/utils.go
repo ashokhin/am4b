@@ -29,7 +29,7 @@ func intFromString(str string) (int, error) {
 	if err != nil {
 		slog.Debug("error in utils.intFromString", "string", str, "error", err)
 
-		return -1, nil
+		return -1, err
 	}
 
 	return intValue, nil
@@ -111,7 +111,7 @@ func GetIntFromElement(sel string, resultInt *int) chromedp.Tasks {
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			*resultInt, err = intFromString(resultStr)
 			if err != nil {
-				slog.Warn("error in utils.GetIntFromElement > utils.intFromString",
+				slog.Debug("error in utils.GetIntFromElement > utils.intFromString",
 					"string", resultStr, "error", err)
 
 				return err
@@ -133,7 +133,7 @@ func GetIntFromChildElement(sel string, resultInt *int, node *cdp.Node) chromedp
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			*resultInt, err = intFromString(resultStr)
 			if err != nil {
-				slog.Warn("error in utils.GetIntFromElement > utils.intFromString",
+				slog.Debug("error in utils.GetIntFromElement > utils.intFromString",
 					"string", resultStr, "error", err)
 
 				return err

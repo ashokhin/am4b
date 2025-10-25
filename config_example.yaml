@@ -22,3 +22,5 @@ services:
   - "marketing_companies"
   - "ac_maintenance"
   - "depart"
+timeout_seconds: 120
+chrome_headless: true

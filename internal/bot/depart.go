@@ -43,6 +43,8 @@ func (b *Bot) getReadyForDepart(ctx context.Context) int {
 	if err := chromedp.Run(ctx,
 		utils.GetIntFromElement(model.TEXT_FI_DEPART_AMOUNT, &readyForDepart),
 	); err != nil {
+		slog.Debug("the 'Depart' amount element not found, assuming 0 ready for depart", "error", err)
+
 		return 0
 	}
 
