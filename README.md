@@ -1,16 +1,22 @@
-# Airline Manager 4 Bot
+# Airline Manager Bot
 
-### Features
-- ✔️ Automatic start marketing companies.
-- ✔️ Automatic departures.
-- ✔️ Automatic buy Fuel when price is low or fuel level is critical.
-- ✔️ Automatic buy CO2 when price is low or quota level is critical.
-- ✔️ Automatic staff morale improvement.
-- ✔️ Automatic hub management.
-- ✔️ Automatic company statistics collection.
-- ✔️ Automatic repair.
-- ✔️ Automatic A-Check.
-- ✔️ Automatic modification.
+Automated bot for managing your Airline Manager company.
+
+
+## Features
+
+- Automatic start marketing companies.
+- Automatic departures.
+- Automatic buy Fuel when price is low or fuel level is critical.
+- Automatic buy CO2 when price is low or quota level is critical.
+- Automatic staff morale improvement.
+- Automatic hub management.
+- Automatic company statistics collection.
+- Automatic repair.
+- Automatic A-Check.
+- Automatic modification.
+- Prometheus metrics support.
+
 
 ## Installation
 
@@ -52,6 +58,7 @@
    ```bash
    sudo systemctl enable am4bot.service --now
    ```
+
 
 ## Configuration
 
@@ -113,6 +120,115 @@ Minimal configuration example:
 username: "username@email.example"
 password: "your_password_here"
 ```
+
+
+## Prometheus Metrics
+
+<details>
+	<summary>Prometheus metrics example output</summary>
+
+```
+# HELP am4_ac_fleet_size Company fleet size value.
+# TYPE am4_ac_fleet_size gauge
+am4_ac_fleet_size 154
+# HELP am4_ac_hangar_capacity Company hangar capacity value.
+# TYPE am4_ac_hangar_capacity gauge
+am4_ac_hangar_capacity 170
+# HELP am4_ac_routes Company routes number value.
+# TYPE am4_ac_routes gauge
+am4_ac_routes 154
+# HELP am4_ac_status Aircraft status by type.
+# TYPE am4_ac_status gauge
+am4_ac_status{type="in_flight"} 146
+am4_ac_status{type="pending_delivery"} 0
+am4_ac_status{type="pending_maintenance"} 10
+am4_ac_status{type="wo_route"} 0
+# HELP am4_build_info A metric with a constant '1' value labeled by version, revision, branch, goversion from which am4 was built, and the goos and goarch for the build.
+# TYPE am4_build_info gauge
+am4_build_info{branch="tags/1.28",goarch="amd64",goos="linux",goversion="go1.24.7",revision="84a34f6b9b1352cda47a517a8ee748c306c7d2e5",tags="unknown",version="1.28"} 1
+# HELP am4_company_fuel_holding Fuel amount holding by fuel type.
+# TYPE am4_company_fuel_holding gauge
+am4_company_fuel_holding{type="co2"} 2.5868711e+07
+am4_company_fuel_holding{type="fuel"} 2.0085064e+07
+# HELP am4_company_fuel_limit Fuel amount limit by fuel type.
+# TYPE am4_company_fuel_limit gauge
+am4_company_fuel_limit{type="co2"} 2.85e+07
+am4_company_fuel_limit{type="fuel"} 2.55e+07
+# HELP am4_company_hubs Company hubs number value.
+# TYPE am4_company_hubs gauge
+am4_company_hubs 6
+# HELP am4_company_money Company money by account type.
+# TYPE am4_company_money gauge
+am4_company_money{type="Airline account"} 3.030865737e+09
+am4_company_money{type="Savings"} 1.102106418e+09
+# HELP am4_company_rank Company rank value.
+# TYPE am4_company_rank gauge
+am4_company_rank 3051
+# HELP am4_company_reputation Company reputation by company type.
+# TYPE am4_company_reputation gauge
+am4_company_reputation{type="airline"} 90
+am4_company_reputation{type="cargo"} 88
+# HELP am4_company_share_value Company share price value.
+# TYPE am4_company_share_value gauge
+am4_company_share_value 1547.3
+# HELP am4_company_staff_salary Company staff salary by staff type.
+# TYPE am4_company_staff_salary gauge
+am4_company_staff_salary{type="crew"} 159
+am4_company_staff_salary{type="engineers"} 264
+am4_company_staff_salary{type="pilots"} 211
+am4_company_staff_salary{type="technicians"} 236
+# HELP am4_company_training_points Company training points value.
+# TYPE am4_company_training_points gauge
+am4_company_training_points 0
+# HELP am4_duration_seconds Duration of execution in seconds.
+# TYPE am4_duration_seconds gauge
+am4_duration_seconds 76.877199534
+# HELP am4_hub_stats Company hub info by hub name and stat type.
+# TYPE am4_hub_stats gauge
+am4_hub_stats{name="BRAZIL, BRASÍLIA",type="arrivals"} 4513
+am4_hub_stats{name="BRAZIL, BRASÍLIA",type="departures"} 5951
+am4_hub_stats{name="BRAZIL, BRASÍLIA",type="paxArrived"} 1.397119e+06
+am4_hub_stats{name="BRAZIL, BRASÍLIA",type="paxDeparted"} 1.920807e+06
+am4_hub_stats{name="CHINA, BEIJING CAPITAL",type="arrivals"} 8513
+am4_hub_stats{name="CHINA, BEIJING CAPITAL",type="departures"} 8535
+am4_hub_stats{name="CHINA, BEIJING CAPITAL",type="paxArrived"} 2.4073e+06
+am4_hub_stats{name="CHINA, BEIJING CAPITAL",type="paxDeparted"} 2.446635e+06
+am4_hub_stats{name="INDIA, NEW DELHI",type="arrivals"} 4443
+am4_hub_stats{name="INDIA, NEW DELHI",type="departures"} 5823
+am4_hub_stats{name="INDIA, NEW DELHI",type="paxArrived"} 1.08529e+06
+am4_hub_stats{name="INDIA, NEW DELHI",type="paxDeparted"} 1.624256e+06
+am4_hub_stats{name="TURKEY, ISTANBUL ATATÜRK",type="arrivals"} 5950
+am4_hub_stats{name="TURKEY, ISTANBUL ATATÜRK",type="departures"} 5962
+am4_hub_stats{name="TURKEY, ISTANBUL ATATÜRK",type="paxArrived"} 1.532606e+06
+am4_hub_stats{name="TURKEY, ISTANBUL ATATÜRK",type="paxDeparted"} 1.548672e+06
+am4_hub_stats{name="UNITED STATES, ATLANTA INT",type="arrivals"} 64
+am4_hub_stats{name="UNITED STATES, ATLANTA INT",type="departures"} 66
+am4_hub_stats{name="UNITED STATES, ATLANTA INT",type="paxArrived"} 10594
+am4_hub_stats{name="UNITED STATES, ATLANTA INT",type="paxDeparted"} 9280
+am4_hub_stats{name="UNITED STATES, NEW YORK JFK",type="arrivals"} 16269
+am4_hub_stats{name="UNITED STATES, NEW YORK JFK",type="departures"} 16389
+am4_hub_stats{name="UNITED STATES, NEW YORK JFK",type="paxArrived"} 3.759363e+06
+am4_hub_stats{name="UNITED STATES, NEW YORK JFK",type="paxDeparted"} 3.825323e+06
+# HELP am4_market_fuel_price Fuel amount price by fuel type.
+# TYPE am4_market_fuel_price gauge
+am4_market_fuel_price{type="co2"} 151
+am4_market_fuel_price{type="fuel"} 1713
+# HELP am4_stats_cargo_transported Cargo transported by type.
+# TYPE am4_stats_cargo_transported gauge
+am4_stats_cargo_transported{type="heavy"} 6.35925e+08
+am4_stats_cargo_transported{type="large"} 6.36211e+08
+# HELP am4_stats_flights_operated Company flights operated value.
+# TYPE am4_stats_flights_operated gauge
+am4_stats_flights_operated 82737
+# HELP am4_stats_passengers_transported Passengers transported by type.
+# TYPE am4_stats_passengers_transported gauge
+am4_stats_passengers_transported{type="business"} 4.010239e+06
+am4_stats_passengers_transported{type="economy"} 1.528383e+07
+am4_stats_passengers_transported{type="first"} 2.27574e+06
+```
+
+</details>
+
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
