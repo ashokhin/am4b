@@ -3,9 +3,9 @@ username: "username@email.example"
 password: "your_password_here"
 log_level: "info"
 budget_percent:
-  maintenance: 50
-  marketing: 70
   fuel: 70
+  maintenance: 30
+  marketing: 70
 good_price:
   fuel: 500
   co2: 120

@@ -356,7 +356,7 @@ func (b *Bot) modifyAllAircraft(ctx context.Context) error {
 		return aircraftNeedModify[i].RegNumber < aircraftNeedModify[j].RegNumber
 	})
 
-	aircraftNeedModify = aircraftNeedModify[len(aircraftNeedModify)-int(b.Conf.AircraftModifyLimit):]
+	aircraftNeedModify = aircraftNeedModify[len(aircraftNeedModify)-b.Conf.AircraftModifyLimit:]
 
 	slog.Debug("sorted and sliced aircraft for modify list", "list", aircraftNeedModify)
 
