@@ -74,6 +74,22 @@ func main() {
 		}
 	}
 
+	// The CLI's "web.listen-address" and config's "prometheus_address" by default are both ":9150"
+	// if they are not -- check further
+	if *webAddr != conf.PrometheusAddress {
+		// If CLI's "web.listen-address" is not default (:9150) then prioritize CLI's value
+		if *webAddr != ":9150" {
+			slog.Info("set Prometheus address from CLI", "address", *webAddr)
+
+		} else { // else - set "prometheus_address" from config
+			slog.Info("set Prometheus address from config", "address", conf.PrometheusAddress)
+
+			*webAddr = conf.PrometheusAddress
+		}
+	}
+
+	// create Prometheus registry
+
 	prometheusRegistry := prometheus.NewRegistry()
 	prometheusRegistry.MustRegister(versionCollector.NewCollector(EXPORTER_NAMESPACE))
 	prometheusRegistry.MustRegister(collectors.NewGoCollector())

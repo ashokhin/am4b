@@ -84,6 +84,7 @@ Automated bot for managing your Airline Manager company.
 | `services` | list of strings | `["company_stats","staff_morale",`<br />`"hubs","buy_fuel","depart",`<br />`"marketing_companies","ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `staff_morale`,<br />`hubs`, `buy_fuel`, `depart`,<br />`marketing_companies`, `ac_maintenance`. |
 | `timeout_seconds` | int | `120` | Timeout for full round in seconds. |
 | `chrome_headless` | bool | `true` | Run browser in headless mode. |
+| `prometheus_address` | string | `":9150"` | Address to expose Prometheus metrics. |
 
 Example of `config.yaml` with the default options:
 ```yaml
@@ -113,6 +114,7 @@ services:
   - "depart"
 timeout_seconds: 120
 chrome_headless: true
+prometheus_address: ":9150"
 ```
 
 Minimal configuration example:

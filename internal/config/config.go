@@ -24,6 +24,7 @@ type Config struct {
 	Services                []string `default:"[\"company_stats\",\"staff_morale\",\"hubs\",\"buy_fuel\",\"marketing_companies\",\"ac_maintenance\",\"depart\"]" yaml:"services"`
 	TimeoutSeconds          int      `default:"120" yaml:"timeout_seconds"`
 	ChromeHeadless          bool     `default:"true" yaml:"chrome_headless"`
+	PrometheusAddress       string   `default:":9150" yaml:"prometheus_address"`
 	// internal fields
 	BudgetMoney   Budget
 	passwordRunes []rune // most safe storage for password in memory
