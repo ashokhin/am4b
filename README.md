@@ -74,7 +74,7 @@
 | `aircraft_modify_limit` | int | `3` | Max aircraft for modifications checks. |
 | `fuel_critical_percent` | float | `20` | Fuel level percentage to trigger refuel. |
 | `service_cron_string` | string | `"*/5 * * * *"` | Cron schedule for services. Default: Every 5 minutes. |
-| `services` | list of strings | `["company_stats","staff_morale","hubs","buy_fuel","marketing_companies","ac_maintenance","depart"]` | List of services to run. Possible values: `company_stats`, `staff_morale`, `hubs`, `buy_fuel`, `marketing_companies`, `ac_maintenance`, `depart`. |
+| `services` | list of strings | `["company_stats","staff_morale",`<br />`"hubs","buy_fuel","depart",`<br />`"marketing_companies","ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `staff_morale`,<br />`hubs`, `buy_fuel`, `depart`,<br />`marketing_companies`, `ac_maintenance`. |
 | `timeout_seconds` | int | `120` | Timeout for full round in seconds. |
 | `chrome_headless` | bool | `true` | Run browser in headless mode. |
 
