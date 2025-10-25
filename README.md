@@ -2,6 +2,9 @@
 ![GitHub issues](https://img.shields.io/github/issues/ashokhin/am4b)
 ![Docker Pulls](https://img.shields.io/docker/pulls/ashokhin/am4bot)
 
+[Docker Hub](https://hub.docker.com/r/ashokhin/am4bot)
+
+
 # Airline Manager Bot
 
 Automated bot for managing your Airline Manager company.
@@ -71,6 +74,7 @@ simulating user actions to perform the necessary tasks.
    
    Then enable and start the service:
    ```bash
+   sudo systemctl daemon-reload
    sudo systemctl enable am4bot.service --now
    ```
 
