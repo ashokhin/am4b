@@ -1,0 +1,26 @@
+url: "https://www.airlinemanager.com/"
+username: "username@email.example"
+password: "your_password_here"
+log_level: "info"
+budget_percent:
+  fuel: 70
+  maintenance: 30
+  marketing: 70
+good_price:
+  fuel: 500
+  co2: 120
+aircraft_wear_percent: 80
+aircraft_max_hours_to_check: 24
+aircraft_modify_limit: 3
+fuel_critical_percent: 20
+service_cron_string: "*/5 * * * *"
+services:
+  - "company_stats"
+  - "staff_morale"
+  - "hubs"
+  - "buy_fuel"
+  - "marketing_companies"
+  - "ac_maintenance"
+  - "depart"
+timeout_seconds: 120
+chrome_headless: true
