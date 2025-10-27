@@ -1,4 +1,6 @@
 name: Docker Image run
+permissions:
+  contents: read
 
 on:
   schedule:
