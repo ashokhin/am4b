@@ -2,7 +2,7 @@
 ![GitHub issues](https://img.shields.io/github/issues/ashokhin/am4b)
 ![Docker Pulls](https://img.shields.io/docker/pulls/ashokhin/am4bot)
 
-[Docker Hub](https://hub.docker.com/r/ashokhin/am4bot)
+🐳[Docker Hub](https://hub.docker.com/r/ashokhin/am4bot)
 
 
 # Airline Manager Bot
