@@ -29,7 +29,9 @@ simulating user actions to perform the necessary tasks.
 - Automatic buy CO2 when price is low or quota level is critical.
 - Automatic staff morale improvement.
 - Automatic hub management.
+- Automatic catering purchase.
 - Automatic company statistics collection.
+- Automatic alliance statistics collection.
 - Automatic repair.
 - Automatic A-Check.
 - Automatic modification.
@@ -100,7 +102,7 @@ simulating user actions to perform the necessary tasks.
 | `aircraft_modify_limit` | int | `3` | Max aircraft for modifications checks. |
 | `fuel_critical_percent` | float | `20` | Fuel level percentage to trigger refuel. Even the price isn't good. |
 | `service_cron_string` | string | `"*/5 * * * *"` | Cron schedule for services. Default: Every 5 minutes. |
-| `services` | list of strings | `["company_stats","staff_morale",`<br />`"hubs","buy_fuel","depart",`<br />`"marketing_companies","ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `staff_morale`,<br />`hubs`, `buy_fuel`, `depart`,<br />`marketing_companies`, `ac_maintenance`. |
+| `services` | list of strings | `["company_stats","staff_morale",`<br />`"alliance_stats","hubs",`<br />`"buy_fuel","depart",`<br />`"marketing_companies","ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `alliance_stats`, `staff_morale`, `hubs`, `buy_fuel`, `depart`, `marketing_companies`, `ac_maintenance`. |
 | `timeout_seconds` | int | `120` | Timeout for full round in seconds. |
 | `chrome_headless` | bool | `true` | Run browser in headless mode. |
 | `prometheus_address` | string | `":9150"` | Address to expose Prometheus metrics. |
@@ -125,6 +127,7 @@ fuel_critical_percent: 20
 service_cron_string: "*/5 * * * *"
 services:
   - "company_stats"
+  - "alliance_stats"
   - "staff_morale"
   - "hubs"
   - "buy_fuel"
@@ -164,6 +167,18 @@ am4_ac_status{type="in_flight"} 146
 am4_ac_status{type="pending_delivery"} 0
 am4_ac_status{type="pending_maintenance"} 10
 am4_ac_status{type="wo_route"} 0
+# HELP am4_alliance_contributed_per_day Alliance contributed per day value.
+# TYPE am4_alliance_contributed_per_day gauge
+am4_alliance_contributed_per_day 31318
+# HELP am4_alliance_contributed_total Alliance contributed total value.
+# TYPE am4_alliance_contributed_total gauge
+am4_alliance_contributed_total 79152
+# HELP am4_alliance_flights Alliance flights value.
+# TYPE am4_alliance_flights gauge
+am4_alliance_flights 479
+# HELP am4_alliance_season_money Alliance season money value.
+# TYPE am4_alliance_season_money gauge
+am4_alliance_season_money 147
 # HELP am4_build_info A metric with a constant '1' value labeled by version, revision, branch, goversion from which am4 was built, and the goos and goarch for the build.
 # TYPE am4_build_info gauge
 am4_build_info{branch="tags/1.28",goarch="amd64",goos="linux",goversion="go1.24.7",revision="84a34f6b9b1352cda47a517a8ee748c306c7d2e5",tags="unknown",version="1.28"} 1

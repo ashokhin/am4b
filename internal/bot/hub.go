@@ -185,7 +185,7 @@ func (b *Bot) buyCatering(ctx context.Context, hub model.Hub, hubElem *cdp.Node)
 		chromedp.WaitReady(model.ELEM_HUBS_CATERING_OPTION_3, chromedp.ByQuery),
 		utils.ClickElement(model.ELEM_HUBS_CATERING_OPTION_3),
 		chromedp.SetValue(model.SELECT_HUBS_CATERING_DURATION, model.OPTION_HUBS_CATERING_DURATION_1W, chromedp.ByQuery),
-		chromedp.SetValue(model.SELECT_HUBS_CATERING_AMOUNT, model.OPTION_HUBS_CATERING_AMOUNT_20000, chromedp.ByQuery),
+		chromedp.SetValue(model.SELECT_HUBS_CATERING_AMOUNT, model.OPTION_HUBS_CATERING_AMOUNT_200000, chromedp.ByQuery),
 		utils.GetFloatFromElement(model.TEXT_HUBS_CATERING_COST, &cateringCost),
 	); err != nil {
 		slog.Warn("error in Bot.buyCatering > select hub", "error", err)

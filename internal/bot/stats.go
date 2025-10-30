@@ -81,3 +81,36 @@ func (b *Bot) companyStats(ctx context.Context) error {
 
 	return nil
 }
+
+func (b *Bot) allianceStats(ctx context.Context) error {
+	var (
+		contributedTotal  float64
+		contributedPerDay float64
+		allianceFlights   float64
+		seasonMoney       float64
+	)
+	// Placeholder for allianceStats implementation
+	slog.Info("check alliance stats")
+	slog.Debug("open pop-up window", "window", "alliance_overview")
+
+	if err := chromedp.Run(ctx,
+		chromedp.Click(model.BUTTON_ALLIANCE_INFO, chromedp.ByQuery),
+		chromedp.WaitReady(model.TEXT_ALLIANCE_CONTRIBUTED_TOTAL, chromedp.ByQuery),
+		utils.GetFloatFromElement(model.TEXT_ALLIANCE_CONTRIBUTED_TOTAL, &contributedTotal),
+		utils.GetFloatFromElement(model.TEXT_ALLIANCE_CONTRIBUTED_PER_DAY, &contributedPerDay),
+		utils.GetFloatFromElement(model.TEXT_ALLIANCE_FLIGHTS, &allianceFlights),
+		utils.GetFloatFromElement(model.TEXT_ALLIANCE_SEASON_MONEY, &seasonMoney),
+		chromedp.Click(model.BUTTON_COMMON_CLOSE_POPUP, chromedp.ByQuery),
+	); err != nil {
+		slog.Debug("error in Bot.allianceStats", "error", err)
+
+		return err
+	}
+
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AllianceContributedTotal, contributedTotal)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AllianceContributedPerDay, contributedPerDay)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AllianceFlights, allianceFlights)
+	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AllianceSeasonMoney, seasonMoney)
+
+	return nil
+}

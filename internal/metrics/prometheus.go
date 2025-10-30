@@ -9,27 +9,31 @@ const (
 )
 
 type Metrics struct {
-	Up                    prometheus.Gauge
-	StartTime             prometheus.Gauge
-	Duration              prometheus.Gauge
-	CompanyRank           prometheus.Gauge
-	CompanyTrainingPoints prometheus.Gauge
-	CompanyFleetSize      prometheus.Gauge
-	RoutesNumber          prometheus.Gauge
-	HubsNumber            prometheus.Gauge
-	HangarCapacity        prometheus.Gauge
-	SharePrice            prometheus.Gauge
-	FlightsOperated       prometheus.Gauge
-	PassengersTransported *prometheus.GaugeVec
-	CargoTransported      *prometheus.GaugeVec
-	AircraftStatus        *prometheus.GaugeVec
-	CompanyReputation     *prometheus.GaugeVec
-	CompanyMoney          *prometheus.GaugeVec
-	HubStats              *prometheus.GaugeVec
-	StaffSalary           *prometheus.GaugeVec
-	FuelHolding           *prometheus.GaugeVec
-	FuelLimit             *prometheus.GaugeVec
-	FuelPrice             *prometheus.GaugeVec
+	Up                        prometheus.Gauge
+	StartTime                 prometheus.Gauge
+	Duration                  prometheus.Gauge
+	CompanyRank               prometheus.Gauge
+	CompanyTrainingPoints     prometheus.Gauge
+	CompanyFleetSize          prometheus.Gauge
+	RoutesNumber              prometheus.Gauge
+	HubsNumber                prometheus.Gauge
+	HangarCapacity            prometheus.Gauge
+	SharePrice                prometheus.Gauge
+	FlightsOperated           prometheus.Gauge
+	AllianceContributedTotal  prometheus.Gauge
+	AllianceContributedPerDay prometheus.Gauge
+	AllianceFlights           prometheus.Gauge
+	AllianceSeasonMoney       prometheus.Gauge
+	PassengersTransported     *prometheus.GaugeVec
+	CargoTransported          *prometheus.GaugeVec
+	AircraftStatus            *prometheus.GaugeVec
+	CompanyReputation         *prometheus.GaugeVec
+	CompanyMoney              *prometheus.GaugeVec
+	HubStats                  *prometheus.GaugeVec
+	StaffSalary               *prometheus.GaugeVec
+	FuelHolding               *prometheus.GaugeVec
+	FuelLimit                 *prometheus.GaugeVec
+	FuelPrice                 *prometheus.GaugeVec
 }
 
 func New() *Metrics {
@@ -110,6 +114,34 @@ func New() *Metrics {
 				Namespace: namespace,
 				Name:      "stats_flights_operated",
 				Help:      "Company flights operated value.",
+			},
+		),
+		AllianceContributedTotal: prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_contributed_total",
+				Help:      "Alliance contributed total value.",
+			},
+		),
+		AllianceContributedPerDay: prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_contributed_per_day",
+				Help:      "Alliance contributed per day value.",
+			},
+		),
+		AllianceFlights: prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_flights",
+				Help:      "Alliance flights value.",
+			},
+		),
+		AllianceSeasonMoney: prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_season_money",
+				Help:      "Alliance season money value.",
 			},
 		),
 		PassengersTransported: prometheus.NewGaugeVec(
@@ -208,6 +240,10 @@ func (m *Metrics) RegisterMetrics(registry *prometheus.Registry) {
 		m.HangarCapacity,
 		m.SharePrice,
 		m.FlightsOperated,
+		m.AllianceContributedTotal,
+		m.AllianceContributedPerDay,
+		m.AllianceFlights,
+		m.AllianceSeasonMoney,
 		m.PassengersTransported,
 		m.CargoTransported,
 		m.AircraftStatus,

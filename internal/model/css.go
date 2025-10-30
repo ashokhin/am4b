@@ -31,6 +31,7 @@ const (
 
 	// "Flight info" elements
 	ICON_FI_LOUNGE_ALERT  string = "div#flightInfo span#loungeAlertIcon"
+	BUTTON_ALLIANCE_INFO  string = `div#flightInfo span[onclick="popup('alliance.php','Alliance');"]`
 	BUTTON_FI_OVERVIEW    string = `div#flightInfo div#flightInfoSecContainer button[onclick="popup('overview.php','Overview');"]`
 	BUTTON_FI_DEPART_ALL  string = "div#flightInfo button.btn-xs:nth-child(2)"
 	TEXT_FI_DEPART_AMOUNT string = "div#flightInfo span#listDepartAmount"
@@ -53,27 +54,33 @@ const (
 	TEXT_OVERVIEW_CARGO_TRANSPORTED_LARGE         string = "div#popup div#popContent div.col-sm-6:nth-child(8) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(8) > td:nth-child(2)"
 	TEXT_OVERVIEW_CARGO_TRANSPORTED_HEAVY         string = "div#popup div#popContent div.col-sm-6:nth-child(8) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(9) > td:nth-child(2)"
 
+	// "Alliance" pop-up
+	TEXT_ALLIANCE_CONTRIBUTED_TOTAL   string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(3)"
+	TEXT_ALLIANCE_CONTRIBUTED_PER_DAY string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(4)"
+	TEXT_ALLIANCE_FLIGHTS             string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(6)"
+	TEXT_ALLIANCE_SEASON_MONEY        string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(8)"
+
 	// "Hubs" pop-up
-	LIST_HUBS_HUBS                    string = "div#hubList > div.row.mt-1.opa.rounded"
-	ELEMENT_HUB                       string = "div.row.mt-1.opa.rounded > div:nth-child(3) > div:nth-child(1)"
-	TEXT_HUBS_HUB_NAME                string = "div.p-2.col-9.exo.m-text > b"
-	TEXT_HUBS_HUB_DEPARTURES          string = "div.row.mt-1.opa.rounded > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > span:nth-child(3)"
-	TEXT_HUBS_HUB_ARRIVALS            string = "div.row.mt-1.opa.rounded > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > span:nth-child(3)"
-	TEXT_HUBS_HUB_PAX_DEPARTED        string = "div.row.mt-1.opa.rounded > div:nth-child(4) > div:nth-child(1) > div:nth-child(1) > span:nth-child(3)"
-	TEXT_HUBS_HUB_PAX_ARRIVED         string = "div.row.mt-1.opa.rounded > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > span:nth-child(3)"
-	BUTTON_HUBS_HUB_MANAGE            string = "div#hubDetail button.btn.btn-danger.btn-xs-real"
-	TEXT_HUBS_HUB_MANAGE_REPAIR_COST  string = "#loungeRepairCost"
-	BUTTON_HUBS_HUB_MANAGE_REPAIR     string = "div#hubDetail.hidden button#loungeRepairBtn"
-	BUTTON_HUBS_HUB_MANAGE_BACK       string = "#hubReturnBtn > button:nth-child(1)"
-	ICON_HUBS_CATERING                string = "div.row.mt-1.opa.rounded span.glyphicons-fast-food"
-	BUTTON_HUBS_ADD_CATERING          string = "div#hubDetail button.btn-success:nth-child(1)"
-	ELEM_HUBS_CATERING_OPTION_3       string = "div#caterMain div.col-4:nth-child(4)"
-	SELECT_HUBS_CATERING_DURATION     string = "div#caterMain select#durationSelector"
-	SELECT_HUBS_CATERING_AMOUNT       string = "div#caterMain select#caterAmount"
-	OPTION_HUBS_CATERING_DURATION_1W  string = "168"
-	OPTION_HUBS_CATERING_AMOUNT_20000 string = "20000"
-	TEXT_HUBS_CATERING_COST           string = "div#caterMain span#sumCost"
-	BUTTON_HUBS_CATERING_BUY          string = "div#caterMain button#btnCaterDo"
+	LIST_HUBS_HUBS                     string = "div#hubList > div.row.mt-1.opa.rounded"
+	ELEMENT_HUB                        string = "div.row.mt-1.opa.rounded > div:nth-child(3) > div:nth-child(1)"
+	TEXT_HUBS_HUB_NAME                 string = "div.p-2.col-9.exo.m-text > b"
+	TEXT_HUBS_HUB_DEPARTURES           string = "div.row.mt-1.opa.rounded > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > span:nth-child(3)"
+	TEXT_HUBS_HUB_ARRIVALS             string = "div.row.mt-1.opa.rounded > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > span:nth-child(3)"
+	TEXT_HUBS_HUB_PAX_DEPARTED         string = "div.row.mt-1.opa.rounded > div:nth-child(4) > div:nth-child(1) > div:nth-child(1) > span:nth-child(3)"
+	TEXT_HUBS_HUB_PAX_ARRIVED          string = "div.row.mt-1.opa.rounded > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > span:nth-child(3)"
+	BUTTON_HUBS_HUB_MANAGE             string = "div#hubDetail button.btn.btn-danger.btn-xs-real"
+	TEXT_HUBS_HUB_MANAGE_REPAIR_COST   string = "#loungeRepairCost"
+	BUTTON_HUBS_HUB_MANAGE_REPAIR      string = "div#hubDetail.hidden button#loungeRepairBtn"
+	BUTTON_HUBS_HUB_MANAGE_BACK        string = "#hubReturnBtn > button:nth-child(1)"
+	ICON_HUBS_CATERING                 string = "div.row.mt-1.opa.rounded span.glyphicons-fast-food"
+	BUTTON_HUBS_ADD_CATERING           string = "div#hubDetail button.btn-success:nth-child(1)"
+	ELEM_HUBS_CATERING_OPTION_3        string = "div#caterMain div.col-4:nth-child(4)"
+	SELECT_HUBS_CATERING_DURATION      string = "div#caterMain select#durationSelector"
+	SELECT_HUBS_CATERING_AMOUNT        string = "div#caterMain select#caterAmount"
+	OPTION_HUBS_CATERING_DURATION_1W   string = "168"
+	OPTION_HUBS_CATERING_AMOUNT_200000 string = "200000"
+	TEXT_HUBS_CATERING_COST            string = "div#caterMain span#sumCost"
+	BUTTON_HUBS_CATERING_BUY           string = "div#caterMain button#btnCaterDo"
 
 	// "Company" pop-up
 	TEXT_COMPANY_RANK                  string = "div.text-secondary"

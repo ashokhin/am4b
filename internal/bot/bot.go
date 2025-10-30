@@ -85,6 +85,13 @@ func (b *Bot) Run(ctx context.Context) error {
 				return err
 			}
 
+		case "alliance_stats":
+			if err := b.allianceStats(ctx); err != nil {
+				slog.Warn("error in Bot.Run > Bot.alianceStats", "error", err)
+
+				return err
+			}
+
 		case "staff_morale":
 			if err := b.staffMorale(ctx); err != nil {
 				slog.Warn("error in Bot.Run > Bot.staffMorale", "error", err)
