@@ -252,9 +252,14 @@ am4_stats_passengers_transported{type="first"} 2.27574e+06
 
 ## Grafana Dashboard
 
-You can use the following [Grafana dashboard](resources/Grafana_dashboard_airline_manager.json) to visualize the Prometheus metrics collected by the bot.
+You can use the following [Grafana dashboard](https://github.com/ashokhin/ansible-collection/blob/main/grafana/files/dashboards/airline-manager.json) to visualize the Prometheus metrics collected by the bot.
 
 ![Grafana dashboard](resources/Grafana_dashboard.png?raw=true "Grafana Dashboard Screenshot")
 
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+## Maintainer
+GitHub: [@ashokhin](https://github.com/ashokhin)
