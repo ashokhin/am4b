@@ -12,7 +12,7 @@ import (
 
 const FUEL_MINIMUM_AMOUNT float64 = 1000.00
 
-var fuelList []model.Fuel = []model.Fuel{
+var fuelList = []model.Fuel{
 	{
 		FuelType: "fuel",
 	},
@@ -30,6 +30,7 @@ func (b *Bot) fuel(ctx context.Context) error {
 	utils.DoClickElement(ctx, model.BUTTON_MAIN_FUEL)
 	defer utils.DoClickElement(ctx, model.BUTTON_COMMON_CLOSE_POPUP)
 
+	// iterate over fuel types
 	for _, fuelEntry := range fuelList {
 		slog.Debug("processing fuel type", "type", fuelEntry.FuelType)
 
@@ -42,12 +43,14 @@ func (b *Bot) fuel(ctx context.Context) error {
 
 		slog.Debug("fuel collected", "type", fuelEntry.FuelType, "fuel", fuelEntry)
 
+		// skip full fuel type if already full
 		if fuelEntry.IsFull {
 			slog.Debug("fuel is full", "type", fuelEntry.FuelType)
 
 			continue
 		}
 
+		// try to buy fuel
 		if err := b.buyFuelType(ctx, &fuelEntry); err != nil {
 			slog.Warn("error from Bot.fuel > buyFuelType", "type",
 				fuelEntry.FuelType, "error", err)
@@ -59,9 +62,11 @@ func (b *Bot) fuel(ctx context.Context) error {
 	return nil
 }
 
+// checkFuelType retrieves fuel information for a specific fuel type
 func (b *Bot) checkFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 	slog.Debug("check fuel type", "type", fuelStruct.FuelType)
 
+	// select fuel tab depending on fuel type
 	switch fuelStruct.FuelType {
 	case "fuel":
 		utils.DoClickElement(ctx, model.BUTTON_COMMON_TAB1)
@@ -69,6 +74,7 @@ func (b *Bot) checkFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 		utils.DoClickElement(ctx, model.BUTTON_COMMON_TAB2)
 	}
 
+	// retrieve fuel information
 	if err := chromedp.Run(ctx,
 		utils.GetFloatFromElement(model.TEXT_FUEL_FUEL_PRICE, &fuelStruct.Price),
 		utils.GetFloatFromElement(model.TEXT_FUEL_FUEL_HOLDING, &fuelStruct.Holding),
@@ -85,19 +91,25 @@ func (b *Bot) checkFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 	b.PrometheusMetrics.FuelLimit.WithLabelValues(fuelStruct.FuelType).Set(fuelStruct.Capacity)
 	b.PrometheusMetrics.FuelPrice.WithLabelValues(fuelStruct.FuelType).Set(fuelStruct.Price)
 
-	// calc how much fuel do we need to max.capacity and compare it with FUEL_MINIMUM_AMOUNT
-	// needAmount = capacity - holding
-	// if needAmount less than FUEL_MINIMUM_AMOUNT then isFull = true
-	fuelStruct.IsFull = (fuelStruct.Capacity - fuelStruct.Holding) < FUEL_MINIMUM_AMOUNT
+	// Set IsFull using helper for clarity.
+	fuelStruct.IsFull = isFuelFull(fuelStruct.Capacity, fuelStruct.Holding)
 
 	return nil
 }
 
+// isFuelFull determines if the fuel tank is considered full based on the minimum amount threshold.
+func isFuelFull(capacity, holding float64) bool {
+	needAmount := capacity - holding
+	return needAmount < FUEL_MINIMUM_AMOUNT
+}
+
+// buyFuelType attempts to purchase fuel of a specific type based on budget and price conditions
 func (b *Bot) buyFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 	var fuelExpectedPrice float64
 
 	slog.Debug("buy fuel type", "type", fuelStruct.FuelType)
 
+	// select fuel tab depending on fuel type and set expected price
 	switch fuelStruct.FuelType {
 	case "fuel":
 		utils.DoClickElement(ctx, model.BUTTON_COMMON_TAB1)
@@ -107,6 +119,7 @@ func (b *Bot) buyFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 		fuelExpectedPrice = b.Conf.FuelPrice.Co2
 	}
 
+	// calculate fuel need amount and price
 	fuelNeedAmount := fuelStruct.Capacity - fuelStruct.Holding
 	fuelKeepAmountPercent := (fuelStruct.Holding / fuelStruct.Capacity) * 100
 	// price per 1000 Lbs/Quotas
@@ -128,11 +141,12 @@ func (b *Bot) buyFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 
 		return nil
 	}
-
+	// define fuel amount string for input field
 	fuelNeedAmountString := fmt.Sprintf("%d", int(fuelNeedAmount))
 
 	slog.Debug("buying fuel", "type", fuelStruct.FuelType, "amount", fuelNeedAmountString, "price", int(amountPrice))
 
+	// perform buy fuel action
 	if err := chromedp.Run(ctx,
 		chromedp.SendKeys(model.TEXT_FIELD_FUEL_AMOUNT, fuelNeedAmountString, chromedp.ByQuery),
 		utils.ClickElement(model.BUTTON_FUEL_BUY),
@@ -143,6 +157,7 @@ func (b *Bot) buyFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 	}
 
 	slog.Debug("money before", "AccountBalance", int(b.AccountBalance), "fuelBudget", int(b.Conf.BudgetMoney.Fuel))
+	// update bot money values after purchase
 	b.AccountBalance -= amountPrice
 	b.Conf.BudgetMoney.Fuel -= amountPrice
 	slog.Debug("money after", "AccountBalance", int(b.AccountBalance), "fuelBudget", int(b.Conf.BudgetMoney.Fuel))

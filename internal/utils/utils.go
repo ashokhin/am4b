@@ -53,6 +53,7 @@ func floatFromString(str string) (float64, error) {
 	return floatValue, nil
 }
 
+// getCallerFunctionName returns the name of the calling function.
 func getCallerFunctionName() string {
 	pc, _, _, _ := runtime.Caller(2)
 	f := runtime.FuncForPC(pc)
@@ -67,6 +68,7 @@ func getCallerFunctionName() string {
 	return funcName
 }
 
+// RefreshPage reloads the current page and waits until the loading overlay is not visible.
 func RefreshPage() chromedp.Tasks {
 	slog.Debug("refresh page")
 
@@ -76,6 +78,7 @@ func RefreshPage() chromedp.Tasks {
 	}
 }
 
+// Screenshot takes a full-page screenshot and saves it to a file named with the caller function and timestamp.
 func Screenshot() chromedp.Tasks {
 	var buf []byte
 
@@ -122,6 +125,7 @@ func GetIntFromElement(sel string, resultInt *int) chromedp.Tasks {
 	}
 }
 
+// GetIntFromChildElement is an element query action that retrieves the visible text of a child element
 func GetIntFromChildElement(sel string, resultInt *int, node *cdp.Node) chromedp.Tasks {
 	var resultStr string
 	var err error
@@ -144,6 +148,28 @@ func GetIntFromChildElement(sel string, resultInt *int, node *cdp.Node) chromedp
 	}
 }
 
+// GetIntFromChildElementAttribute retrieves the value of a specified attribute from a child element
+func GetIntFromChildElementAttribute(sel string, resultInt *int, node *cdp.Node) error {
+	var resultStr string
+	var err error
+
+	slog.Debug("get integer from child element attribute", "attribute", sel)
+
+	resultStr = node.AttributeValue(sel)
+	*resultInt, err = intFromString(resultStr)
+
+	if err != nil {
+		slog.Warn("error in utils.GetIntFromElement > utils.intFromString",
+			"string", resultStr, "error", err)
+
+		return err
+	}
+
+	return nil
+}
+
+// GetFloatFromElement is an element query action that retrieves the visible text of the first element
+// node matching the selector and converts it to Float.
 func GetFloatFromElement(sel string, resultFloat *float64) chromedp.Tasks {
 	var resultStr string
 	var err error
@@ -166,6 +192,7 @@ func GetFloatFromElement(sel string, resultFloat *float64) chromedp.Tasks {
 	}
 }
 
+// GetFloatFromChildElement is an element query action that retrieves the visible text of a child element
 func GetFloatFromChildElement(sel string, resultFloat *float64, node *cdp.Node) chromedp.Tasks {
 	var resultStr string
 	var resultInt int
@@ -191,30 +218,29 @@ func GetFloatFromChildElement(sel string, resultFloat *float64, node *cdp.Node) 
 	}
 }
 
-func GetFloatFromChildElementAttribute(sel string, resultFloat *float64, node *cdp.Node) chromedp.Tasks {
+// GetFloatFromChildElementAttribute retrieves the value of a specified attribute from a child element
+func GetFloatFromChildElementAttribute(sel string, resultFloat *float64, node *cdp.Node) error {
 	var resultStr string
 	var err error
 
-	slog.Debug("get float from child element attribute", "element", sel)
+	slog.Debug("get float from child element attribute", "attribute", sel)
 
-	return chromedp.Tasks{
-		chromedp.Text(sel, &resultStr, chromedp.ByQuery, chromedp.FromNode(node)),
-		chromedp.ActionFunc(func(ctx context.Context) error {
-			*resultFloat, err = floatFromString(resultStr)
-			if err != nil {
-				slog.Warn("error in utils.GetIntFromElement > utils.floatFromString",
-					"string", resultStr, "error", err)
+	resultStr = node.AttributeValue(sel)
+	*resultFloat, err = floatFromString(resultStr)
 
-				return err
-			}
+	if err != nil {
+		slog.Warn("error in utils.GetIntFromElement > utils.floatFromString",
+			"string", resultStr, "error", err)
 
-			return nil
-		}),
+		return err
 	}
+
+	return nil
 }
 
-// ClickElement is an element query action that sends a mouse click event to the first element
-// node matching the selector and waits for 1sec.
+// ClickElement sends a mouse click event to the first element matching the selector.
+// It waits for 2 seconds after the click.
+// This function returns chromedp.Tasks to be used in a chromedp.Run call.
 func ClickElement(sel string) chromedp.Tasks {
 	slog.Debug("click element", "element", sel)
 
@@ -224,6 +250,9 @@ func ClickElement(sel string) chromedp.Tasks {
 	}
 }
 
+// DoClickElement sends a mouse click event to the first element matching the selector.
+// It waits for 2 seconds after the click.
+// This function executes the click immediately using the provided context.
 func DoClickElement(ctx context.Context, sel string) error {
 	slog.Debug("click element", "element", sel)
 
@@ -239,6 +268,7 @@ func DoClickElement(ctx context.Context, sel string) error {
 	return nil
 }
 
+// IsElementVisible checks if an element matching the selector is visible on the page.
 func IsElementVisible(ctx context.Context, sel string) bool {
 	var nodesList []*cdp.Node
 
@@ -265,6 +295,7 @@ func IsElementVisible(ctx context.Context, sel string) bool {
 
 }
 
+// IsSubElementVisible checks if a sub-element matching the selector is visible within a given node.
 func IsSubElementVisible(ctx context.Context, sel string, node *cdp.Node) bool {
 	var nodesList []*cdp.Node
 
@@ -291,7 +322,7 @@ func IsSubElementVisible(ctx context.Context, sel string, node *cdp.Node) bool {
 
 }
 
-// set non-negative Prometheus metrics
+// SetPromGaugeNonNeg sets the Prometheus Gauge metric to the specified value if it is non-negative.
 func SetPromGaugeNonNeg(promMetric prometheus.Gauge, value float64) {
 
 	if value < 0 {

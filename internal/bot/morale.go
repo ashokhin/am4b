@@ -10,6 +10,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// staffMorale checks and adjusts the morale of various staff members in the company.
 func (b *Bot) staffMorale(ctx context.Context) error {
 	var rank, trainingPoints float64
 
@@ -50,6 +51,7 @@ func (b *Bot) staffMorale(ctx context.Context) error {
 	return nil
 }
 
+// checkStaffEntry checks and adjusts the morale for a specific staff entry.
 func (b *Bot) checkStaffEntry(ctx context.Context, e model.StaffEntry) error {
 	var moralePercent int
 

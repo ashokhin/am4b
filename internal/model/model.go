@@ -8,6 +8,7 @@ const (
 	MODIFY
 )
 
+// StaffEntry represents a staff category with associated UI elements for salary and morale management.
 type StaffEntry struct {
 	Name             string
 	TextSalary       string
@@ -47,6 +48,7 @@ var StaffEntires = []StaffEntry{
 	},
 }
 
+// Fuel represents fuel information for an aircraft.
 type Fuel struct {
 	FuelType string
 	Price    float64
@@ -55,13 +57,15 @@ type Fuel struct {
 	IsFull   bool
 }
 
+// Aircraft represents an aircraft in the fleet.
 type Aircraft struct {
 	RegNumber   string
 	AcType      string
 	WearPercent float64
-	HoursACheck float64
+	HoursACheck int
 }
 
+// MarketingCompany represents a marketing company with associated UI elements for activation and cost.
 type MarketingCompany struct {
 	Name               string
 	CompanyRow         string
@@ -70,6 +74,7 @@ type MarketingCompany struct {
 	CompanyButton      string
 }
 
+// Hub represents an airport hub with various statistics.
 type Hub struct {
 	Name        string
 	Departures  float64

@@ -9,6 +9,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// auth performs authentication on the target website using credentials from the bot configuration.
 func (b *Bot) auth(ctx context.Context) error {
 	slog.Debug("auth", "url", b.Conf.Url, "user", b.Conf.User)
 

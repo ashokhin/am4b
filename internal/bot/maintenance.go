@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/ashokhin/am4bot/internal/model"
@@ -13,6 +12,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// maintenance performs maintenance operations on aircraft, including A-Checks, repairs, and modifications.
 func (b *Bot) maintenance(ctx context.Context) error {
 	slog.Info("start aircraft maintenance")
 
@@ -43,6 +43,7 @@ func (b *Bot) maintenance(ctx context.Context) error {
 	return nil
 }
 
+// maintenanceAcByType performs a specific maintenance operation (A-Check, Repair, Modify) on a given aircraft.
 func (b *Bot) maintenanceAcByType(ctx context.Context, ac model.Aircraft, mntType model.MaintenanceType) (bool, error) {
 	var mntOperationStr string
 	var mntOperationButton string
@@ -88,7 +89,7 @@ func (b *Bot) maintenanceAcByType(ctx context.Context, ac model.Aircraft, mntTyp
 	slog.Debug("search aircraft row")
 
 	for _, acElem := range aircraftElemList {
-		if ac.RegNumber == acElem.AttributeValue("data-reg") {
+		if ac.RegNumber == acElem.AttributeValue(model.TEXT_MAINTENANCE_AC_REG_NUMBER) {
 			slog.Debug("row found")
 
 			acWebElemNode = acElem
@@ -169,6 +170,7 @@ func (b *Bot) maintenanceAcByType(ctx context.Context, ac model.Aircraft, mntTyp
 	return mntOperationPerformed, nil
 }
 
+// aCheckAllAircraft performs A-Check maintenance on all eligible aircraft.
 func (b *Bot) aCheckAllAircraft(ctx context.Context) error {
 	var aircraftPlaned int
 	var aircraftNeedACheck []model.Aircraft
@@ -197,18 +199,27 @@ func (b *Bot) aCheckAllAircraft(ctx context.Context) error {
 
 	// collect list of aircraft which need a-check
 	for _, aircraftElem := range aircraftElemList {
-		acACheckHours, _ := strconv.ParseFloat(aircraftElem.AttributeValue("data-hours"), 64)
+		var acACheckHours int
+
+		if err := utils.GetIntFromChildElementAttribute(model.TEXT_MAINTENANCE_AC_A_CHECK_HOURS, &acACheckHours, aircraftElem); err != nil {
+			slog.Warn("error in Bot.aCheckAllAircraft > utils.GetFloatFromChildElementAttribute",
+				"reg.number", aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_REG_NUMBER), "error", err)
+
+			continue
+		}
 
 		if acACheckHours > b.Conf.AircraftMaxHoursToCheck {
-			slog.Debug("skip aircraft")
+			slog.Debug("skip aircraft", "reg.number", aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_REG_NUMBER),
+				"a-check hours", acACheckHours)
 
 			continue
 		}
 
 		var aircraft model.Aircraft
-		aircraft.RegNumber = aircraftElem.AttributeValue("data-reg")
-		aircraft.AcType = aircraftElem.AttributeValue("data-type")
-		aircraft.HoursACheck, _ = strconv.ParseFloat(aircraftElem.AttributeValue("data-hours"), 64)
+
+		aircraft.RegNumber = aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_REG_NUMBER)
+		aircraft.AcType = aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_TYPE)
+		aircraft.HoursACheck = acACheckHours
 
 		slog.Debug("add aircraft for a-check", "aircraft", aircraft)
 
@@ -242,6 +253,7 @@ func (b *Bot) aCheckAllAircraft(ctx context.Context) error {
 	return nil
 }
 
+// repairAllAircraft performs repair maintenance on all eligible aircraft.
 func (b *Bot) repairAllAircraft(ctx context.Context) error {
 	var aircraftPlaned int
 	var aircraftNeedRepair []model.Aircraft
@@ -268,18 +280,27 @@ func (b *Bot) repairAllAircraft(ctx context.Context) error {
 
 	// collect list of aircraft which need repair
 	for _, aircraftElem := range aircraftElemList {
-		acWearPercent, _ := strconv.ParseFloat(aircraftElem.AttributeValue("data-wear"), 64)
+		var acWearPercent float64
+
+		if err := utils.GetFloatFromChildElementAttribute(model.TEXT_MAINTENANCE_AC_WEAR_PERCENT, &acWearPercent, aircraftElem); err != nil {
+			slog.Warn("error in Bot.repairAllAircraft > utils.GetFloatFromChildElementAttribute",
+				"reg.number", aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_REG_NUMBER), "error", err)
+
+			continue
+		}
 
 		if acWearPercent < b.Conf.AircraftWearPercent {
-			slog.Debug("skip aircraft")
+			slog.Debug("skip aircraft", "reg.number", aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_REG_NUMBER),
+				"wear percent", acWearPercent)
 
 			continue
 		}
 
 		var aircraft model.Aircraft
-		aircraft.RegNumber = aircraftElem.AttributeValue("data-reg")
-		aircraft.AcType = aircraftElem.AttributeValue("data-type")
-		aircraft.WearPercent, _ = strconv.ParseFloat(aircraftElem.AttributeValue("data-wear"), 64)
+
+		aircraft.RegNumber = aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_REG_NUMBER)
+		aircraft.AcType = aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_TYPE)
+		aircraft.WearPercent = acWearPercent
 
 		slog.Debug("add aircraft for repair", "aircraft", aircraft)
 
@@ -313,6 +334,7 @@ func (b *Bot) repairAllAircraft(ctx context.Context) error {
 	return nil
 }
 
+// repairAllAircraft performs repair maintenance on all eligible aircraft.
 func (b *Bot) modifyAllAircraft(ctx context.Context) error {
 	var aircraftPlaned int
 	var aircraftNeedModify []model.Aircraft
@@ -341,27 +363,32 @@ func (b *Bot) modifyAllAircraft(ctx context.Context) error {
 	for _, aircraftElem := range aircraftElemList {
 
 		var aircraft model.Aircraft
-		aircraft.RegNumber = aircraftElem.AttributeValue("data-reg")
-		aircraft.AcType = aircraftElem.AttributeValue("data-type")
 
-		slog.Debug("add aircraft for modify", "aircraft", aircraft)
+		aircraft.RegNumber = aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_REG_NUMBER)
+		aircraft.AcType = aircraftElem.AttributeValue(model.TEXT_MAINTENANCE_AC_TYPE)
+
+		slog.Debug("add aircraft for modify check", "aircraft", aircraft.RegNumber)
 
 		aircraftNeedModify = append(aircraftNeedModify, aircraft)
 	}
 
-	slog.Debug("sort and slice aircraft for modify list")
+	slog.Debug("sort and slice aircraft for modify list", "slice_limit", b.Conf.AircraftModifyLimit)
 
 	// sort "aircraft" list by reg.number and get only last "Conf.AircraftModifyLimit" number of aircraft
+	// Note: Sorting is lexicographical; registration numbers with mixed formats or without zero-padding may not sort numerically.
+	// If numerical sorting is required, normalize RegNumber before sorting.
 	sort.Slice(aircraftNeedModify, func(i, j int) bool {
 		return aircraftNeedModify[i].RegNumber < aircraftNeedModify[j].RegNumber
 	})
 
-	aircraftNeedModify = aircraftNeedModify[len(aircraftNeedModify)-b.Conf.AircraftModifyLimit:]
+	if len(aircraftNeedModify) >= b.Conf.AircraftModifyLimit {
+		aircraftNeedModify = aircraftNeedModify[len(aircraftNeedModify)-b.Conf.AircraftModifyLimit:]
+	}
 
-	slog.Debug("sorted and sliced aircraft for modify list", "list", aircraftNeedModify)
+	slog.Debug("sorted and sliced aircraft for modify list", "list_length", len(aircraftNeedModify), "list", aircraftNeedModify)
 
 	for _, aircraft := range aircraftNeedModify {
-		slog.Debug("try to modify aircraft", "aircraft", aircraft)
+		slog.Debug("try to modify aircraft", "aircraft", aircraft.RegNumber)
 
 		if mntOperationPerformed, err := b.maintenanceAcByType(ctx, aircraft, model.MODIFY); err != nil {
 			slog.Warn("error in Bot.modifyAllAircraft > Bot.maintenanceAcByType", "error", err)

@@ -9,6 +9,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// companyStats retrieves and updates various statistics about the company.
 func (b *Bot) companyStats(ctx context.Context) error {
 	var (
 		airlineReputation             float64
@@ -82,6 +83,7 @@ func (b *Bot) companyStats(ctx context.Context) error {
 	return nil
 }
 
+// allianceStats retrieves and updates various statistics about the alliance.
 func (b *Bot) allianceStats(ctx context.Context) error {
 	var (
 		contributedTotal  float64

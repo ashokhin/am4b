@@ -11,6 +11,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// hubs checks the status of all hubs, collects statistics, repairs lounges if needed, and buys catering.
 func (b *Bot) hubs(ctx context.Context) error {
 	var needRepair bool
 
@@ -22,6 +23,7 @@ func (b *Bot) hubs(ctx context.Context) error {
 	slog.Debug("repair status", "need_repair", needRepair)
 	slog.Debug("open pop-up window", "window", "hubs")
 
+	// open hubs window
 	if err := chromedp.Run(ctx,
 		utils.ClickElement(model.BUTTON_MAIN_HUBS),
 	); err != nil {
@@ -45,12 +47,13 @@ func (b *Bot) hubs(ctx context.Context) error {
 		return err
 	}
 
-	// get metrics for all hubs in humElemList
+	// get metrics for all hubs in hubsElemList
 	for _, hubElem := range hubsElemList {
 		var hub model.Hub
 
 		slog.Debug("hubElem", "elem", hubElem)
 
+		// retrieve hub statistics
 		if err := chromedp.Run(ctx,
 			chromedp.Text(model.TEXT_HUBS_HUB_NAME, &hub.Name, chromedp.ByQuery, chromedp.FromNode(hubElem)),
 			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_DEPARTURES, &hub.Departures, hubElem),
@@ -58,13 +61,14 @@ func (b *Bot) hubs(ctx context.Context) error {
 			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_PAX_DEPARTED, &hub.PaxDeparted, hubElem),
 			utils.GetFloatFromChildElement(model.TEXT_HUBS_HUB_PAX_ARRIVED, &hub.PaxArrived, hubElem),
 		); err != nil {
-			slog.Warn("error in Bot.hubs > get gub info", "error", err)
+			slog.Warn("error in Bot.hubs > get hub info", "error", err)
 
 			return err
 		}
 
 		slog.Debug("hub found", "name", hub.Name)
 
+		// check if catering is present
 		hub.HasCatering = utils.IsSubElementVisible(ctx, model.ICON_HUBS_CATERING, hubElem)
 
 		b.PrometheusMetrics.HubStats.WithLabelValues(hub.Name, "departures").Set(hub.Departures)
@@ -83,7 +87,8 @@ func (b *Bot) hubs(ctx context.Context) error {
 			}
 		}
 
-		if !hub.HasCatering {
+		// buy catering if not present
+		if (!hub.HasCatering) && (b.Conf.BuyCateringIfMissing) {
 			if err := b.buyCatering(ctx, hub, hubElem); err != nil {
 				slog.Warn("error in Bot.hubs > Bot.buyCatering", "error", err)
 
@@ -97,6 +102,7 @@ func (b *Bot) hubs(ctx context.Context) error {
 	return nil
 }
 
+// repairLounge repairs the lounge of a specific hub if the repair cost is within the maintenance budget.
 func (b *Bot) repairLounge(ctx context.Context, hubElem *cdp.Node) error {
 	slog.Debug("repair lounge")
 
@@ -185,7 +191,7 @@ func (b *Bot) buyCatering(ctx context.Context, hub model.Hub, hubElem *cdp.Node)
 		chromedp.WaitReady(model.ELEM_HUBS_CATERING_OPTION_3, chromedp.ByQuery),
 		utils.ClickElement(model.ELEM_HUBS_CATERING_OPTION_3),
 		chromedp.SetValue(model.SELECT_HUBS_CATERING_DURATION, model.OPTION_HUBS_CATERING_DURATION_1W, chromedp.ByQuery),
-		chromedp.SetValue(model.SELECT_HUBS_CATERING_AMOUNT, model.OPTION_HUBS_CATERING_AMOUNT_200000, chromedp.ByQuery),
+		chromedp.SetValue(model.SELECT_HUBS_CATERING_AMOUNT, b.Conf.CateringAmountOption, chromedp.ByQuery),
 		utils.GetFloatFromElement(model.TEXT_HUBS_CATERING_COST, &cateringCost),
 	); err != nil {
 		slog.Warn("error in Bot.buyCatering > select hub", "error", err)
@@ -208,6 +214,10 @@ func (b *Bot) buyCatering(ctx context.Context, hub model.Hub, hubElem *cdp.Node)
 
 		return err
 	}
+
+	// reduce current account money and maintenance budget by catering cost
+	b.AccountBalance -= cateringCost
+	b.Conf.BudgetMoney.Maintenance -= cateringCost
 
 	return nil
 }

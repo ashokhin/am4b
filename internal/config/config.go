@@ -16,9 +16,11 @@ type Config struct {
 	LogLevel                string   `default:"info" yaml:"log_level"`
 	BudgetPercent           Budget   `yaml:"budget_percent"`
 	FuelPrice               Price    `yaml:"good_price"`
+	BuyCateringIfMissing    bool     `default:"true" yaml:"buy_catering_if_missing"`
+	CateringAmountOption    string   `default:"200000" yaml:"catering_amount_option"`
 	FuelCriticalPercent     float64  `default:"20" yaml:"fuel_critical_percent"`
 	AircraftWearPercent     float64  `default:"80" yaml:"aircraft_wear_percent"`
-	AircraftMaxHoursToCheck float64  `default:"24" yaml:"aircraft_max_hours_to_check"`
+	AircraftMaxHoursToCheck int      `default:"24" yaml:"aircraft_max_hours_to_check"`
 	AircraftModifyLimit     int      `default:"3" yaml:"aircraft_modify_limit"`
 	CronSchedule            string   `default:"*/5 * * * *" yaml:"service_cron_string"`
 	Services                []string `default:"[\"company_stats\",\"alliance_stats\",\"staff_morale\",\"hubs\",\"buy_fuel\",\"marketing_companies\",\"ac_maintenance\",\"depart\"]" yaml:"services"`

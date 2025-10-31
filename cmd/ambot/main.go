@@ -89,11 +89,11 @@ func main() {
 	}
 
 	// create Prometheus registry
-
 	prometheusRegistry := prometheus.NewRegistry()
 	prometheusRegistry.MustRegister(versionCollector.NewCollector(EXPORTER_NAMESPACE))
 	prometheusRegistry.MustRegister(collectors.NewGoCollector())
 
+	// create Bot object with loaded configuration
 	bot := bot.New(conf, prometheusRegistry)
 
 	handler := promhttp.HandlerFor(
@@ -119,7 +119,7 @@ func main() {
 
 	// create cron object
 	c := cron.New()
-	// create cron job
+	// create cron job with schedule from configuration
 	c.AddFunc(bot.Conf.CronSchedule, func() {
 		slog.Warn("start job", "start_time", time.Now().UTC())
 
@@ -144,6 +144,7 @@ func main() {
 
 	slog.Info(fmt.Sprintf("starting Prometheus exporter %s", EXPORTER_NAME), "address", *webAddr, "location", *webTelemetry)
 
+	// start HTTP server for Prometheus scraping
 	if err := http.ListenAndServe(*webAddr, nil); err != nil {
 		slog.Error("error in http server", "error", err)
 

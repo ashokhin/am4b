@@ -9,7 +9,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-var marketingCompaniesList []model.MarketingCompany = []model.MarketingCompany{
+var marketingCompaniesList = []model.MarketingCompany{
 	{
 		Name:               "Airline reputation",
 		CompanyRow:         model.ELEM_FINANCE_MARKETING_INC_AIRLINE_REP,
@@ -33,6 +33,7 @@ var marketingCompaniesList []model.MarketingCompany = []model.MarketingCompany{
 	},
 }
 
+// marketingCompanies checks and activates marketing companies based on budget and status.
 func (b *Bot) marketingCompanies(ctx context.Context) error {
 	slog.Info("check marketing companies")
 
@@ -53,6 +54,7 @@ func (b *Bot) marketingCompanies(ctx context.Context) error {
 	return nil
 }
 
+// activateMarketingCompany activates a specific marketing company if it is affordable and not already active.
 func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCompany) error {
 	var marketingCompanyElemAttributes map[string]string
 

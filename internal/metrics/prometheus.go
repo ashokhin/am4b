@@ -8,6 +8,7 @@ const (
 	namespace = "am4"
 )
 
+// Metrics holds all Prometheus metrics used in the application.
 type Metrics struct {
 	Up                        prometheus.Gauge
 	StartTime                 prometheus.Gauge
@@ -36,6 +37,7 @@ type Metrics struct {
 	FuelPrice                 *prometheus.GaugeVec
 }
 
+// New initializes and returns a new Metrics instance with all Prometheus metrics defined.
 func New() *Metrics {
 	return &Metrics{
 		Up: prometheus.NewGauge(
@@ -227,6 +229,7 @@ func New() *Metrics {
 	}
 }
 
+// RegisterMetrics registers all Prometheus metrics with the provided registry.
 func (m *Metrics) RegisterMetrics(registry *prometheus.Registry) {
 	registry.MustRegister(
 		m.Up,

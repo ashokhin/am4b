@@ -14,6 +14,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// Bot represents the automation bot with its configuration and state.
 type Bot struct {
 	Conf              *config.Config
 	chromeOpts        []chromedp.ExecAllocatorOption
@@ -21,6 +22,7 @@ type Bot struct {
 	PrometheusMetrics metrics.Metrics
 }
 
+// New creates a new Bot instance with the provided configuration and Prometheus registry.
 func New(conf *config.Config, registry *prometheus.Registry) Bot {
 	metrics := metrics.New()
 	metrics.RegisterMetrics(registry)
@@ -44,6 +46,7 @@ func New(conf *config.Config, registry *prometheus.Registry) Bot {
 	}
 }
 
+// Run executes the bot's main workflow, including authentication and service tasks.
 func (b *Bot) Run(ctx context.Context) error {
 	timeStart := time.Now()
 
@@ -64,18 +67,21 @@ func (b *Bot) Run(ctx context.Context) error {
 	slog.Debug("run bot", "start_time", timeStart.UTC())
 	slog.Info("authentication")
 
+	// perform authentication
 	if err := b.auth(ctx); err != nil {
 		slog.Warn("error in Bot.Run > Bot.auth", "error", err)
 
 		return err
 	}
 
+	// perform money check
 	if err := b.Money(ctx); err != nil {
 		slog.Warn("error in Bot.Run > Bot.Money", "error", err)
 
 		return err
 	}
 
+	// iterate over configured services and execute them
 	for _, serviceName := range b.Conf.Services {
 		switch serviceName {
 		case "company_stats":
@@ -87,7 +93,7 @@ func (b *Bot) Run(ctx context.Context) error {
 
 		case "alliance_stats":
 			if err := b.allianceStats(ctx); err != nil {
-				slog.Warn("error in Bot.Run > Bot.alianceStats", "error", err)
+				slog.Warn("error in Bot.Run > Bot.allianceStats", "error", err)
 
 				return err
 			}
@@ -136,10 +142,11 @@ func (b *Bot) Run(ctx context.Context) error {
 		default:
 			slog.Warn("unknown service", "service", serviceName,
 				"available_services",
-				[]string{"company_stats, staff_morale, hubs, buy_fuel, marketing_companies, ac_maintenance", "depart"})
+				[]string{"company_stats", "staff_morale", "hubs", "buy_fuel", "marketing_companies", "ac_maintenance", "depart"})
 		}
 	}
 
+	// calculate total duration for Prometheus metric
 	duration := time.Since(timeStart)
 
 	slog.Info("run complete", "elapsed_time", fmt.Sprint(duration))

@@ -11,6 +11,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// Money checks account balances and updates the bot's budget allocations accordingly.
 func (b *Bot) Money(ctx context.Context) error {
 	var accElemList []*cdp.Node
 
@@ -59,6 +60,7 @@ func (b *Bot) Money(ctx context.Context) error {
 	return nil
 }
 
+// calcBudget calculates the budget allocations for maintenance, marketing, and fuel based on the total account balance and configured percentages.
 func (b *Bot) calcBudget() {
 	slog.Debug("calculate budgets")
 
