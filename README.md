@@ -98,7 +98,7 @@ simulating user actions to perform the necessary tasks.
 | `good_price.fuel` | int | `500` | Good price for Fuel (per 1,000 Lbs). |
 | `good_price.co2` | int | `120` | Good price for CO2 (per 1,000 Quotas). |
 | `buy_catering_if_missing` | bool | `true` | Whether to buy catering if missing in hubs. |
-| `catering_amount_option` | string | `"200000"` | Catering amount option to select when buying catering. Possible values: *TBD*. |
+| `catering_amount_option` | string | `"20000"` | Catering amount option to select when buying catering. Possible values: *TBD*. |
 | `aircraft_wear_percent` | float | `80` | Aircraft wear percentage to trigger maintenance. |
 | `aircraft_max_hours_to_check` | int | `24` | Max hours to next A-Check to trigger it. |
 | `aircraft_modify_limit` | int | `3` | Max aircraft for modifications checks. |
@@ -123,7 +123,7 @@ good_price:
   fuel: 500
   co2: 120
 buy_catering_if_missing: true
-catering_amount_option: "200000"
+catering_amount_option: "20000"
 aircraft_wear_percent: 80
 aircraft_max_hours_to_check: 24
 aircraft_modify_limit: 3

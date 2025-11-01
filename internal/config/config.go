@@ -17,7 +17,7 @@ type Config struct {
 	BudgetPercent           Budget   `yaml:"budget_percent"`
 	FuelPrice               Price    `yaml:"good_price"`
 	BuyCateringIfMissing    bool     `default:"true" yaml:"buy_catering_if_missing"`
-	CateringAmountOption    string   `default:"200000" yaml:"catering_amount_option"`
+	CateringAmountOption    string   `default:"20000" yaml:"catering_amount_option"`
 	FuelCriticalPercent     float64  `default:"20" yaml:"fuel_critical_percent"`
 	AircraftWearPercent     float64  `default:"80" yaml:"aircraft_wear_percent"`
 	AircraftMaxHoursToCheck int      `default:"24" yaml:"aircraft_max_hours_to_check"`
