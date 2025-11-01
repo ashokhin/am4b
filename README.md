@@ -99,17 +99,17 @@ simulating user actions to perform the necessary tasks.
 | `good_price.co2` | int | `120` | Good price for CO2 (per 1,000 Quotas). |
 | `buy_catering_if_missing` | bool | `true` | Whether to buy catering if missing in hubs. |
 | `catering_amount_option` | string | `"200000"` | Catering amount option to select when buying catering. Possible values: *TBD*. |
-| `aircraft_wear_percent` | int | `80` | Aircraft wear percentage to trigger maintenance. |
+| `aircraft_wear_percent` | float | `80` | Aircraft wear percentage to trigger maintenance. |
 | `aircraft_max_hours_to_check` | int | `24` | Max hours to next A-Check to trigger it. |
 | `aircraft_modify_limit` | int | `3` | Max aircraft for modifications checks. |
 | `fuel_critical_percent` | float | `20` | Fuel level percentage to trigger refuel. Even the price isn't good. |
-| `service_cron_string` | string | `"*/5 * * * *"` | Cron schedule for services. Default: Every 5 minutes. |
-| `services` | list of strings | `["company_stats","staff_morale",`<br />`"alliance_stats","hubs",`<br />`"buy_fuel","depart",`<br />`"marketing_companies","ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `alliance_stats`, `staff_morale`, `hubs`, `buy_fuel`, `depart`, `marketing_companies`, `ac_maintenance`. |
+| `cron_schedule` | string | `"*/5 * * * *"` | Cron schedule for services. Default: Every 5 minutes. |
+| `services` | list of strings | `["company_stats",` `"staff_morale",` `"alliance_stats",` `"hubs",` `"buy_fuel",` `"depart",` `"marketing",` `"ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `alliance_stats`, `staff_morale`, `hubs`, `buy_fuel`, `depart`, `marketing`, `ac_maintenance`. |
 | `timeout_seconds` | int | `120` | Timeout for full round in seconds. |
 | `chrome_headless` | bool | `true` | Run browser in headless mode. |
 | `prometheus_address` | string | `":9150"` | Address to expose Prometheus metrics. |
 
-Example of `config.yaml` with the default options:
+#### Example of `config.yaml` with the default options:
 ```yaml
 url: "https://www.airlinemanager.com/"
 username: ""
@@ -122,18 +122,20 @@ budget_percent:
 good_price:
   fuel: 500
   co2: 120
+buy_catering_if_missing: true
+catering_amount_option: "200000"
 aircraft_wear_percent: 80
 aircraft_max_hours_to_check: 24
 aircraft_modify_limit: 3
 fuel_critical_percent: 20
-service_cron_string: "*/5 * * * *"
+cron_schedule: "*/5 * * * *"
 services:
   - "company_stats"
   - "alliance_stats"
   - "staff_morale"
   - "hubs"
   - "buy_fuel"
-  - "marketing_companies"
+  - "marketing"
   - "ac_maintenance"
   - "depart"
 timeout_seconds: 120
@@ -141,11 +143,26 @@ chrome_headless: true
 prometheus_address: ":9150"
 ```
 
-Minimal configuration example:
+#### Minimal configuration example:
 ```yaml
 username: "username@email.example"
 password: "your_password_here"
 ```
+
+#### Service descriptions:
+- `company_stats`: Collects and exposes company statistics as Prometheus metrics.
+- `alliance_stats`: Collects and exposes alliance statistics as Prometheus metrics.
+- `staff_morale`: Improves staff morale if below 100%.
+- `hubs`: Manages hubs, including buying catering if missing.
+- `buy_fuel`: Buys fuel and CO2 based on good price thresholds and critical levels.
+- `marketing`: Starts marketing campaigns based on budget percentage.
+- `ac_maintenance`: Performs aircraft maintenance, A-Checks, and modifications based on configured thresholds.
+- `depart`: Schedules departures for flights ready to depart.
+
+> [!NOTE]
+> 
+> Note that the order of services in the configuration matters.
+> All services are executed sequentially in the order they are listed.
 
 
 ## Prometheus Metrics

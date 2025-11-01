@@ -22,8 +22,8 @@ type Config struct {
 	AircraftWearPercent     float64  `default:"80" yaml:"aircraft_wear_percent"`
 	AircraftMaxHoursToCheck int      `default:"24" yaml:"aircraft_max_hours_to_check"`
 	AircraftModifyLimit     int      `default:"3" yaml:"aircraft_modify_limit"`
-	CronSchedule            string   `default:"*/5 * * * *" yaml:"service_cron_string"`
-	Services                []string `default:"[\"company_stats\",\"alliance_stats\",\"staff_morale\",\"hubs\",\"buy_fuel\",\"marketing_companies\",\"ac_maintenance\",\"depart\"]" yaml:"services"`
+	CronSchedule            string   `default:"*/5 * * * *" yaml:"cron_schedule"`
+	Services                []string `default:"[\"company_stats\",\"alliance_stats\",\"staff_morale\",\"hubs\",\"buy_fuel\",\"marketing\",\"ac_maintenance\",\"depart\"]" yaml:"services"`
 	TimeoutSeconds          int      `default:"120" yaml:"timeout_seconds"`
 	ChromeHeadless          bool     `default:"true" yaml:"chrome_headless"`
 	PrometheusAddress       string   `default:":9150" yaml:"prometheus_address"`

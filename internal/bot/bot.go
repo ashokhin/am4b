@@ -119,7 +119,7 @@ func (b *Bot) Run(ctx context.Context) error {
 				return err
 			}
 
-		case "marketing_companies":
+		case "marketing":
 			if err := b.marketingCompanies(ctx); err != nil {
 				slog.Warn("error in Bot.Run > Bot.marketingCompanies", "error", err)
 
@@ -142,7 +142,7 @@ func (b *Bot) Run(ctx context.Context) error {
 		default:
 			slog.Warn("unknown service", "service", serviceName,
 				"available_services",
-				[]string{"company_stats", "staff_morale", "hubs", "buy_fuel", "marketing_companies", "ac_maintenance", "depart"})
+				[]string{"company_stats", "staff_morale", "alliance_stats", "hubs", "buy_fuel", "depart", "marketing", "ac_maintenance"})
 		}
 	}
 

@@ -65,10 +65,10 @@ func main() {
 	if promslogConfig.Level.String() != conf.LogLevel {
 		// If CLI's "log.level" is not default (info) then prioritize CLI's value
 		if promslogConfig.Level.String() != "info" {
-			slog.Info("set log level from CLI", "level", promslogConfig.Level.String())
+			slog.Info("set log level from CLI", "log.level", promslogConfig.Level.String())
 
 		} else { // else - set "log_level" from config
-			slog.Info("set log level from config", "level", conf.LogLevel)
+			slog.Info("set log level from config", "log_level", conf.LogLevel)
 
 			promslogConfig.Level.Set(conf.LogLevel)
 		}
