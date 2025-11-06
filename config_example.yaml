@@ -1,21 +1,22 @@
 url: "https://www.airlinemanager.com/"
-username: ""
-password: ""
-log_level: "info"
+username: "your_email@example.com"
+password: "YourPasswordHere"
+log_level: "warn"
 budget_percent:
-  fuel: 70
-  maintenance: 30
-  marketing: 70
+  fuel: 75
+  maintenance: 25
+  marketing: 75
 good_price:
-  fuel: 500
-  co2: 120
+  fuel: 550
+  co2: 140
 buy_catering_if_missing: true
-catering_amount_option: "200000"
-aircraft_wear_percent: 80
-aircraft_max_hours_to_check: 24
-aircraft_modify_limit: 3
-fuel_critical_percent: 20
-cron_schedule: "*/5 * * * *"
+catering_duration_hours: "24"
+catering_amount_option: "5000"
+aircraft_wear_percent: 75
+aircraft_max_hours_to_check: 48
+aircraft_modify_limit: 5
+fuel_critical_percent: 15
+cron_schedule: "*/10 * * * *"
 services:
   - "company_stats"
   - "alliance_stats"
@@ -25,6 +26,8 @@ services:
   - "marketing"
   - "ac_maintenance"
   - "depart"
-timeout_seconds: 120
+timeout_seconds: 180
+# Not recommended to change this option
+# on systems without GUI support
 chrome_headless: true
 prometheus_address: ":9150"

@@ -23,7 +23,7 @@ simulating user actions to perform the necessary tasks.
 
 ## Features
 
-- Automatic start marketing companies.
+- Automatic start marketing companies (Only available of: `Airline reputation`, `Cargo reputation`, `Eco friendly`).
 - Automatic departures.
 - Automatic buy Fuel when price is low or fuel level is critical.
 - Automatic buy CO2 when price is low or quota level is critical.
@@ -98,7 +98,8 @@ simulating user actions to perform the necessary tasks.
 | `good_price.fuel` | int | `500` | Good price for Fuel (per 1,000 Lbs). |
 | `good_price.co2` | int | `120` | Good price for CO2 (per 1,000 Quotas). |
 | `buy_catering_if_missing` | bool | `true` | Whether to buy catering if missing in hubs. |
-| `catering_amount_option` | string | `"20000"` | Catering amount option to select when buying catering. Possible values: *TBD*. |
+| `catering_duration_hours` | string | `"168"` | Catering duration in hours to set when buying catering. Possible values: `6`, `12`, `18`, `24`, `48`, `72`, `96`, `120`, `144`, `168` |
+| `catering_amount_option` | string | `"20000"` | Catering amount option to select when buying catering. Possible values: `200`, `500`, `1000`, `2000`, `3000`, `4000`, `5000`, `10000`, `15000`, `20000`, `50000`, `100000`, `200000` |
 | `aircraft_wear_percent` | float | `80` | Aircraft wear percentage to trigger maintenance. |
 | `aircraft_max_hours_to_check` | int | `24` | Max hours to next A-Check to trigger it. |
 | `aircraft_modify_limit` | int | `3` | Max aircraft for modifications checks. |
@@ -109,26 +110,27 @@ simulating user actions to perform the necessary tasks.
 | `chrome_headless` | bool | `true` | Run browser in headless mode. |
 | `prometheus_address` | string | `":9150"` | Address to expose Prometheus metrics. |
 
-#### Example of `config.yaml` with the default options:
+#### Example of `config.yaml` with the non-default options:
 ```yaml
 url: "https://www.airlinemanager.com/"
-username: ""
-password: ""
-log_level: "info"
+username: "your_email@example.com"
+password: "YourPasswordHere"
+log_level: "warn"
 budget_percent:
-  fuel: 70
-  maintenance: 30
-  marketing: 70
+  fuel: 75
+  maintenance: 25
+  marketing: 75
 good_price:
-  fuel: 500
-  co2: 120
+  fuel: 550
+  co2: 140
 buy_catering_if_missing: true
-catering_amount_option: "20000"
-aircraft_wear_percent: 80
-aircraft_max_hours_to_check: 24
-aircraft_modify_limit: 3
-fuel_critical_percent: 20
-cron_schedule: "*/5 * * * *"
+catering_duration_hours: "24"
+catering_amount_option: "5000"
+aircraft_wear_percent: 75
+aircraft_max_hours_to_check: 48
+aircraft_modify_limit: 5
+fuel_critical_percent: 15
+cron_schedule: "*/10 * * * *"
 services:
   - "company_stats"
   - "alliance_stats"
@@ -138,7 +140,9 @@ services:
   - "marketing"
   - "ac_maintenance"
   - "depart"
-timeout_seconds: 120
+timeout_seconds: 180
+# Not recommended to change this option
+# on systems without GUI support
 chrome_headless: true
 prometheus_address: ":9150"
 ```

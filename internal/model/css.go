@@ -77,7 +77,6 @@ const (
 	ELEM_HUBS_CATERING_OPTION_3      string = "div#caterMain div.col-4:nth-child(4)"
 	SELECT_HUBS_CATERING_DURATION    string = "div#caterMain select#durationSelector"
 	SELECT_HUBS_CATERING_AMOUNT      string = "div#caterMain select#caterAmount"
-	OPTION_HUBS_CATERING_DURATION_1W string = "168"
 	TEXT_HUBS_CATERING_COST          string = "div#caterMain span#sumCost"
 	BUTTON_HUBS_CATERING_BUY         string = "div#caterMain button#btnCaterDo"
 
