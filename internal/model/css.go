@@ -103,12 +103,12 @@ const (
 	BUTTON_MAINTENANCE_A_CHECK          string = `div[role="group"] button:nth-child(1)`
 	BUTTON_MAINTENANCE_REPAIR           string = `div[role="group"] button:nth-child(2)`
 	BUTTON_MAINTENANCE_MODIFY           string = `div[role="group"] button:nth-child(3)`
-	CHECKBOX_MAINTENANCE_MODIFY_MOD1    string = "div#typeModify table.table:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > label:nth-child(1) > span:nth-child(2)"
-	CHECKBOX_MAINTENANCE_MODIFY_MOD2    string = "div#typeModify table.table:nth-child(3) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > label:nth-child(1) > span:nth-child(2)"
-	CHECKBOX_MAINTENANCE_MODIFY_MOD3    string = "div#typeModify table.table:nth-child(3) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > label:nth-child(1) > span:nth-child(2)"
+	CHECKBOX_MAINTENANCE_MODIFY_MOD1    string = "div#typeModify table.table.table-sm.exo > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > label:nth-child(1) > span:nth-child(2)"
+	CHECKBOX_MAINTENANCE_MODIFY_MOD2    string = "div#typeModify table.table.table-sm.exo > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > label:nth-child(1) > span:nth-child(2)"
+	CHECKBOX_MAINTENANCE_MODIFY_MOD3    string = "div#typeModify table.table.table-sm.exo > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > label:nth-child(1) > span:nth-child(2)"
 	TEXT_MAINTENANCE_A_CHECK_TOTAL_COST string = "div#typeCheck div.col-6:nth-child(6) > div:nth-child(3)"
 	TEXT_MAINTENANCE_REPAIR_TOTAL_COST  string = "div#typeRepair div:nth-child(4) > div:nth-child(3)"
-	TEXT_MAINTENANCE_MODIFY_TOTAL_COST  string = "div#typeModify span#acCost"
+	TEXT_MAINTENANCE_MODIFY_TOTAL_COST  string = "div#typeModify div.row > div.col-6.text-center > span.text-danger.font-weight-bold"
 	BUTTON_MAINTENANCE_PLAN_CHECK       string = "div#typeCheck button.btn.btn-xs-real.btn-danger"
 	BUTTON_MAINTENANCE_PLAN_REPAIR      string = "div#typeRepair button.btn.btn-xs-real.btn-danger"
 	BUTTON_MAINTENANCE_PLAN_MODIFY      string = "div#typeModify button.btn-danger:nth-child(1)"
