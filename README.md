@@ -23,7 +23,7 @@ simulating user actions to perform the necessary tasks.
 
 ## Features
 
-- Automatic start marketing companies (Only available of: `Airline reputation`, `Cargo reputation`, `Eco friendly`).
+- Automatic start marketing companies (Available: `Airline reputation`, `Cargo reputation`, `Eco friendly`).
 - Automatic departures.
 - Automatic buy Fuel when price is low or fuel level is critical.
 - Automatic buy CO2 when price is low or quota level is critical.
@@ -49,12 +49,12 @@ simulating user actions to perform the necessary tasks.
    Paste your configuration and save the file.
 3. Run the bot:
    ```bash
-   docker run --rm --name ambot --volume /opt/ambot/conf/config.yaml:/app/conf/config.yaml ashokhin/am4bot:latest
+   docker run --rm --name ambot --volume /opt/ambot/conf/config.yaml:/config.yaml ashokhin/am4bot:latest
    ```
    
-   For collecting Prometheus metrics, you can expose port 9150:
+   For collecting Prometheus metrics, you can expose port 9150 (default in the config option `prometheus_address`) from container to host:
    ```bash
-   docker run --rm --name ambot --volume /opt/ambot/conf/config.yaml:/app/conf/config.yaml -p 9150:9150 ashokhin/am4bot:latest
+   docker run --rm --name ambot --volume /opt/ambot/conf/config.yaml:/config.yaml -p 9150:9150 ashokhin/am4bot:latest
    ```
 4. (Optional) To run the bot as a [systemd service](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html), create a file `/etc/systemd/system/am4bot.service` with the following content:
    ```ini
@@ -68,7 +68,7 @@ simulating user actions to perform the necessary tasks.
    Type=simple
    Restart=always
    ExecStartPre=-/usr/bin/docker pull ashokhin/am4bot:latest
-   ExecStart=/usr/bin/docker run --rm --name %n --volume /opt/ambot/conf/config.yaml:/app/conf/config.yaml --publish 9150:9150 ashokhin/am4bot:latest
+   ExecStart=/usr/bin/docker run --rm --name %n --volume /opt/ambot/conf/config.yaml:/config.yaml --publish 9150:9150 ashokhin/am4bot:latest
 
    [Install]
    WantedBy=multi-user.target
