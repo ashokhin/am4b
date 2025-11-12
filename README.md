@@ -21,6 +21,28 @@ It uses a headless browser to interact with the Airline Manager web interface,
 simulating user actions to perform the necessary tasks.
 
 
+## How it works
+
+Under the hood, the bot uses [Chromedp](https://github.com/chromedp/chromedp) to control a headless Chrome/Chromium browser. 
+
+It logs into the Airline Manager website using the provided credentials,
+navigates through the web elements, and performs actions based on the configured options.
+
+> [!WARNING]
+>
+> Since the bot interacts with the Airline Manager web interface,
+> it is necessary to ensure that the game's layout and elements remain unchanged.
+>
+> For this purpose, you have to make sure to keep game settings as:
+>
+> 1. `Language`: English (Default)
+>
+> 2. `Icon Menu`: Enabled
+>
+> As it is shown in the screenshot below:
+
+![Game settings](resources/Game_settings.png?raw=true "Game Settings Screenshot")
+
 ## Features
 
 - Automatic start marketing companies (Available: `Airline reputation`, `Cargo reputation`, `Eco friendly`).
