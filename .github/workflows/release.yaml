@@ -1,0 +1,36 @@
+name: Create release
+
+on:
+  push:
+    tags:
+     - '[0-9]+.[0-9]+'
+
+permissions:
+    contents: write
+    packages: write
+
+jobs:
+
+  release-linux-amd64:
+    strategy:
+      matrix:
+          os: [linux, windows]
+          arch: [amd64]
+
+    name:  "${{ matrix.os }}-${{ matrix.arch }}: Create and publish release on GitHub"
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Checkout repo
+      uses: actions/checkout@v5
+    
+    - name: Build application
+      uses: wangyoucao577/go-release-action@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.os }}
+        goarch: ${{ matrix.arch }}
+        build_command: "make ${{ matrix.os }}"
+        binary_name: "ambot"
+        extra_files: LICENSE README.md

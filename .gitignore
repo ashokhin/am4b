@@ -1,4 +1,4 @@
 .vscode/
 .venv/
-/bin/
+/bin
 /config.yaml
