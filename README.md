@@ -57,6 +57,7 @@ navigates through the web elements, and performs actions based on the configured
 - Automatic repair.
 - Automatic A-Check.
 - Automatic modification.
+- Automatic rewards claiming.
 - Prometheus metrics support.
 
 
@@ -127,7 +128,7 @@ navigates through the web elements, and performs actions based on the configured
 | `aircraft_modify_limit` | int | `3` | Max aircraft for modifications checks. |
 | `fuel_critical_percent` | float | `20` | Fuel level percentage to trigger refuel. Even the price isn't good. |
 | `cron_schedule` | string | `"*/5 * * * *"` | Cron schedule for services. Default: Every 5 minutes. |
-| `services` | list of strings | `["company_stats",` `"staff_morale",` `"alliance_stats",` `"hubs",` `"buy_fuel",` `"depart",` `"marketing",` `"ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `alliance_stats`, `staff_morale`, `hubs`, `buy_fuel`, `depart`, `marketing`, `ac_maintenance`. |
+| `services` | list of strings | `["company_stats",` `"staff_morale",` `"alliance_stats",` `"claim_rewards",` `"hubs",` `"buy_fuel",` `"depart",` `"marketing",` `"ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `alliance_stats`, `claim_rewards`, `staff_morale`, `hubs`, `buy_fuel`, `depart`, `marketing`, `ac_maintenance`. |
 | `timeout_seconds` | int | `120` | Timeout for full round in seconds. |
 | `chrome_headless` | bool | `true` | Run browser in headless mode. |
 | `prometheus_address` | string | `":9150"` | Address to expose Prometheus metrics. |
@@ -156,6 +157,7 @@ cron_schedule: "*/10 * * * *"
 services:
   - "company_stats"
   - "alliance_stats"
+  - "claim_rewards"
   - "staff_morale"
   - "hubs"
   - "buy_fuel"
@@ -178,6 +180,7 @@ password: "your_password_here"
 #### Service descriptions:
 - `company_stats`: Collects and exposes company statistics as Prometheus metrics.
 - `alliance_stats`: Collects and exposes alliance statistics as Prometheus metrics.
+- `claim_rewards`: Claims available rewards from the "Bonus" -> "Biweekly gift" menu.
 - `staff_morale`: Improves staff morale if below 100%.
 - `hubs`: Manages hubs, including buying catering if missing.
 - `buy_fuel`: Buys fuel and CO2 based on good price thresholds and critical levels.

@@ -75,8 +75,8 @@ func (b *Bot) Run(ctx context.Context) error {
 	}
 
 	// perform money check
-	if err := b.Money(taskCtx); err != nil {
-		slog.Warn("error in Bot.Run > Bot.Money", "error", err)
+	if err := b.money(taskCtx); err != nil {
+		slog.Warn("error in Bot.Run > Bot.money", "error", err)
 
 		return err
 	}
@@ -94,6 +94,13 @@ func (b *Bot) Run(ctx context.Context) error {
 		case "alliance_stats":
 			if err := b.allianceStats(taskCtx); err != nil {
 				slog.Warn("error in Bot.Run > Bot.allianceStats", "error", err)
+
+				return err
+			}
+
+		case "claim_rewards":
+			if err := b.claimRewards(taskCtx); err != nil {
+				slog.Warn("error in Bot.Run > Bot.claimRewards", "error", err)
 
 				return err
 			}

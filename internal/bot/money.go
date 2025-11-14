@@ -11,8 +11,8 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-// Money checks account balances and updates the bot's budget allocations accordingly.
-func (b *Bot) Money(ctx context.Context) error {
+// money checks account balances and updates the bot's budget allocations accordingly.
+func (b *Bot) money(ctx context.Context) error {
 	var accElemList []*cdp.Node
 
 	slog.Info("check account money")

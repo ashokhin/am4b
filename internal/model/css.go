@@ -17,6 +17,8 @@ const (
 	BUTTON_MAIN_FUEL        string = `div#smallMainMenu div#mapMaint[data-original-title="Fuel & co2"]`
 	BUTTON_MAIN_MAINTENANCE string = `div#smallMainMenu div#mapMaint[data-original-title="Maintenance"]`
 	BUTTON_MAIN_FINANCE     string = `div#smallMainMenu div#mapMaint[data-original-title="Finance, Marketing & Stock"]`
+	BUTTON_MAIN_BONUS       string = `div#smallMainMenu div#mapMaint[data-original-title="Bonus & Increase"]`
+	ICON_FREE_REWARDS       string = "div#smallMainMenu img#bonusDutyFreeIconAlert"
 
 	// Account pop-up
 	LIST_ACCOUNT_ACCOUNTS        string = "div#bankingAction > table > tbody > tr"
@@ -127,4 +129,8 @@ const (
 	BUTTON_FINANCE_MARKETING_INC_AIRLINE_REP_BUY       string = "div#financeAction button#c4Btn"
 	BUTTON_FINANCE_MARKETING_INC_CARGO_REP_BUY         string = "div#financeAction button#c4Btn"
 	BUTTON_FINANCE_MARKETING_ECO_FRIENDLY_BUY          string = TEXT_FINANCE_MARKETING_ECO_FRIENDLY_COST
+
+	// "Bonus" pop-up
+	BUTTON_BONUS_DUTY_FREE_TAB string = "div#popContent button#dutyFree"
+	BUTTON_BONUS_CLAIM_GIFT    string = "div#popContent div#dutyFree button#claim_gift"
 )

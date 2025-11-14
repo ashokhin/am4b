@@ -270,17 +270,16 @@ func DoClickElement(ctx context.Context, sel string) error {
 
 // IsElementVisible checks if an element matching the selector is visible on the page.
 func IsElementVisible(ctx context.Context, sel string) bool {
-	var nodesList []*cdp.Node
-
 	slog.Debug("check if element is visible", "element", sel)
 
+	// create a local context with 2 seconds timeout
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
-	slog.Debug("init nodesList", "len", len(nodesList))
-
+	// wait for 2 seconds for the element to be visible
+	// if element is not found then return false - element is not visible
 	if err := chromedp.Run(ctx,
-		chromedp.Nodes(sel, &nodesList, chromedp.ByQueryAll),
+		chromedp.WaitVisible(sel, chromedp.ByQuery),
 	); err != nil {
 		// if not found for the ctx timeout then return false - element is not visible
 		slog.Debug("error in utils.IsElementVisible", "selector", sel, "error", err)
@@ -288,11 +287,9 @@ func IsElementVisible(ctx context.Context, sel string) bool {
 		return false
 	}
 
-	slog.Debug("current nodesList", "len", len(nodesList))
+	slog.Debug("element is visible", "selector", sel)
 
-	// if 1 or more elements found then return true - element is visible
-	return len(nodesList) > 0
-
+	return true
 }
 
 // IsSubElementVisible checks if a sub-element matching the selector is visible within a given node.
