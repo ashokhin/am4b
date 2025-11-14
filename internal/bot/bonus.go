@@ -46,6 +46,7 @@ func (b *Bot) claimRewards(ctx context.Context) error {
 		utils.ClickElement(model.BUTTON_BONUS_DUTY_FREE_TAB),
 		chromedp.WaitReady(model.BUTTON_BONUS_CLAIM_GIFT, chromedp.ByQuery),
 		utils.ClickElement(model.BUTTON_BONUS_CLAIM_GIFT),
+		utils.ClickElement(model.BUTTON_COMMON_CLOSE_POPUP),
 	); err != nil {
 		slog.Warn("error in Bot.claimRewards > claim gifts", "error", err)
 
