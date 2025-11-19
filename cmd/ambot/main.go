@@ -24,9 +24,10 @@ import (
 )
 
 const (
-	APP_NAME           string = "ambot"
-	EXPORTER_NAME      string = "ambot_exporter"
-	EXPORTER_NAMESPACE string = "am4"
+	APP_NAME             string = "ambot"
+	EXPORTER_NAME        string = "ambot_exporter"
+	EXPORTER_NAMESPACE   string = "am4"
+	MAX_RESTORE_ATTEMPTS int    = 5
 )
 
 var (
@@ -116,22 +117,32 @@ func main() {
 	}
 
 	// now start it inside "cronjob" (goroutine with schedule)
-
 	// create cron object
 	c := cron.New()
+	// add counter for restore attempts after error
+	restoreAttemptsCount := 0
 	// create cron job with schedule from configuration
 	c.AddFunc(bot.Conf.CronSchedule, func() {
 		slog.Warn("start job", "start_time", time.Now().UTC())
 
 		if err := bot.Run(ctx); err != nil {
-			slog.Error("error in Bot.Run", "error", err)
+			restoreAttemptsCount++
 
-			os.Exit(1)
+			slog.Error("error in Bot.Run", "restore_attempts_count", restoreAttemptsCount, "max_attempts", MAX_RESTORE_ATTEMPTS, "error", err)
+
+			if restoreAttemptsCount >= MAX_RESTORE_ATTEMPTS {
+				slog.Error("max restore attempts count has been reached. Exit.")
+
+				os.Exit(1)
+			}
+
+			slog.Error("job has been failed", "end_time", time.Now().UTC(), "next_run", c.Entry(1).Next.UTC())
 		} else {
 			bot.PrometheusMetrics.Up.Set(1)
+
+			slog.Warn("job has been done", "end_time", time.Now().UTC(), "next_run", c.Entry(1).Next.UTC())
 		}
 
-		slog.Warn("job done", "end_time", time.Now().UTC(), "next_run", c.Entry(1).Next.UTC())
 	})
 
 	// start cron object, schedule jobs
@@ -148,6 +159,6 @@ func main() {
 	if err := http.ListenAndServe(*webAddr, nil); err != nil {
 		slog.Error("error in http server", "error", err)
 
-		return
+		os.Exit(1)
 	}
 }
