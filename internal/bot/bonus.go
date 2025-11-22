@@ -17,7 +17,7 @@ func (b *Bot) claimRewards(ctx context.Context) error {
 	slog.Info("check duty free rewards")
 
 	// check "Free Reward" icon for the "Bonus" menu
-	hasRewards = utils.IsElementVisible(ctx, model.ICON_FREE_REWARDS)
+	hasRewards = utils.IsElementVisible(ctx, model.ICON_FREE_REWARDS, 10)
 
 	slog.Debug("rewards available", "has_rewards", hasRewards)
 

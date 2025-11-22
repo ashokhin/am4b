@@ -128,8 +128,8 @@ navigates through the web elements, and performs actions based on the configured
 | `aircraft_modify_limit` | int | `3` | Max aircraft for modifications checks. |
 | `fuel_critical_percent` | float | `20` | Fuel level percentage to trigger refuel. Even the price isn't good. |
 | `cron_schedule` | string | `"*/5 * * * *"` | Cron schedule for services. Default: Every 5 minutes. |
-| `services` | list of strings | `["company_stats",` `"staff_morale",` `"alliance_stats",` `"claim_rewards",` `"hubs",` `"buy_fuel",` `"depart",` `"marketing",` `"ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `alliance_stats`, `claim_rewards`, `staff_morale`, `hubs`, `buy_fuel`, `depart`, `marketing`, `ac_maintenance`. |
-| `timeout_seconds` | int | `120` | Timeout for full round in seconds. |
+| `services` | list of strings | `["company_stats",` `"staff_morale",` `"alliance_stats",` `"hubs",` `"claim_rewards",` `"buy_fuel",` `"depart",` `"marketing",` `"ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `alliance_stats`, `staff_morale`, `hubs`, `claim_rewards`, `buy_fuel`, `depart`, `marketing`, `ac_maintenance`. |
+| `timeout_seconds` | int | `180` | Timeout for full round in seconds. |
 | `chrome_headless` | bool | `true` | Run browser in headless mode. |
 | `prometheus_address` | string | `":9150"` | Address to expose Prometheus metrics. |
 
@@ -157,14 +157,14 @@ cron_schedule: "*/10 * * * *"
 services:
   - "company_stats"
   - "alliance_stats"
-  - "claim_rewards"
   - "staff_morale"
   - "hubs"
+ - "claim_rewards"
   - "buy_fuel"
   - "marketing"
   - "ac_maintenance"
   - "depart"
-timeout_seconds: 180
+timeout_seconds: 240
 # Not recommended to change this option
 # on systems without GUI support
 chrome_headless: true

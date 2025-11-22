@@ -269,11 +269,18 @@ func DoClickElement(ctx context.Context, sel string) error {
 }
 
 // IsElementVisible checks if an element matching the selector is visible on the page.
-func IsElementVisible(ctx context.Context, sel string) bool {
+func IsElementVisible(ctx context.Context, sel string, waitTimeoutArgs ...int) bool {
 	slog.Debug("check if element is visible", "element", sel)
 
-	// create a local context with 2 seconds timeout
-	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	// define default timeout
+	waitTimeout := 2 * time.Second
+
+	if len(waitTimeoutArgs) > 0 {
+		waitTimeout = time.Duration(waitTimeoutArgs[0]) * time.Second
+	}
+
+	// create a local context with timeout
+	ctx, cancel := context.WithTimeout(ctx, waitTimeout)
 	defer cancel()
 
 	// wait for 2 seconds for the element to be visible
