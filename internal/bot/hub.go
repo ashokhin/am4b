@@ -124,7 +124,7 @@ func (b *Bot) hubsCollectMetrics(ctx context.Context, hubsElemList []*cdp.Node) 
 }
 
 // hubsLoungesRepair performs repair operation for limited number of hubs. Limit comes from the
-// configuration option "bot.Conf.hubs_max_maint_limit"
+// configuration option "bot.Conf.hubs_maintenance_limit"
 func (b *Bot) hubsLoungesRepair(ctx context.Context, hubsMap map[string]model.Hub) error {
 	var err error
 	loungesRepairCount := 0
@@ -140,11 +140,11 @@ func (b *Bot) hubsLoungesRepair(ctx context.Context, hubsMap map[string]model.Hu
 
 	defer utils.DoClickElement(ctx, model.BUTTON_HUBS_LOUNGES_BACK_TO_HUBS)
 
-	// perform repair for the first N ( defined by the config option "bot.Conf.hubs_max_maint_limit")
+	// perform repair for the first N ( defined by the config option "bot.Conf.hubs_maintenance_limit")
 	// hubs number in hubsMap
 	for hubName, hub := range hubsMap {
-		if loungesRepairCount >= b.Conf.HubsMaxMaintLimit {
-			slog.Info("Maximum lounges limit for repair has been reached for this run", "hubs_max_maint_limit", b.Conf.HubsMaxMaintLimit)
+		if loungesRepairCount >= b.Conf.HubsMaintenanceLimit {
+			slog.Info("Maximum lounges limit for repair has been reached for this run", "hubs_maintenance_limit", b.Conf.HubsMaintenanceLimit)
 
 			break
 		}
@@ -241,14 +241,14 @@ func (b *Bot) collectLoungeInfo(ctx context.Context, hubName string, hub *model.
 }
 
 // hubsBuyCatering buys catering for limited number of hubs. Limit comes from the
-// configuration option "bot.Conf.hubs_max_maint_limit"
+// configuration option "bot.Conf.hubs_maintenance_limit"
 func (b *Bot) hubsBuyCatering(ctx context.Context, hubsMap map[string]model.Hub) error {
 	hubsBuyCateringCount := 0
-	// perform catering buy for the first N ( defined by the config option "bot.Conf.hubs_max_maint_limit")
+	// perform catering buy for the first N ( defined by the config option "bot.Conf.hubs_maintenance_limit")
 	// hubs number in hubsMap
 	for hubName, hub := range hubsMap {
-		if hubsBuyCateringCount >= b.Conf.HubsMaxMaintLimit {
-			slog.Info("Maximum hubs limit for catering has been reached for this run", "hubs_max_maint_limit", b.Conf.HubsMaxMaintLimit)
+		if hubsBuyCateringCount >= b.Conf.HubsMaintenanceLimit {
+			slog.Info("Maximum hubs limit for catering has been reached for this run", "hubs_maintenance_limit", b.Conf.HubsMaintenanceLimit)
 
 			break
 		}

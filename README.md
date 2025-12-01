@@ -120,7 +120,7 @@ navigates through the web elements, and performs actions based on the configured
 | `good_price` | map of strings to int | see below | Good price thresholds for resources. |
 | `good_price.fuel` | int | `500` | Good price for Fuel (per 1,000 Lbs). |
 | `good_price.co2` | int | `120` | Good price for CO2 (per 1,000 Quotas). |
-| `hubs_max_maint_limit` | int | `5` | Maximum number of hubs for maintenance (`repair lounge`, `buy catering`) per run. |
+| `hubs_maintenance_limit` | int | `5` | Maximum number of hubs for maintenance (`repair lounge`, `buy catering`) per run. |
 | `repair_lounges` | bool | `true` | Whether to repair lounges in hubs. |
 | `buy_catering_if_missing` | bool | `true` | Whether to buy catering if missing in hubs. |
 | `catering_duration_hours` | string | `"168"` | Catering duration in hours to set when buying catering. Possible values: `6`, `12`, `18`, `24`, `48`, `72`, `96`, `120`, `144`, `168` |
@@ -148,7 +148,7 @@ budget_percent:
 good_price:
   fuel: 550
   co2: 140
-hubs_max_maint_limit: 3
+hubs_maintenance_limit: 3
 repair_lounges: false
 buy_catering_if_missing: false
 catering_duration_hours: "24"

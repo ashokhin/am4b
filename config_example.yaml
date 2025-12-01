@@ -9,6 +9,7 @@ budget_percent:
 good_price:
   fuel: 550
   co2: 140
+hubs_maintenance_limit: 3
 repair_lounges: true
 buy_catering_if_missing: true
 catering_duration_hours: "24"
