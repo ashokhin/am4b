@@ -317,6 +317,17 @@ func (b *Bot) repairLounge(ctx context.Context, hub *model.Hub) error {
 	b.AccountBalance -= loungeRepairCost
 	b.BudgetMoney.Maintenance -= loungeRepairCost
 
+	// after clicking the "repair" button,
+	// lounges grid is redrawn, so we need to re-open lounges maintenance tab
+	if err := chromedp.Run(ctx,
+		utils.ClickElement(model.BUTTON_HUBS_LOUNGES_BACK_TO_HUBS),
+		utils.ClickElement(model.BUTTON_HUBS_LOUNGES_MAINTENANCE),
+	); err != nil {
+		slog.Warn("error in Bot.repairLounge > reopen lounges tab", "error", err)
+
+		return err
+	}
+
 	return nil
 }
 
