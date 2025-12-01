@@ -186,7 +186,7 @@ password: "your_password_here"
 - `alliance_stats`: Collects and exposes alliance statistics as Prometheus metrics.
 - `claim_rewards`: Claims available rewards from the "Bonus" -> "Biweekly gift" menu.
 - `staff_morale`: Improves staff morale if below 100%.
-- `hubs`: Manages hubs, including buying catering if missing.
+- `hubs`: Manages hubs, including repairing lounges and buying catering if missing.
 - `buy_fuel`: Buys fuel and CO2 based on good price thresholds and critical levels.
 - `marketing`: Starts marketing campaigns based on budget percentage.
 - `ac_maintenance`: Performs aircraft maintenance, A-Checks, and modifications based on configured thresholds.
