@@ -64,15 +64,15 @@ func (b *Bot) money(ctx context.Context) error {
 func (b *Bot) calcBudget() {
 	slog.Debug("calculate budgets")
 
-	b.Conf.BudgetMoney.Maintenance = (b.AccountBalance * (b.Conf.BudgetPercent.Maintenance * 0.01))
-	b.Conf.BudgetMoney.Marketing = (b.AccountBalance * (b.Conf.BudgetPercent.Marketing * 0.01))
-	b.Conf.BudgetMoney.Fuel = (b.AccountBalance * (b.Conf.BudgetPercent.Fuel * 0.01))
+	b.BudgetMoney.Maintenance = (b.AccountBalance * (b.Conf.BudgetPercent.Maintenance * 0.01))
+	b.BudgetMoney.Marketing = (b.AccountBalance * (b.Conf.BudgetPercent.Marketing * 0.01))
+	b.BudgetMoney.Fuel = (b.AccountBalance * (b.Conf.BudgetPercent.Fuel * 0.01))
 
 	slog.Debug("calculated budget",
 		"maintenancePercent", b.Conf.BudgetPercent.Maintenance,
-		"maintenanceMoney", int(b.Conf.BudgetMoney.Maintenance),
+		"maintenanceBudget", int(b.BudgetMoney.Maintenance),
 		"marketingPercent", b.Conf.BudgetPercent.Marketing,
-		"marketingMoney", int(b.Conf.BudgetMoney.Marketing),
+		"marketingBudget", int(b.BudgetMoney.Marketing),
 		"fuelPercent", int(b.Conf.BudgetPercent.Fuel),
-		"fuelMoney", int(b.Conf.BudgetMoney.Fuel))
+		"fuelBudget", int(b.BudgetMoney.Fuel))
 }

@@ -19,7 +19,15 @@ type Bot struct {
 	Conf              *config.Config
 	chromeOpts        []chromedp.ExecAllocatorOption
 	AccountBalance    float64
+	BudgetMoney       BudgetType
 	PrometheusMetrics metrics.Metrics
+}
+
+// Budget defines the budget allocations for different categories.
+type BudgetType struct {
+	Maintenance float64
+	Marketing   float64
+	Fuel        float64
 }
 
 // New creates a new Bot instance with the provided configuration and Prometheus registry.

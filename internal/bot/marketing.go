@@ -81,13 +81,13 @@ func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCo
 
 	utils.DoClickElement(ctx, mc.CompanyRow)
 
-	var companyCost float64
+	var marketingCompanyCost float64
 	// get marketing company cost
 	switch mc.Name {
 	// in case of "Eco friendly" marketing company we skip "select option" actions
 	case "Eco friendly":
 		if err := chromedp.Run(ctx,
-			utils.GetFloatFromElement(mc.CompanyCost, &companyCost),
+			utils.GetFloatFromElement(mc.CompanyCost, &marketingCompanyCost),
 		); err != nil {
 			slog.Warn("error in Bot.activateMarketingCompany > get company cost", "company", mc.Name, "error", err)
 
@@ -96,7 +96,7 @@ func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCo
 	default:
 		if err := chromedp.Run(ctx,
 			chromedp.SetValue(model.SELECT_FINANCE_MARKETING_COMPANY_DURATION, mc.CompanyOptionValue, chromedp.ByQuery),
-			utils.GetFloatFromElement(mc.CompanyCost, &companyCost),
+			utils.GetFloatFromElement(mc.CompanyCost, &marketingCompanyCost),
 		); err != nil {
 			slog.Warn("error in Bot.activateMarketingCompany > get company cost", "company", mc.Name, "error", err)
 
@@ -104,11 +104,11 @@ func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCo
 		}
 	}
 
-	slog.Debug("company cost", "company", mc.Name, "cost", int(companyCost))
+	slog.Debug("company cost", "company", mc.Name, "cost", int(marketingCompanyCost))
 
-	if companyCost > b.Conf.BudgetMoney.Marketing {
+	if marketingCompanyCost > b.BudgetMoney.Marketing {
 		slog.Warn("marketing company is too expensive", "company", mc.Name,
-			"cost", int(companyCost), "budget", int(b.Conf.BudgetMoney.Marketing))
+			"cost", int(marketingCompanyCost), "budget", int(b.BudgetMoney.Marketing))
 
 		return nil
 	}
@@ -122,8 +122,8 @@ func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCo
 		return err
 	}
 
-	b.Conf.BudgetMoney.Marketing -= companyCost
-	b.AccountBalance -= companyCost
+	b.BudgetMoney.Marketing -= marketingCompanyCost
+	b.AccountBalance -= marketingCompanyCost
 
 	return nil
 }

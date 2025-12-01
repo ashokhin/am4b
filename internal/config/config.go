@@ -10,30 +10,31 @@ import (
 )
 
 type Config struct {
-	Url                     string   `default:"https://www.airlinemanager.com/" yaml:"url"`
-	User                    string   `yaml:"username"`
-	Password                string   `yaml:"password"`
-	LogLevel                string   `default:"info" yaml:"log_level"`
-	BudgetPercent           Budget   `yaml:"budget_percent"`
-	FuelPrice               Price    `yaml:"good_price"`
-	BuyCateringIfMissing    bool     `default:"true" yaml:"buy_catering_if_missing"`
-	CateringDurationHours   string   `default:"168" yaml:"catering_duration_hours"`
-	CateringAmountOption    string   `default:"20000" yaml:"catering_amount_option"`
-	FuelCriticalPercent     float64  `default:"20" yaml:"fuel_critical_percent"`
-	AircraftWearPercent     float64  `default:"80" yaml:"aircraft_wear_percent"`
-	AircraftMaxHoursToCheck int      `default:"24" yaml:"aircraft_max_hours_to_check"`
-	AircraftModifyLimit     int      `default:"3" yaml:"aircraft_modify_limit"`
-	CronSchedule            string   `default:"*/5 * * * *" yaml:"cron_schedule"`
-	Services                []string `default:"[\"company_stats\",\"alliance_stats\",\"staff_morale\",\"hubs\",\"claim_rewards\",\"buy_fuel\",\"marketing\",\"ac_maintenance\",\"depart\"]" yaml:"services"`
-	TimeoutSeconds          int      `default:"180" yaml:"timeout_seconds"`
-	ChromeHeadless          bool     `default:"true" yaml:"chrome_headless"`
-	PrometheusAddress       string   `default:":9150" yaml:"prometheus_address"`
+	Url                     string     `default:"https://www.airlinemanager.com/" yaml:"url"`
+	User                    string     `yaml:"username"`
+	Password                string     `yaml:"password"`
+	LogLevel                string     `default:"info" yaml:"log_level"`
+	BudgetPercent           BudgetType `yaml:"budget_percent"`
+	FuelPrice               Price      `yaml:"good_price"`
+	RepairLounges           bool       `default:"true" yaml:"repair_lounges"`
+	BuyCateringIfMissing    bool       `default:"true" yaml:"buy_catering_if_missing"`
+	CateringDurationHours   string     `default:"168" yaml:"catering_duration_hours"`
+	CateringAmountOption    string     `default:"20000" yaml:"catering_amount_option"`
+	HubsMaxMaintLimit       int        `default:"5" yaml:"hubs_max_maint_limit"`
+	FuelCriticalPercent     float64    `default:"20" yaml:"fuel_critical_percent"`
+	AircraftWearPercent     float64    `default:"80" yaml:"aircraft_wear_percent"`
+	AircraftMaxHoursToCheck int        `default:"24" yaml:"aircraft_max_hours_to_check"`
+	AircraftModifyLimit     int        `default:"3" yaml:"aircraft_modify_limit"`
+	CronSchedule            string     `default:"*/5 * * * *" yaml:"cron_schedule"`
+	Services                []string   `default:"[\"company_stats\",\"alliance_stats\",\"staff_morale\",\"hubs\",\"claim_rewards\",\"buy_fuel\",\"marketing\",\"ac_maintenance\",\"depart\"]" yaml:"services"`
+	TimeoutSeconds          int        `default:"180" yaml:"timeout_seconds"`
+	ChromeHeadless          bool       `default:"true" yaml:"chrome_headless"`
+	PrometheusAddress       string     `default:":9150" yaml:"prometheus_address"`
 	// internal fields
-	BudgetMoney   Budget
 	passwordRunes []rune // most safe storage for password in memory
 }
 
-type Budget struct {
+type BudgetType struct {
 	Maintenance float64 `default:"50" yaml:"maintenance"`
 	Marketing   float64 `default:"70" yaml:"marketing"`
 	Fuel        float64 `default:"70" yaml:"fuel"`
@@ -48,8 +49,8 @@ func (c *Config) String() string {
 	return fmt.Sprintf("%+v", *c)
 }
 
-// convert password string into array of runes
-func (c *Config) SafeStorePassword() {
+// safeStorePassword converts password string into array of runes
+func (c *Config) safeStorePassword() {
 	c.passwordRunes = []rune(c.Password)
 	c.Password = ""
 }
@@ -71,7 +72,7 @@ func New(filePath string) (*Config, error) {
 		return &c, err
 	}
 
-	c.SafeStorePassword()
+	c.safeStorePassword()
 
 	slog.Debug("yaml loaded", "yaml", c)
 

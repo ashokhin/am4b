@@ -120,6 +120,8 @@ func GetIntFromElement(sel string, resultInt *int) chromedp.Tasks {
 				return err
 			}
 
+			slog.Debug("got integer from element", "value", *resultInt)
+
 			return nil
 		}),
 	}
@@ -143,6 +145,8 @@ func GetIntFromChildElement(sel string, resultInt *int, node *cdp.Node) chromedp
 				return err
 			}
 
+			slog.Debug("got integer from child element", "value", *resultInt)
+
 			return nil
 		}),
 	}
@@ -165,6 +169,8 @@ func GetIntFromChildElementAttribute(sel string, resultInt *int, node *cdp.Node)
 		return err
 	}
 
+	slog.Debug("got integer from child element attribute", "value", *resultInt)
+
 	return nil
 }
 
@@ -186,6 +192,8 @@ func GetFloatFromElement(sel string, resultFloat *float64) chromedp.Tasks {
 
 				return err
 			}
+
+			slog.Debug("got float from element", "value", *resultFloat)
 
 			return nil
 		}),
@@ -213,6 +221,8 @@ func GetFloatFromChildElement(sel string, resultFloat *float64, node *cdp.Node) 
 
 			*resultFloat = float64(resultInt)
 
+			slog.Debug("got float from child element", "value", *resultFloat)
+
 			return nil
 		}),
 	}
@@ -234,6 +244,8 @@ func GetFloatFromChildElementAttribute(sel string, resultFloat *float64, node *c
 
 		return err
 	}
+
+	slog.Debug("got float from child element attribute", "value", *resultFloat)
 
 	return nil
 }

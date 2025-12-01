@@ -145,9 +145,9 @@ func (b *Bot) maintenanceAcByType(ctx context.Context, ac model.Aircraft, mntTyp
 		return mntOperationPerformed, nil
 	}
 
-	if mntOperationCost > b.Conf.BudgetMoney.Maintenance {
+	if mntOperationCost > b.BudgetMoney.Maintenance {
 		slog.Warn("maintenance is too expensive", "cost", int(mntOperationCost),
-			"budget", int(b.Conf.BudgetMoney.Maintenance), "operation", mntOperationStr,
+			"budget", int(b.BudgetMoney.Maintenance), "operation", mntOperationStr,
 			"reg.number", strings.ToUpper(ac.RegNumber))
 
 		return mntOperationPerformed, nil
@@ -163,7 +163,7 @@ func (b *Bot) maintenanceAcByType(ctx context.Context, ac model.Aircraft, mntTyp
 		return mntOperationPerformed, err
 	}
 
-	b.Conf.BudgetMoney.Maintenance -= mntOperationCost
+	b.BudgetMoney.Maintenance -= mntOperationCost
 	b.AccountBalance -= mntOperationCost
 	mntOperationPerformed = true
 

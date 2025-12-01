@@ -135,9 +135,9 @@ func (b *Bot) buyFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 			"expected", int(fuelExpectedPrice))
 
 		return nil
-	} else if amountPrice > b.Conf.BudgetMoney.Fuel { // else if amountPrice more than budget then exit
+	} else if amountPrice > b.BudgetMoney.Fuel { // else if amountPrice more than budget then exit
 		slog.Info("not enough money for buying fuel", "type", fuelStruct.FuelType, "need", int(amountPrice),
-			"budget", int(b.Conf.BudgetMoney.Fuel))
+			"budget", int(b.BudgetMoney.Fuel))
 
 		return nil
 	}
@@ -156,11 +156,11 @@ func (b *Bot) buyFuelType(ctx context.Context, fuelStruct *model.Fuel) error {
 		return err
 	}
 
-	slog.Debug("money before", "AccountBalance", int(b.AccountBalance), "fuelBudget", int(b.Conf.BudgetMoney.Fuel))
+	slog.Debug("money before", "AccountBalance", int(b.AccountBalance), "fuelBudget", int(b.BudgetMoney.Fuel))
 	// update bot money values after purchase
 	b.AccountBalance -= amountPrice
-	b.Conf.BudgetMoney.Fuel -= amountPrice
-	slog.Debug("money after", "AccountBalance", int(b.AccountBalance), "fuelBudget", int(b.Conf.BudgetMoney.Fuel))
+	b.BudgetMoney.Fuel -= amountPrice
+	slog.Debug("money after", "AccountBalance", int(b.AccountBalance), "fuelBudget", int(b.BudgetMoney.Fuel))
 
 	return nil
 }

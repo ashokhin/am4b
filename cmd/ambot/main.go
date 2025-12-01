@@ -126,7 +126,9 @@ func main() {
 		slog.Warn("start job", "start_time", time.Now().UTC())
 
 		if err := bot.Run(ctx); err != nil {
+			// failed run increases counter
 			restoreAttemptsCount++
+			bot.PrometheusMetrics.Up.Set(0)
 
 			slog.Error("error in Bot.Run", "restore_attempts_count", restoreAttemptsCount, "max_attempts", MAX_RESTORE_ATTEMPTS, "error", err)
 
@@ -138,6 +140,8 @@ func main() {
 
 			slog.Error("job has been failed", "end_time", time.Now().UTC(), "next_run", c.Entry(1).Next.UTC())
 		} else {
+			// successful run resets counter
+			restoreAttemptsCount = 0
 			bot.PrometheusMetrics.Up.Set(1)
 
 			slog.Warn("job has been done", "end_time", time.Now().UTC(), "next_run", c.Entry(1).Next.UTC())

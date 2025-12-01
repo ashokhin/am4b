@@ -1,5 +1,11 @@
 package model
 
+import (
+	"fmt"
+
+	"github.com/chromedp/cdproto/cdp"
+)
+
 type MaintenanceType int
 
 const (
@@ -76,10 +82,18 @@ type MarketingCompany struct {
 
 // Hub represents an airport hub with various statistics.
 type Hub struct {
-	Name        string
-	Departures  float64
-	Arrivals    float64
-	PaxDeparted float64
-	PaxArrived  float64
-	HasCatering bool
+	Departures    float64
+	Arrivals      float64
+	PaxDeparted   float64
+	PaxArrived    float64
+	HasCatering   bool
+	NeedsRepair   bool
+	HubCdpNode    *cdp.Node
+	LoungeCdpNode *cdp.Node
+}
+
+func (h Hub) String() string {
+	return fmt.Sprint("{Departures:", h.Departures, ", Arrivals:", h.Arrivals,
+		", PaxDeparted:", h.PaxDeparted, ", PaxArrived:", h.PaxArrived,
+		", HasCatering:", h.HasCatering, ", NeedsRepair:", h.NeedsRepair, "}")
 }
