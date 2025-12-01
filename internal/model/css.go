@@ -90,8 +90,24 @@ const (
 	BUTTON_HUBS_CATERING_BUY              string = "div#caterMain button#btnCaterDo"
 
 	// "Company" pop-up
-	TEXT_COMPANY_RANK                  string = "div.text-secondary"
-	TEXT_COMPANY_STAFF_TRAINING_POINTS string = "span#tPoints"
+	TEXT_COMPANY_RANK                           string = "div.text-secondary"
+	TEXT_COMPANY_STAFF_TRAINING_POINTS          string = "span#tPoints"
+	TEXT_COMPANY_STAFF_PILOT_SALARY             string = "#pilotSalary"
+	TEXT_COMPANY_STAFF_PILOT_MORALE             string = "#pilotMorale"
+	BUTTON_COMPANY_STAFF_PILOT_SALARY_UP        string = "#pilot_main > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > button:nth-child(1)"
+	BUTTON_COMPANY_STAFF_PILOT_SALARY_DOWN      string = "#pilot_main > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)"
+	TEXT_COMPANY_STAFF_CREW_SALARY              string = "#crewSalary"
+	TEXT_COMPANY_STAFF_CREW_MORALE              string = "#crewMorale"
+	BUTTON_COMPANY_STAFF_CREW_SALARY_UP         string = "#crew_main > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > button:nth-child(1)"
+	BUTTON_COMPANY_STAFF_CREW_SALARY_DOWN       string = "#crew_main > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)"
+	TEXT_COMPANY_STAFF_ENGINEER_SALARY          string = "#engineerSalary"
+	TEXT_COMPANY_STAFF_ENGINEER_MORALE          string = "#engineerMorale"
+	BUTTON_COMPANY_STAFF_ENGINEER_SALARY_UP     string = "#engineer_main > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > button:nth-child(1)"
+	BUTTON_COMPANY_STAFF_ENGINEER_SALARY_DOWN   string = "#engineer_main > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)"
+	TEXT_COMPANY_STAFF_TECHNICIAN_SALARY        string = "#techSalary"
+	TEXT_COMPANY_STAFF_TECHNICIAN_MORALE        string = "#techMorale"
+	BUTTON_COMPANY_STAFF_TECHNICIAN_SALARY_UP   string = "#tech_main > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > button:nth-child(1)"
+	BUTTON_COMPANY_STAFF_TECHNICIAN_SALARY_DOWN string = "#tech_main > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > button:nth-child(1)"
 
 	// "Fuel" pop-up
 	TEXT_FUEL_FUEL_PRICE    string = "div#fuelMain span#sumCost"
