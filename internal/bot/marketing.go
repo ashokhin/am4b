@@ -9,22 +9,22 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-var marketingCompaniesList = []model.MarketingCompany{
-	{
+var marketingCompaniesMap = map[string]model.MarketingCompany{
+	"AirlineReputation": {
 		Name:               "Airline reputation",
 		CompanyRow:         model.ELEM_FINANCE_MARKETING_INC_AIRLINE_REP,
 		CompanyOptionValue: model.OPTION_FINANCE_MARKETING_INC_AIRLINE_REP_24H_VALUE,
 		CompanyCost:        model.TEXT_FINANCE_MARKETING_INC_AIRLINE_REP_COST,
 		CompanyButton:      model.BUTTON_FINANCE_MARKETING_INC_AIRLINE_REP_BUY,
 	},
-	{
+	"CargoReputation": {
 		Name:               "Cargo reputation",
 		CompanyRow:         model.ELEM_FINANCE_MARKETING_INC_CARGO_REP,
 		CompanyOptionValue: model.OPTION_FINANCE_MARKETING_INC_CARGO_REP_24H_VALUE,
 		CompanyCost:        model.TEXT_FINANCE_MARKETING_INC_CARGO_REP_COST,
 		CompanyButton:      model.BUTTON_FINANCE_MARKETING_INC_CARGO_REP_BUY,
 	},
-	{
+	"EcoFriendly": {
 		Name:               "Eco friendly",
 		CompanyRow:         model.ELEM_FINANCE_MARKETING_ECO_FRIENDLY,
 		CompanyOptionValue: "",
@@ -40,30 +40,52 @@ func (b *Bot) marketingCompanies(ctx context.Context) error {
 	// open finance pop-up
 	utils.DoClickElement(ctx, model.BUTTON_MAIN_FINANCE)
 	defer utils.DoClickElement(ctx, model.BUTTON_COMMON_CLOSE_POPUP)
+	// open the "+ New campaign" section
+	if err := chromedp.Run(ctx,
+		utils.ClickElement(model.BUTTON_COMMON_TAB2),
+		utils.ClickElement(model.BUTTON_FINANCE_MARKETING_NEW_COMPANY),
+	); err != nil {
+		slog.Warn("error in Bot.marketingCompanies > open marketing companies window", "error", err)
 
-	for _, markComp := range marketingCompaniesList {
-		slog.Debug("marketing company", "company", markComp.Name)
+		return err
+	}
 
-		if err := b.activateMarketingCompany(ctx, markComp); err != nil {
-			slog.Warn("error in Bot.marketingCompanies > Bot.activateMarketingCompany", "company", markComp.Name, "error", err)
+	// check marketing companies status
+	for markCompName, markComp := range marketingCompaniesMap {
+
+		if err := b.checkMarketingCompanyStatus(ctx, &markComp); err != nil {
+			slog.Warn("error in Bot.marketingCompanies > Bot.checkMarketingCompanyStatus", "company", markComp.Name, "error", err)
 
 			return err
+		}
+
+		slog.Debug("marketing company status", "company", markComp.Name, "isActive", markComp.IsActive)
+		marketingCompaniesMap[markCompName] = markComp
+	}
+
+	// activate marketing companies if not active
+	for _, markComp := range marketingCompaniesMap {
+
+		if !markComp.IsActive {
+			if err := b.activateMarketingCompany(ctx, markComp); err != nil {
+				slog.Warn("error in Bot.marketingCompanies > Bot.activateMarketingCompany", "company", markComp.Name, "error", err)
+
+				return err
+			}
 		}
 	}
 
 	return nil
 }
 
-// activateMarketingCompany activates a specific marketing company if it is affordable and not already active.
-func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCompany) error {
+// checkMarketingCompanyStatus checks if a marketing company is currently active.
+func (b *Bot) checkMarketingCompanyStatus(ctx context.Context, mc *model.MarketingCompany) error {
 	var marketingCompanyElemAttributes map[string]string
 
-	slog.Debug("Check marketing company", "company", mc.Name)
+	slog.Debug("Check marketing company by the 'class' attribute", "company", mc.Name)
 
 	// search marketingCompany element attributes
 	if err := chromedp.Run(ctx,
-		utils.ClickElement(model.BUTTON_COMMON_TAB2),
-		utils.ClickElement(model.BUTTON_FINANCE_MARKETING_NEW_COMPANY),
 		chromedp.Attributes(mc.CompanyRow, &marketingCompanyElemAttributes, chromedp.ByQuery),
 	); err != nil {
 		slog.Warn("error in Bot.activateMarketingCompany > get company elem attributes", "company", mc.Name, "error", err)
@@ -73,13 +95,33 @@ func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCo
 
 	slog.Debug("attributes found", "company", mc.Name, "attributes", marketingCompanyElemAttributes)
 
+	// check if marketing company element has "not-active" class (means company is active)
 	if marketingCompanyElemAttributes["class"] == "not-active" {
-		slog.Debug("marketing company inactive", "company", mc.Name)
+		slog.Debug("marketing company is active", "company", mc.Name)
 
-		return nil
+		mc.IsActive = true
+	} else {
+		slog.Debug("marketing company is not active", "company", mc.Name)
+
+		mc.IsActive = false
 	}
 
-	utils.DoClickElement(ctx, mc.CompanyRow)
+	return nil
+}
+
+// activateMarketingCompany activates a specific marketing company if it is affordable and not already active.
+func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCompany) error {
+	slog.Debug("activate marketing company", "company", mc.Name)
+
+	if err := chromedp.Run(ctx,
+		utils.ClickElement(model.BUTTON_COMMON_TAB2),
+		utils.ClickElement(model.BUTTON_FINANCE_MARKETING_NEW_COMPANY),
+		utils.ClickElement(mc.CompanyRow),
+	); err != nil {
+		slog.Warn("error in Bot.activateMarketingCompany > click company row", "error", err)
+
+		return err
+	}
 
 	var marketingCompanyCost float64
 	// get marketing company cost

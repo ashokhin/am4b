@@ -140,6 +140,7 @@ const (
 
 	// "Finance" pop-up
 	BUTTON_FINANCE_MARKETING_NEW_COMPANY               string = "div#financeAction button#newCampaign"
+	ELEM_FINANCE_MARKETING_LIST                        string = "div#financeAction #active-campaigns > table:nth-child(1) > tbody:nth-child(1)"
 	ELEM_FINANCE_MARKETING_INC_AIRLINE_REP             string = "div#financeAction table.table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(1)"
 	ELEM_FINANCE_MARKETING_INC_CARGO_REP               string = "div#financeAction table.table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(2)"
 	ELEM_FINANCE_MARKETING_ECO_FRIENDLY                string = "div#financeAction table.table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(3)"

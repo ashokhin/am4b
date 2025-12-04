@@ -78,6 +78,7 @@ type MarketingCompany struct {
 	CompanyOptionValue string
 	CompanyCost        string
 	CompanyButton      string
+	IsActive           bool
 }
 
 // Hub represents an airport hub with various statistics.
