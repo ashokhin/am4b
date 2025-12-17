@@ -1,6 +1,8 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/ashokhin/am4b)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/ashokhin/am4b)
 ![GitHub issues](https://img.shields.io/github/issues/ashokhin/am4b)
 ![Docker Pulls](https://img.shields.io/docker/pulls/ashokhin/am4bot)
+![GitHub license](https://img.shields.io/github/license/ashokhin/am4b)
 
 🐳[Docker Hub](https://hub.docker.com/r/ashokhin/am4bot)
 
@@ -28,6 +30,11 @@ Under the hood, the bot uses [Chromedp](https://github.com/chromedp/chromedp) to
 It logs into the Airline Manager website using the provided credentials,
 navigates through the web elements, and performs actions based on the configured options.
 
+In parallel, it collects various statistics about the airline and alliance,
+exposing them as [Prometheus](https://prometheus.io/docs/introduction/overview/) metrics for monitoring and analysis.
+
+You can visualize these metrics using [Grafana](https://grafana.com/grafana/).
+
 > [!WARNING]
 >
 > Since the bot interacts with the Airline Manager web interface,
@@ -46,18 +53,18 @@ navigates through the web elements, and performs actions based on the configured
 ## Features
 
 - Automatic start marketing companies (Available: `Airline reputation`, `Cargo reputation`, `Eco friendly`).
-- Automatic departures.
+- Automatic aircraft departures.
 - Automatic buy Fuel when price is low or fuel level is critical.
 - Automatic buy CO2 when price is low or quota level is critical.
 - Automatic staff morale improvement.
-- Automatic hub management.
-- Automatic catering purchase.
+- Automatic hubs repair.
+- Automatic catering purchase in hubs.
 - Automatic company statistics collection.
 - Automatic alliance statistics collection.
-- Automatic repair.
-- Automatic A-Check.
-- Automatic modification.
-- Automatic rewards claiming.
+- Automatic aircraft repair.
+- Automatic aircraft A-Check.
+- Automatic aircraft modification.
+- Automatic duty free rewards (Biweekly gift) claiming.
 - Prometheus metrics support.
 
 
@@ -133,6 +140,7 @@ navigates through the web elements, and performs actions based on the configured
 | `services` | list of strings | `["company_stats",` `"staff_morale",` `"alliance_stats",` `"hubs",` `"claim_rewards",` `"buy_fuel",` `"depart",` `"marketing",` `"ac_maintenance"]` | List of services to run. Possible values: `company_stats`, `alliance_stats`, `staff_morale`, `hubs`, `claim_rewards`, `buy_fuel`, `depart`, `marketing`, `ac_maintenance`. |
 | `timeout_seconds` | int | `180` | Timeout for full round in seconds. |
 | `chrome_headless` | bool | `true` | Run browser in headless mode. |
+| `chrome_debug` | bool | `false` | Enable detailed Chrome/Chromium debugging logs. |
 | `prometheus_address` | string | `":9150"` | Address to expose Prometheus metrics. |
 
 #### Example of `config.yaml` with the non-default options:
@@ -172,6 +180,7 @@ timeout_seconds: 240
 # Not recommended to change this option
 # on systems without GUI support
 chrome_headless: true
+chrome_debug: true
 prometheus_address: ":9150"
 ```
 
@@ -231,7 +240,7 @@ am4_alliance_flights 479
 # HELP am4_alliance_season_money Alliance season money value.
 # TYPE am4_alliance_season_money gauge
 am4_alliance_season_money 147
-# HELP am4_build_info A metric with a constant '1' value labeled by version, revision, branch, goversion from which am4 was built, and the goos and goarch for the build.
+# HELP am4_build_info A metric with a constant '1' value labeled by version, revision, branch, goversion from which am4bot was built, and the goos and goarch for the build.
 # TYPE am4_build_info gauge
 am4_build_info{branch="tags/1.28",goarch="amd64",goos="linux",goversion="go1.24.7",revision="84a34f6b9b1352cda47a517a8ee748c306c7d2e5",tags="unknown",version="1.28"} 1
 # HELP am4_company_fuel_holding Fuel amount holding by fuel type.
@@ -309,9 +318,17 @@ You can use the following [Grafana dashboard](https://grafana.com/grafana/dashbo
 ![Grafana dashboard](resources/Grafana_dashboard.png?raw=true "Grafana Dashboard Screenshot")
 
 
+## Known Issues
+
+- During the maintenance operations, the "Modification" function chooses only the last `N` aircraft from the list of aircraft eligible for modification,
+  where `N` is the `aircraft_modify_limit` configuration option. Note that the function chooses aircraft sorted by registration number, lexicographically (alphabetically). Insure that your fleet registration numbers are assigned in a way that allows the bot to select the desired aircraft for modification.
+
+
 ## License
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
 ## Maintainer
+
 GitHub: [@ashokhin](https://github.com/ashokhin)
