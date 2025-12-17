@@ -11,16 +11,20 @@ import (
 
 // auth performs authentication on the target website using credentials from the bot configuration.
 func (b *Bot) auth(ctx context.Context) error {
-	slog.Debug("auth", "url", b.Conf.Url, "user", b.Conf.User)
+	slog.Debug("auth", "url", b.Conf.Url, "user", utils.MaskUsername(b.Conf.User))
 
 	if err := chromedp.Run(ctx,
+		// open login page
 		chromedp.Navigate(b.Conf.Url),
+		// perform login steps
 		chromedp.Click(model.BUTTON_PLAY_NOW, chromedp.ByQuery),
 		chromedp.Click(model.BUTTON_LOGIN, chromedp.ByQuery),
 		chromedp.WaitReady(model.TEXT_FIELD_LOGIN, chromedp.ByQuery),
+		// fill in credentials and submit
 		chromedp.SendKeys(model.TEXT_FIELD_LOGIN, b.Conf.User, chromedp.ByQuery),
 		chromedp.SendKeys(model.TEXT_FIELD_PASSWORD, b.Conf.GetPassword(), chromedp.ByQuery),
 		chromedp.Click(model.BUTTON_AUTH, chromedp.ByQuery),
+		// wait for main page to load
 		chromedp.WaitNotVisible(model.OVERLAY_LOADING, chromedp.ByQuery),
 		utils.RefreshPage(),
 	); err != nil {

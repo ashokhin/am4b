@@ -23,6 +23,7 @@ type StaffEntry struct {
 	ButtonSalaryDown string
 }
 
+// StaffEntires is a list of all staff categories in the company.
 var StaffEntires = []StaffEntry{
 	{
 		"pilots",
@@ -93,6 +94,7 @@ type Hub struct {
 	LoungeCdpNode *cdp.Node
 }
 
+// String returns a string representation of the Hub struct.
 func (h Hub) String() string {
 	return fmt.Sprint("{Departures:", h.Departures, ", Arrivals:", h.Arrivals,
 		", PaxDeparted:", h.PaxDeparted, ", PaxArrived:", h.PaxArrived,

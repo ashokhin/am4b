@@ -33,4 +33,5 @@ timeout_seconds: 180
 # Not recommended to change this option
 # on systems without GUI support
 chrome_headless: true
+chrome_debug: true
 prometheus_address: ":9150"

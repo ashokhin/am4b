@@ -23,7 +23,6 @@ func (b *Bot) staffMorale(ctx context.Context) error {
 		utils.GetFloatFromElement(model.TEXT_COMPANY_RANK, &rank),
 		chromedp.Click(model.BUTTON_COMMON_TAB2, chromedp.ByQuery),
 		utils.GetFloatFromElement(model.TEXT_COMPANY_STAFF_TRAINING_POINTS, &trainingPoints),
-		//utils.Screenshot(),
 	); err != nil {
 		slog.Debug("error in Bot.staffMorale", "error", err)
 

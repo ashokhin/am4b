@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	// HUB_WEAR_PERCENT_FOR_REPAIR defines the wear percentage threshold for lounge repair
 	HUB_WEAR_PERCENT_FOR_REPAIR float64 = 16.0
 )
 

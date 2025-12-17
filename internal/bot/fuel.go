@@ -10,6 +10,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// FUEL_MINIMUM_AMOUNT defines the minimum amount of fuel that system allows to be purchased
 const FUEL_MINIMUM_AMOUNT float64 = 1000.00
 
 var fuelList = []model.Fuel{

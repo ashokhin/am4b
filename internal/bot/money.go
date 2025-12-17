@@ -60,7 +60,8 @@ func (b *Bot) money(ctx context.Context) error {
 	return nil
 }
 
-// calcBudget calculates the budget allocations for maintenance, marketing, and fuel based on the total account balance and configured percentages.
+// calcBudget calculates the budget allocations for maintenance, marketing
+// and fuel based on the total account balance and configured percentages.
 func (b *Bot) calcBudget() {
 	slog.Debug("calculate budgets")
 
@@ -73,6 +74,6 @@ func (b *Bot) calcBudget() {
 		"maintenanceBudget", int(b.BudgetMoney.Maintenance),
 		"marketingPercent", b.Conf.BudgetPercent.Marketing,
 		"marketingBudget", int(b.BudgetMoney.Marketing),
-		"fuelPercent", int(b.Conf.BudgetPercent.Fuel),
+		"fuelPercent", b.Conf.BudgetPercent.Fuel,
 		"fuelBudget", int(b.BudgetMoney.Fuel))
 }

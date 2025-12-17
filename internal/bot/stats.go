@@ -91,7 +91,7 @@ func (b *Bot) allianceStats(ctx context.Context) error {
 		allianceFlights   float64
 		seasonMoney       float64
 	)
-	// Placeholder for allianceStats implementation
+
 	slog.Info("check alliance stats")
 	slog.Debug("open pop-up window", "window", "alliance_overview")
 

@@ -17,6 +17,32 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// MaskUsername is an anonymization function for logging user name in the logs.
+func MaskUsername(userName string) string {
+	userNameParts := strings.Split(userName, "@")
+
+	// if it's not an email format then mask the whole string
+	if len(userNameParts) == 1 {
+		return maskString(userNameParts[0])
+	}
+
+	// mask only the user name part of the email
+	return fmt.Sprintf("%s@%s", maskString(userNameParts[0]), userNameParts[1])
+}
+
+// maskString replaces part of the string with asterisks for anonymization.
+func maskString(str string) string {
+	switch {
+	case len(str) == 3:
+		return fmt.Sprintf("%s%s", string(str[0]), strings.Repeat("*", len(str)-1))
+
+	case len(str) > 3:
+		return fmt.Sprintf("%s%s%s", string(str[0]), strings.Repeat("*", len(str)-2), string(str[len(str)-1]))
+	default:
+		return strings.Repeat("*", len(str))
+	}
+}
+
 // intFromString deletes all non-digit values like words, letters, signs, spaces etc. and returns Integer value.
 func intFromString(str string) (int, error) {
 	var intValue int
@@ -335,7 +361,6 @@ func IsSubElementVisible(ctx context.Context, sel string, node *cdp.Node) bool {
 
 	// if 1 or more elements found then return true - element is visible
 	return len(nodesList) > 0
-
 }
 
 // SetPromGaugeNonNeg sets the Prometheus Gauge metric to the specified value if it is non-negative.

@@ -14,17 +14,21 @@ import (
 func (b *Bot) depart(ctx context.Context) error {
 	slog.Info("depart all available aircraft")
 
+	// get the number of aircraft ready for departure
 	aircraftReadyForDepart := b.getReadyForDepart(ctx)
 	// calculate maximum retries, because the "Depart" button may process only 20 aircraft at a time
 	// also to avoid infinite loops when aircraft has been grounded
 	maxRetries := int(math.Round(float64(aircraftReadyForDepart)/20) + 1)
 
+	// loop until all aircraft have departed or maximum retries reached
 	for (aircraftReadyForDepart > 0) && (maxRetries > 0) {
 		var availableAfterDepart int
 
 		slog.Debug("depart available aircraft", "ready to depart", aircraftReadyForDepart, "depart retries", maxRetries)
 
+		// click the "Depart All" button
 		utils.DoClickElement(ctx, model.BUTTON_FI_DEPART_ALL)
+		// get the number of aircraft still ready for departure
 		availableAfterDepart = b.getReadyForDepart(ctx)
 
 		slog.Info("aircraft departed", "count", (aircraftReadyForDepart - availableAfterDepart))

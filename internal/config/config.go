@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Config holds the configuration settings for the bot.
 type Config struct {
 	Url                     string     `default:"https://www.airlinemanager.com/" yaml:"url"`
 	User                    string     `yaml:"username"`
@@ -29,6 +30,7 @@ type Config struct {
 	Services                []string   `default:"[\"company_stats\",\"alliance_stats\",\"staff_morale\",\"hubs\",\"claim_rewards\",\"buy_fuel\",\"marketing\",\"ac_maintenance\",\"depart\"]" yaml:"services"`
 	TimeoutSeconds          int        `default:"180" yaml:"timeout_seconds"`
 	ChromeHeadless          bool       `default:"true" yaml:"chrome_headless"`
+	ChromeDebug             bool       `default:"false" yaml:"chrome_debug"`
 	PrometheusAddress       string     `default:":9150" yaml:"prometheus_address"`
 	// internal fields
 	passwordRunes []rune // most safe storage for password in memory
@@ -50,16 +52,19 @@ func (c *Config) String() string {
 }
 
 // safeStorePassword converts password string into array of runes
+// and clears the original string to reduce the risk of password leakage in memory.
 func (c *Config) safeStorePassword() {
 	c.passwordRunes = []rune(c.Password)
 	c.Password = ""
 }
 
-// getter for returning password as a string
+// GetPassword is the getter for returning password as a string
 func (c *Config) GetPassword() string {
 	return string(c.passwordRunes)
 }
 
+// New loads configuration from the specified YAML file path
+// and returns a Config instance.
 func New(filePath string) (*Config, error) {
 	var err error
 	var c Config
@@ -79,6 +84,8 @@ func New(filePath string) (*Config, error) {
 	return &c, err
 }
 
+// loadYaml reads a YAML file from the specified path
+// and unmarshals its content into the provided output structure.
 func loadYaml(filePath string, out any) error {
 	var err error
 	var f []byte

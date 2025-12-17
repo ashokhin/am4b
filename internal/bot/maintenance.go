@@ -22,18 +22,21 @@ func (b *Bot) maintenance(ctx context.Context) error {
 
 	defer utils.DoClickElement(ctx, model.BUTTON_COMMON_CLOSE_POPUP)
 
+	// perform the 'A-Check' operation on all eligible aircraft
 	if err := b.aCheckAllAircraft(ctx); err != nil {
 		slog.Warn("error in Bot.maintenance > Bot.aCheckAllAircraft", "error", err)
 
 		return err
 	}
 
+	// perform the 'Repair' operation on all eligible aircraft
 	if err := b.repairAllAircraft(ctx); err != nil {
 		slog.Warn("error in Bot.maintenance > Bot.repairAllAircraft", "error", err)
 
 		return err
 	}
 
+	// perform the 'Modify' operation on all eligible aircraft
 	if err := b.modifyAllAircraft(ctx); err != nil {
 		slog.Warn("error in Bot.maintenance > Bot.modifyAllAircraft", "error", err)
 
@@ -53,6 +56,7 @@ func (b *Bot) maintenanceAcByType(ctx context.Context, ac model.Aircraft, mntTyp
 	var mntOperationPerformed bool
 	var acWebElemNode *cdp.Node
 
+	// determine maintenance operation parameters based on type
 	switch mntType {
 	case model.A_CHECK:
 		mntOperationStr = "a-check"
@@ -163,6 +167,7 @@ func (b *Bot) maintenanceAcByType(ctx context.Context, ac model.Aircraft, mntTyp
 		return mntOperationPerformed, err
 	}
 
+	// update budget and account balance
 	b.BudgetMoney.Maintenance -= mntOperationCost
 	b.AccountBalance -= mntOperationCost
 	mntOperationPerformed = true
@@ -195,7 +200,7 @@ func (b *Bot) aCheckAllAircraft(ctx context.Context) error {
 	}
 
 	// the "Maintenance list" element is dynamic, it means that we have to search
-	// every aircraft individually
+	// every aircraft individually by it's reg.number, inside the Bot.maintenanceAcByType function
 
 	// collect list of aircraft which need a-check
 	for _, aircraftElem := range aircraftElemList {
@@ -276,7 +281,7 @@ func (b *Bot) repairAllAircraft(ctx context.Context) error {
 	}
 
 	// the "Maintenance list" element is dynamic, it means that we have to search
-	// every aircraft individually
+	// every aircraft individually by it's reg.number, inside the Bot.maintenanceAcByType function
 
 	// collect list of aircraft which need repair
 	for _, aircraftElem := range aircraftElemList {
@@ -357,7 +362,7 @@ func (b *Bot) modifyAllAircraft(ctx context.Context) error {
 	}
 
 	// the "Maintenance list" element is dynamic, it means that we have to search
-	// every aircraft individually
+	// every aircraft individually by it's reg.number, inside the Bot.maintenanceAcByType function
 
 	// create "aircraft" list
 	for _, aircraftElem := range aircraftElemList {

@@ -4,6 +4,29 @@ import (
 	"testing"
 )
 
+func TestMaskUsername(t *testing.T) {
+	testCases := map[string]struct {
+		input    string
+		expected string
+	}{
+		"test01": {"ed@gmail.com", "**@gmail.com"},
+		"test02": {"bob@yahoo.com", "b**@yahoo.com"},
+		"test03": {"rick@icloud.com", "r**k@icloud.com"},
+		"test04": {"golang.community@gmail.com", "g**************y@gmail.com"},
+		"test05": {"notTheEmailFormat", "n***************t"},
+		"test06": {"", ""},
+	}
+
+	for testName, testData := range testCases {
+		t.Run(testName, func(t *testing.T) {
+			result := MaskUsername(testData.input)
+			if result != testData.expected {
+				t.Errorf(`MaskUsername("%+v") returned '%+v', expected '%+v'`, testData.input, result, testData.expected)
+			}
+		})
+	}
+}
+
 func TestIntFromString(t *testing.T) {
 	testCases := map[string]struct {
 		testString string

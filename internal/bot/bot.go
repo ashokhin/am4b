@@ -36,15 +36,15 @@ func New(conf *config.Config, registry *prometheus.Registry) Bot {
 	metrics.RegisterMetrics(registry)
 	metrics.StartTime.SetToCurrentTime()
 
+	// Setup Chrome options
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.NoFirstRun,
 		chromedp.NoDefaultBrowserCheck,
 		chromedp.WindowSize(1920, 1080),
-		// Change to 'false' for displaying Chrome window
+		// set the 'chrome_headless: false' config for displaying Chrome window
 		chromedp.Flag("headless", conf.ChromeHeadless),
 		chromedp.Flag("start-maximized", true),
 		chromedp.Flag("disable-dev-shm-usage", true),
-		chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"),
 	)
 
 	return Bot{
@@ -57,18 +57,25 @@ func New(conf *config.Config, registry *prometheus.Registry) Bot {
 // Run executes the bot's main workflow, including authentication and service tasks.
 func (b *Bot) Run(ctx context.Context) error {
 	timeStart := time.Now()
+	var cdpLogger chromedp.ContextOption
 
 	slog.Debug("create context with timeout", "timeout_seconds", b.Conf.TimeoutSeconds)
+
 	timeoutCtx, cancel := context.WithTimeout(ctx, time.Duration(b.Conf.TimeoutSeconds)*time.Second)
 	defer cancel()
 
 	allocatorCtx, cancel := chromedp.NewExecAllocator(timeoutCtx, b.chromeOpts...)
 	defer cancel()
 
+	if b.Conf.ChromeDebug {
+		cdpLogger = chromedp.WithDebugf(log.Printf)
+	} else {
+		cdpLogger = chromedp.WithLogf(log.Printf)
+	}
+
 	taskCtx, cancel := chromedp.NewContext(
 		allocatorCtx,
-		chromedp.WithLogf(log.Printf),
-		//chromedp.WithDebugf(log.Printf),
+		cdpLogger,
 	)
 	defer cancel()
 
@@ -161,7 +168,7 @@ func (b *Bot) Run(ctx context.Context) error {
 		}
 	}
 
-	// calculate total duration for Prometheus metric
+	// calculate total duration for Prometheus metric and logging
 	duration := time.Since(timeStart)
 
 	slog.Info("run complete", "elapsed_time", fmt.Sprint(duration))

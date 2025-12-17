@@ -164,6 +164,7 @@ func (b *Bot) activateMarketingCompany(ctx context.Context, mc model.MarketingCo
 		return err
 	}
 
+	// update budgets and account balance
 	b.BudgetMoney.Marketing -= marketingCompanyCost
 	b.AccountBalance -= marketingCompanyCost
 
