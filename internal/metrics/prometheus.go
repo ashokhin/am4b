@@ -10,31 +10,36 @@ const (
 
 // Metrics holds all Prometheus metrics used in the application.
 type Metrics struct {
-	Up                        prometheus.Gauge
-	StartTime                 prometheus.Gauge
-	Duration                  prometheus.Gauge
-	CompanyRank               prometheus.Gauge
-	CompanyTrainingPoints     prometheus.Gauge
-	CompanyFleetSize          prometheus.Gauge
-	RoutesNumber              prometheus.Gauge
-	HubsNumber                prometheus.Gauge
-	HangarCapacity            prometheus.Gauge
-	SharePrice                prometheus.Gauge
-	FlightsOperated           prometheus.Gauge
-	AllianceContributedTotal  prometheus.Gauge
-	AllianceContributedPerDay prometheus.Gauge
-	AllianceFlights           prometheus.Gauge
-	AllianceSeasonMoney       prometheus.Gauge
-	PassengersTransported     *prometheus.GaugeVec
-	CargoTransported          *prometheus.GaugeVec
-	AircraftStatus            *prometheus.GaugeVec
-	CompanyReputation         *prometheus.GaugeVec
-	CompanyMoney              *prometheus.GaugeVec
-	HubStats                  *prometheus.GaugeVec
-	StaffSalary               *prometheus.GaugeVec
-	FuelHolding               *prometheus.GaugeVec
-	FuelLimit                 *prometheus.GaugeVec
-	FuelPrice                 *prometheus.GaugeVec
+	Up                              prometheus.Gauge
+	StartTime                       prometheus.Gauge
+	Duration                        prometheus.Gauge
+	CompanyRank                     prometheus.Gauge
+	CompanyTrainingPoints           prometheus.Gauge
+	CompanyFleetSize                prometheus.Gauge
+	RoutesNumber                    prometheus.Gauge
+	HubsNumber                      prometheus.Gauge
+	HangarCapacity                  prometheus.Gauge
+	SharePrice                      prometheus.Gauge
+	FlightsOperated                 prometheus.Gauge
+	AllianceContributedTotal        prometheus.Gauge
+	AllianceContributedPerDay       prometheus.Gauge
+	AllianceFlights                 prometheus.Gauge
+	AllianceSeasonMoney             prometheus.Gauge
+	PassengersTransported           *prometheus.GaugeVec
+	CargoTransported                *prometheus.GaugeVec
+	AircraftStatus                  *prometheus.GaugeVec
+	CompanyReputation               *prometheus.GaugeVec
+	CompanyMoney                    *prometheus.GaugeVec
+	HubStats                        *prometheus.GaugeVec
+	StaffSalary                     *prometheus.GaugeVec
+	FuelHolding                     *prometheus.GaugeVec
+	FuelLimit                       *prometheus.GaugeVec
+	FuelPrice                       *prometheus.GaugeVec
+	AllianceMemberSharePrice        *prometheus.GaugeVec
+	AllianceMemberContributedTotal  *prometheus.GaugeVec
+	AllianceMemberContributedPerDay *prometheus.GaugeVec
+	AllianceMemberContributedSeason *prometheus.GaugeVec
+	AllianceMemberFlightsTotal      *prometheus.GaugeVec
 }
 
 // New initializes and returns a new Metrics instance with all Prometheus metrics defined.
@@ -226,6 +231,46 @@ func New() *Metrics {
 			},
 			[]string{"type"},
 		),
+		AllianceMemberSharePrice: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_member_share_price",
+				Help:      "Share price for alliance member.",
+			},
+			[]string{"uid", "name"},
+		),
+		AllianceMemberContributedTotal: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_member_contributed_total",
+				Help:      "Alliance member contributed total value.",
+			},
+			[]string{"uid", "name"},
+		),
+		AllianceMemberContributedPerDay: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_member_contributed_per_day",
+				Help:      "Alliance member contributed total value.",
+			},
+			[]string{"uid", "name"},
+		),
+		AllianceMemberContributedSeason: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_member_season_money",
+				Help:      "Alliance member season money value.",
+			},
+			[]string{"uid", "name"},
+		),
+		AllianceMemberFlightsTotal: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      "alliance_member_flights",
+				Help:      "Alliance member flights value.",
+			},
+			[]string{"uid", "name"},
+		),
 	}
 }
 
@@ -257,5 +302,10 @@ func (m *Metrics) RegisterMetrics(registry *prometheus.Registry) {
 		m.FuelHolding,
 		m.FuelLimit,
 		m.FuelPrice,
+		m.AllianceMemberSharePrice,
+		m.AllianceMemberContributedTotal,
+		m.AllianceMemberContributedPerDay,
+		m.AllianceMemberContributedSeason,
+		m.AllianceMemberFlightsTotal,
 	)
 }

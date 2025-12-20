@@ -3,9 +3,11 @@ package bot
 import (
 	"context"
 	"log/slog"
+	"strings"
 
 	"github.com/ashokhin/am4bot/internal/model"
 	"github.com/ashokhin/am4bot/internal/utils"
+	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
 )
 
@@ -97,12 +99,30 @@ func (b *Bot) allianceStats(ctx context.Context) error {
 
 	if err := chromedp.Run(ctx,
 		chromedp.Click(model.BUTTON_ALLIANCE_INFO, chromedp.ByQuery),
-		chromedp.WaitReady(model.TEXT_ALLIANCE_CONTRIBUTED_TOTAL, chromedp.ByQuery),
+	); err != nil {
+		slog.Debug("error in Bot.allianceStats", "error", err)
+
+		return err
+	}
+
+	defer utils.DoClickElement(ctx, model.BUTTON_COMMON_CLOSE_POPUP)
+
+	if !utils.IsElementVisible(ctx, model.TEXT_ALLIANCE_CONTRIBUTED_TOTAL) {
+		slog.Warn("no alliance stats available")
+
+		return nil
+	}
+
+	// collect stats for all alliance members
+	if err := b.wholeAllianceStats(ctx); err != nil {
+		slog.Debug("error in Bot.allianceStats > Bot.wholeAllianceStats", "error", err)
+	}
+
+	if err := chromedp.Run(ctx,
 		utils.GetFloatFromElement(model.TEXT_ALLIANCE_CONTRIBUTED_TOTAL, &contributedTotal),
 		utils.GetFloatFromElement(model.TEXT_ALLIANCE_CONTRIBUTED_PER_DAY, &contributedPerDay),
 		utils.GetFloatFromElement(model.TEXT_ALLIANCE_FLIGHTS, &allianceFlights),
 		utils.GetFloatFromElement(model.TEXT_ALLIANCE_SEASON_MONEY, &seasonMoney),
-		chromedp.Click(model.BUTTON_COMMON_CLOSE_POPUP, chromedp.ByQuery),
 	); err != nil {
 		slog.Debug("error in Bot.allianceStats", "error", err)
 
@@ -113,6 +133,76 @@ func (b *Bot) allianceStats(ctx context.Context) error {
 	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AllianceContributedPerDay, contributedPerDay)
 	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AllianceFlights, allianceFlights)
 	utils.SetPromGaugeNonNeg(b.PrometheusMetrics.AllianceSeasonMoney, seasonMoney)
+
+	return nil
+}
+
+// wholeAllianceStats collects statistics about all alliance members
+func (b *Bot) wholeAllianceStats(ctx context.Context) error {
+	var err error
+
+	slog.Debug("check whole alliance stats")
+
+	allianceMembersElemList := make([]*cdp.Node, 0)
+
+	slog.Debug("get list of all alliance members")
+
+	// get list of all alliance members
+	if err = chromedp.Run(ctx,
+		chromedp.Nodes(model.LIST_ALLIANCE_MEMBERS, &allianceMembersElemList, chromedp.ByQueryAll),
+	); err != nil {
+		slog.Warn("error in Bot.wholeAllianceStats > get hubs list", "error", err)
+
+		return err
+	}
+
+	allianceMembersMap := make(map[string]model.AllianceMember)
+
+	for _, memberElem := range allianceMembersElemList {
+		var (
+			allianceMember model.AllianceMember
+			uid            string
+		)
+
+		uid = memberElem.AttributeValue(model.TEXT_ALLIANCE_MEMBER_ID)
+		uid = strings.ReplaceAll(uid, "al-list-", "")
+
+		slog.Debug("member id", "id", uid)
+
+		if err = chromedp.Run(ctx,
+			chromedp.Text(model.TEXT_ALLIANCE_MEMBER_NAME, &allianceMember.Name, chromedp.ByQuery, chromedp.FromNode(memberElem)),
+			utils.GetFloatFromChildElement(model.TEXT_ALLIANCE_MEMBER_CONTRIBUTED_TOTAL, &allianceMember.ContributedTotal, memberElem),
+			utils.GetFloatFromChildElement(model.TEXT_ALLIANCE_MEMBER_CONTRIBUTED_PER_DAY, &allianceMember.ContributedPerDay, memberElem),
+			utils.GetIntFromChildElement(model.TEXT_ALLIANCE_MEMBER_FLIGHTS, &allianceMember.FlightsTotal, memberElem),
+			utils.GetFloatFromChildElement(model.TEXT_ALLIANCE_MEMBER_SEASON_MONEY, &allianceMember.ContributedSeason, memberElem),
+		); err != nil {
+			slog.Warn("error in Bot.wholeAllianceStats > get member data", "error", err)
+		}
+
+		// collect share price separately
+		// bc. it could be the "N/A" string
+		if err = chromedp.Run(ctx,
+			utils.GetFloatFromChildElement(model.TEXT_ALLIANCE_MEMBER_SHARE_PRICE, &allianceMember.SharePrice, memberElem),
+		); err != nil {
+			slog.Warn("error in Bot.wholeAllianceStats > get member share price", "allianceMember.Name", allianceMember.Name, "error", err)
+
+			allianceMember.SharePrice = -1.0
+
+		}
+
+		allianceMembersMap[uid] = allianceMember
+
+	}
+
+	for uid, member := range allianceMembersMap {
+		slog.Debug("set alliance member metrics", "uid", uid, "member", member)
+
+		b.PrometheusMetrics.AllianceMemberSharePrice.WithLabelValues(uid, member.Name).Set(member.SharePrice)
+		b.PrometheusMetrics.AllianceMemberContributedTotal.WithLabelValues(uid, member.Name).Set(member.ContributedTotal)
+		b.PrometheusMetrics.AllianceMemberContributedPerDay.WithLabelValues(uid, member.Name).Set(member.ContributedPerDay)
+		b.PrometheusMetrics.AllianceMemberContributedSeason.WithLabelValues(uid, member.Name).Set(member.ContributedSeason)
+		b.PrometheusMetrics.AllianceMemberFlightsTotal.WithLabelValues(uid, member.Name).Set(float64(member.FlightsTotal))
+	}
 
 	return nil
 }

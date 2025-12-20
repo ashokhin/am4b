@@ -64,10 +64,18 @@ const (
 
 	// "Alliance" pop-up
 
-	TEXT_ALLIANCE_CONTRIBUTED_TOTAL   string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(3)" // Total contributed money text
-	TEXT_ALLIANCE_CONTRIBUTED_PER_DAY string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(4)" // Money contributed per day text
-	TEXT_ALLIANCE_FLIGHTS             string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(6)" // Flights text
-	TEXT_ALLIANCE_SEASON_MONEY        string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(8)" // Season contributed money text
+	LIST_ALLIANCE_MEMBERS                    string = "div#popup div#popContent div#member-container div#member-container-box > table > tbody > tr" // List of alliance members web elements
+	TEXT_ALLIANCE_MEMBER_ID                  string = "id"                                                                                          // member ID attribute
+	TEXT_ALLIANCE_MEMBER_NAME                string = "tr > td:nth-child(1) > a"                                                                    // member name text
+	TEXT_ALLIANCE_MEMBER_SHARE_PRICE         string = "tr > td:nth-child(2)"                                                                        // member share price text
+	TEXT_ALLIANCE_MEMBER_CONTRIBUTED_TOTAL   string = "tr > td:nth-child(3)"                                                                        // member contributed total text
+	TEXT_ALLIANCE_MEMBER_CONTRIBUTED_PER_DAY string = "tr > td:nth-child(4)"                                                                        // member contributed per day text
+	TEXT_ALLIANCE_MEMBER_FLIGHTS             string = "tr > td:nth-child(6)"                                                                        // member flights text
+	TEXT_ALLIANCE_MEMBER_SEASON_MONEY        string = "tr > td:nth-child(8)"                                                                        // member season contributed money text
+	TEXT_ALLIANCE_CONTRIBUTED_TOTAL          string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(3)"         // Total contributed money text
+	TEXT_ALLIANCE_CONTRIBUTED_PER_DAY        string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(4)"         // Money contributed per day text
+	TEXT_ALLIANCE_FLIGHTS                    string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(6)"         // Flights text
+	TEXT_ALLIANCE_SEASON_MONEY               string = "div#popup div#popContent div#member-container tr.td-sort.bg-light > td:nth-child(8)"         // Season contributed money text
 
 	// "Hubs" pop-up
 

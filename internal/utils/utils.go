@@ -213,7 +213,7 @@ func GetFloatFromElement(sel string, resultFloat *float64) chromedp.Tasks {
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			*resultFloat, err = floatFromString(resultStr)
 			if err != nil {
-				slog.Warn("error in utils.GetIntFromElement > utils.floatFromString",
+				slog.Warn("error in utils.GetFloatFromElement > utils.floatFromString",
 					"string", resultStr, "error", err)
 
 				return err
@@ -229,7 +229,6 @@ func GetFloatFromElement(sel string, resultFloat *float64) chromedp.Tasks {
 // GetFloatFromChildElement is an element query action that retrieves the visible text of a child element
 func GetFloatFromChildElement(sel string, resultFloat *float64, node *cdp.Node) chromedp.Tasks {
 	var resultStr string
-	var resultInt int
 	var err error
 
 	slog.Debug("get float from child element", "element", sel)
@@ -237,15 +236,13 @@ func GetFloatFromChildElement(sel string, resultFloat *float64, node *cdp.Node) 
 	return chromedp.Tasks{
 		chromedp.Text(sel, &resultStr, chromedp.ByQuery, chromedp.FromNode(node)),
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			resultInt, err = intFromString(resultStr)
+			*resultFloat, err = floatFromString(resultStr)
 			if err != nil {
-				slog.Warn("error in utils.GetIntFromElement > utils.intFromString",
+				slog.Warn("error in utils.GetFloatFromChildElement > utils.floatFromString",
 					"string", resultStr, "error", err)
 
 				return err
 			}
-
-			*resultFloat = float64(resultInt)
 
 			slog.Debug("got float from child element", "value", *resultFloat)
 
