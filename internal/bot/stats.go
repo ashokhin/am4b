@@ -194,6 +194,13 @@ func (b *Bot) wholeAllianceStats(ctx context.Context) error {
 
 	}
 
+	// reset labels in vectors bc. list of alliance members are dynamic
+	b.PrometheusMetrics.AllianceMemberSharePrice.Reset()
+	b.PrometheusMetrics.AllianceMemberContributedTotal.Reset()
+	b.PrometheusMetrics.AllianceMemberContributedPerDay.Reset()
+	b.PrometheusMetrics.AllianceMemberContributedSeason.Reset()
+	b.PrometheusMetrics.AllianceMemberFlightsTotal.Reset()
+
 	for uid, member := range allianceMembersMap {
 		slog.Debug("set alliance member metrics", "uid", uid, "member", member)
 
