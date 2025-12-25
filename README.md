@@ -40,13 +40,13 @@ You can visualize these metrics using [Grafana](https://grafana.com/grafana/).
 > Since the bot interacts with the Airline Manager web interface,
 > it is necessary to ensure that the game's layout and elements remain unchanged.
 >
-> For this purpose, you have to make sure to keep game settings as:
+> For this purpose, you have to keep game settings as:
 >
 > 1. `Language`: English (Default)
 >
 > 2. `Icon Menu`: Enabled
 >
-> As it is shown in the screenshot below:
+> As it is shown on the screenshot below:
 
 ![Game settings](resources/Game_settings.png?raw=true "Game Settings Screenshot")
 
@@ -230,19 +230,49 @@ am4_ac_status{type="pending_maintenance"} 10
 am4_ac_status{type="wo_route"} 0
 # HELP am4_alliance_contributed_per_day Alliance contributed per day value.
 # TYPE am4_alliance_contributed_per_day gauge
-am4_alliance_contributed_per_day 31318
+am4_alliance_contributed_per_day 30708
 # HELP am4_alliance_contributed_total Alliance contributed total value.
 # TYPE am4_alliance_contributed_total gauge
-am4_alliance_contributed_total 79152
+am4_alliance_contributed_total 1.979472e+06
 # HELP am4_alliance_flights Alliance flights value.
 # TYPE am4_alliance_flights gauge
-am4_alliance_flights 479
+am4_alliance_flights 11470
+# HELP am4_alliance_member_contributed_per_day Alliance member contributed total value.
+# TYPE am4_alliance_member_contributed_per_day gauge
+am4_alliance_member_contributed_per_day{name="Airline1",uid="123456789"} 42085
+am4_alliance_member_contributed_per_day{name="Airline2_wo_IPO",uid="987654321"} 23064
+am4_alliance_member_contributed_per_day{name="Airline3",uid="1324576879"} 43212
+am4_alliance_member_contributed_per_day{name="Airline4",uid="2413685780"} 31275
+# HELP am4_alliance_member_contributed_total Alliance member contributed total value.
+# TYPE am4_alliance_member_contributed_total gauge
+am4_alliance_member_contributed_total{name="Airline1",uid="123456789"} 172087
+am4_alliance_member_contributed_total{name="Airline2_wo_IPO",uid="987654321"} 1.2627622e+07
+am4_alliance_member_contributed_total{name="Airline3",uid="1324576879"} 1.7309648e+07
+am4_alliance_member_contributed_total{name="Airline4",uid="2413685780"} 1.436029e+06
+# HELP am4_alliance_member_flights Alliance member flights value.
+# TYPE am4_alliance_member_flights gauge
+am4_alliance_member_flights{name="Airline1",uid="123456789"} 4472
+am4_alliance_member_flights{name="Airline2_wo_IPO",uid="987654321"} 116571
+am4_alliance_member_flights{name="Airline3",uid="1324576879"} 397505
+am4_alliance_member_flights{name="Airline4",uid="2413685780"} 38655
+# HELP am4_alliance_member_season_money Alliance member season money value.
+# TYPE am4_alliance_member_season_money gauge
+am4_alliance_member_season_money{name="Airline1",uid="123456789"} 1689
+am4_alliance_member_season_money{name="Airline2_wo_IPO",uid="987654321"} 552
+am4_alliance_member_season_money{name="Airline3",uid="1324576879"} 2531
+am4_alliance_member_season_money{name="Airline4",uid="2413685780"} 1191
+# HELP am4_alliance_member_share_price Share price for alliance member.
+# TYPE am4_alliance_member_share_price gauge
+am4_alliance_member_share_price{name="Airline1",uid="123456789"} 3503.13
+am4_alliance_member_share_price{name="Airline2_wo_IPO",uid="987654321"} -1
+am4_alliance_member_share_price{name="Airline3",uid="1324576879"} 19867.2
+am4_alliance_member_share_price{name="Airline4",uid="2413685780"} 1912.08
 # HELP am4_alliance_season_money Alliance season money value.
 # TYPE am4_alliance_season_money gauge
-am4_alliance_season_money 147
-# HELP am4_build_info A metric with a constant '1' value labeled by version, revision, branch, goversion from which am4bot was built, and the goos and goarch for the build.
+am4_alliance_season_money 260
+# HELP am4_build_info A metric with a constant '1' value labeled by version, revision, branch, goversion from which am4 was built, and the goos and goarch for the build.
 # TYPE am4_build_info gauge
-am4_build_info{branch="tags/1.28",goarch="amd64",goos="linux",goversion="go1.24.7",revision="84a34f6b9b1352cda47a517a8ee748c306c7d2e5",tags="unknown",version="1.28"} 1
+am4_build_info{branch="tags/1.50",goarch="amd64",goos="linux",goversion="go1.25.5",revision="3245bbef572f023ca22ff5da1f7115deac6a895a",tags="unknown",version="1.50"} 1
 # HELP am4_company_fuel_holding Fuel amount holding by fuel type.
 # TYPE am4_company_fuel_holding gauge
 am4_company_fuel_holding{type="co2"} 2.5868711e+07
